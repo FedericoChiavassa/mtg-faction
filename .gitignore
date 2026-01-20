@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Supabase local runtime
+.supabase/
+
+# Docker
+docker-data/
+*.log
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
