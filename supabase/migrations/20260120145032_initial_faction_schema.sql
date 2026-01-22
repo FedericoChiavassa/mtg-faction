@@ -36,7 +36,7 @@ create table cards (
   -- Non-creature only
   faction_affinity_ids uuid[],
 
-  raw jsonb not null,
+  -- raw jsonb not null,
 
   created_at timestamptz not null default now()
 );

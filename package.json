@@ -1,0 +1,9 @@
+{
+  "name": "mtg-faction",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.91.0",
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2"
+  }
+}
