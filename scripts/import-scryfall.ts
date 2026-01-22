@@ -173,35 +173,65 @@ function extractCreatureTypes(
   return Array.from(new Set(subtypes));
 }
 
-// Upsert faction identity and return id
-async function upsertFactionIdentity(
-  identity: string[],
-): Promise<string | null> {
-  if (identity.length === 0) return null;
+// Generate all non-empty subsets of a list of creature types
+function generateAllNonEmptySubsets(types: string[]): string[][] {
+  const totalSubsets = 1 << types.length;
+  const subsets: string[][] = [];
 
-  // Check if it exists
-  const { data: existing, error: selectError } = await supabase
+  for (let i = 1; i < totalSubsets; i++) {
+    // Use bitmask to filter types included in this subset
+    const subset = types.filter((_, index) => (i >> index) & 1);
+    subsets.push(subset);
+  }
+  return subsets;
+}
+
+// Add affinity_subsets for all faction identities
+async function updateFactionSubsets() {
+  const { data: allIdentities, error } = await supabase
     .from("faction_identities")
-    .select("id")
-    .eq("identity", identity);
+    .select("*");
 
-  if (selectError) throw selectError;
-  if (existing && existing.length > 0) return existing[0].id;
+  if (error) throw error;
+  if (!allIdentities) throw new Error("Failed to fetch faction identities");
 
-  // Insert new
-  const { data, error: insertError } = await supabase
+  // Helper to create a consistent key for a list of types
+  const getIdentityKey = (types: string[]) => [...types].sort().join("|");
+
+  // Create a lookup map for O(1) access
+  const identityMap = new Map<string, string>();
+  for (const item of allIdentities) {
+    identityMap.set(getIdentityKey(item.identity), item.id);
+  }
+
+  // Prepare all updates in memory
+  const updates = allIdentities.map((identity) => {
+    const subsets = generateAllNonEmptySubsets(identity.identity);
+    const subsetIds = subsets
+      .map((sub) => identityMap.get(getIdentityKey(sub)))
+      .filter((id): id is string => !!id);
+
+    return {
+      ...identity,
+      affinity_subsets: subsetIds,
+    };
+  });
+
+  // Perform a single bulk upsert to minimize network requests
+  const { error: upsertError } = await supabase
     .from("faction_identities")
-    .insert({
-      identity,
-      name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(" "),
-    })
-    .select("id")
-    .single();
+    .upsert(updates);
 
-  if (insertError) throw insertError;
-  if (!data) throw new Error("Failed to insert faction identity");
+  if (upsertError) throw upsertError;
+}
 
-  return data.id;
+// Helper to bulk upsert rows in chunks
+async function bulkUpsert(table: string, rows: any[], onConflict: string, batchSize = 1000) {
+  for (let i = 0; i < rows.length; i += batchSize) {
+    const batch = rows.slice(i, i + batchSize);
+    const { error } = await supabase.from(table).upsert(batch, { onConflict });
+    if (error) throw error;
+  }
 }
 
 // Extract creature groups from text
@@ -226,7 +256,8 @@ function extractFactionIdentityIdsFromText(
       .filter((w): w is string => !!w && singularSet.has(w));
     if (normalizedWords.length === 0) continue;
 
-    const key = normalizedWords.join(" ");
+    normalizedWords.sort(); // Ensure canonical order matches DB
+    const key = normalizedWords.join("|");
     const factionId = factionIdentityMap.get(key);
     if (factionId) groups.push(factionId);
   }
@@ -259,15 +290,6 @@ function computeFactionAffinitiesForNonCreature(
   return factionIdentityIds;
 }
 
-// Upsert a card
-async function upsertCard(card: CardInsert) {
-  const { error } = await supabase
-    .from("cards")
-    .upsert(card, { onConflict: "oracle_id" });
-
-  if (error) throw error;
-}
-
 // --------------------
 // Main import
 // --------------------
@@ -291,7 +313,7 @@ async function importScryfall() {
 
   console.log(`Processing ${cards.length} cards...`);
 
-  // split cards into creatures and non-creatures and remove non paper cards
+  // Split cards into creatures and non-creatures, and remove non paper cards
   const creatures: typeof cards = [];
   const nonCreatures: typeof cards = [];
 
@@ -305,42 +327,74 @@ async function importScryfall() {
     }
   }
 
-  // Process creatures first
+  // 1. Prepare Creature Data & Identities
+  const identityMap = new Map<string, string[]>();
+  const creatureInserts: (CardInsert & { _identityKey: string })[] = [];
+
   for (const c of creatures) {
     const identity = extractCreatureTypes(
       c.type_line,
       creatureTypeSet.singularSet,
       c.card_faces,
     );
+
     if (identity.length === 0) continue; // skip cards without creature identity
 
-    const factionIdentityId = await upsertFactionIdentity(identity);
+    const key = identity.toSorted().join("|");
+    if (!identityMap.has(key)) {
+      identityMap.set(key, identity);
+    }
 
-    const cardInsert: CardInsert = {
+    creatureInserts.push({
       oracle_id: c.oracle_id,
       name: c.name,
       type_line: c.type_line,
       is_creature: true,
       mana_value: c.cmc,
-      faction_identity_id: factionIdentityId,
+      faction_identity_id: null, // Filled later
       faction_affinity_ids: null,
-    };
-
-    await upsertCard(cardInsert);
+      _identityKey: key,
+    });
   }
 
-  // Build factionIdentityMap from DB
-  const { data: factionIdentities } = await supabase
+  // 2. Bulk Upsert Faction Identities
+  const identityRows = Array.from(identityMap.values()).map((identity) => ({
+    identity: identity.toSorted(),
+    name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(" "),
+  }));
+
+  console.log(`Upserting ${identityRows.length} faction identities...`);
+  await bulkUpsert("faction_identities", identityRows, "identity");
+
+  // 3. Fetch IDs to map back to cards
+  const { data: allIdentities } = await supabase
     .from("faction_identities")
     .select("id, identity");
-  if (!factionIdentities)
-    throw new Error("Failed to fetch faction identities from DB");
+  
+  if (!allIdentities) throw new Error("Failed to fetch faction identities");
 
-  const factionIdentityMap = new Map<string, string>(
-    factionIdentities.map((f: any) => [f.identity.join(" "), f.id]),
-  );
+  const factionIdentityMap = new Map<string, string>();
+  for (const item of allIdentities) {
+    factionIdentityMap.set(item.identity.sort().join("|"), item.id);
+  }
 
-  // Then process non-creatures
+  // 4. Bulk Upsert Creature Cards
+  const finalCreatureInserts = creatureInserts.map((c) => {
+    const { _identityKey, ...rest } = c;
+    return {
+      ...rest,
+      faction_identity_id: factionIdentityMap.get(_identityKey) ?? null,
+    };
+  });
+
+  console.log(`Upserting ${finalCreatureInserts.length} creature cards...`);
+  await bulkUpsert("cards", finalCreatureInserts, "oracle_id");
+
+  // 5. Add affinity_subsets to faction identities
+  await updateFactionSubsets();
+
+  // 6. Process Non-Creatures
+  const nonCreatureInserts: CardInsert[] = [];
   for (const c of nonCreatures) {
     const factionAffinityIds = computeFactionAffinitiesForNonCreature(
       c,
@@ -350,7 +404,7 @@ async function importScryfall() {
     );
     if (factionAffinityIds.length === 0) continue; // skip if no affinities exist
 
-    const cardInsert: CardInsert = {
+    nonCreatureInserts.push({
       oracle_id: c.oracle_id,
       name: c.name,
       type_line: c.type_line,
@@ -358,10 +412,11 @@ async function importScryfall() {
       mana_value: c.cmc,
       faction_identity_id: null,
       faction_affinity_ids: factionAffinityIds,
-    };
-
-    await upsertCard(cardInsert);
+    });
   }
+
+  console.log(`Upserting ${nonCreatureInserts.length} non-creature cards...`);
+  await bulkUpsert("cards", nonCreatureInserts, "oracle_id");
 
   console.log("Import complete!");
 }

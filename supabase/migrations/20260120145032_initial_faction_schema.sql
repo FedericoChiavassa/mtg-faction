@@ -17,7 +17,6 @@ create index faction_identities_identity_gin
   on faction_identities
   using gin (identity);
 
-
 create table cards (
   id uuid primary key default gen_random_uuid(),
 
