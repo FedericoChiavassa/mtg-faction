@@ -187,28 +187,17 @@ function generateAllNonEmptySubsets(types: string[]): string[][] {
 }
 
 // Add affinity_subsets for all faction identities
-async function updateFactionSubsets() {
-  const { data: allIdentities, error } = await supabase
-    .from("faction_identities")
-    .select("*");
-
-  if (error) throw error;
-  if (!allIdentities) throw new Error("Failed to fetch faction identities");
+async function updateFactionSubsets(factionIdentityMap: Map<string, string>) {
+  const allIdentities = await fetchAllFactionIdentities();
 
   // Helper to create a consistent key for a list of types
   const getIdentityKey = (types: string[]) => [...types].sort().join("|");
-
-  // Create a lookup map for O(1) access
-  const identityMap = new Map<string, string>();
-  for (const item of allIdentities) {
-    identityMap.set(getIdentityKey(item.identity), item.id);
-  }
 
   // Prepare all updates in memory
   const updates = allIdentities.map((identity) => {
     const subsets = generateAllNonEmptySubsets(identity.identity);
     const subsetIds = subsets
-      .map((sub) => identityMap.get(getIdentityKey(sub)))
+      .map((sub) => factionIdentityMap.get(getIdentityKey(sub)))
       .filter((id): id is string => !!id);
 
     return {
@@ -217,16 +206,17 @@ async function updateFactionSubsets() {
     };
   });
 
-  // Perform a single bulk upsert to minimize network requests
-  const { error: upsertError } = await supabase
-    .from("faction_identities")
-    .upsert(updates);
-
-  if (upsertError) throw upsertError;
+  // Perform bulk upserts to minimize network requests
+  await bulkUpsert("faction_identities", updates, "identity");
 }
 
 // Helper to bulk upsert rows in chunks
-async function bulkUpsert(table: string, rows: any[], onConflict: string, batchSize = 1000) {
+async function bulkUpsert(
+  table: string,
+  rows: any[],
+  onConflict: string,
+  batchSize = 1000,
+) {
   for (let i = 0; i < rows.length; i += batchSize) {
     const batch = rows.slice(i, i + batchSize);
     const { error } = await supabase.from(table).upsert(batch, { onConflict });
@@ -290,6 +280,33 @@ function computeFactionAffinitiesForNonCreature(
   return factionIdentityIds;
 }
 
+// fetch all faction identities with pagination (avoiding 1000 cap)
+async function fetchAllFactionIdentities(select: string | null = null) {
+  const pageSize = 1000;
+  let from = 0;
+  let to = pageSize - 1;
+  const all: any[] = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("faction_identities")
+      .select(select ?? "*")
+      .range(from, to);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+
+    all.push(...data);
+
+    if (data.length < pageSize) break;
+
+    from += pageSize;
+    to += pageSize;
+  }
+
+  return all;
+}
+
 // --------------------
 // Main import
 // --------------------
@@ -313,7 +330,7 @@ async function importScryfall() {
 
   console.log(`Processing ${cards.length} cards...`);
 
-  // Split cards into creatures and non-creatures, and remove non paper cards
+  // 0. Split cards into creatures and non-creatures, and remove non paper cards
   const creatures: typeof cards = [];
   const nonCreatures: typeof cards = [];
 
@@ -367,10 +384,8 @@ async function importScryfall() {
   await bulkUpsert("faction_identities", identityRows, "identity");
 
   // 3. Fetch IDs to map back to cards
-  const { data: allIdentities } = await supabase
-    .from("faction_identities")
-    .select("id, identity");
-  
+  const allIdentities = await fetchAllFactionIdentities("id, identity");
+
   if (!allIdentities) throw new Error("Failed to fetch faction identities");
 
   const factionIdentityMap = new Map<string, string>();
@@ -391,7 +406,7 @@ async function importScryfall() {
   await bulkUpsert("cards", finalCreatureInserts, "oracle_id");
 
   // 5. Add affinity_subsets to faction identities
-  await updateFactionSubsets();
+  await updateFactionSubsets(factionIdentityMap);
 
   // 6. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
