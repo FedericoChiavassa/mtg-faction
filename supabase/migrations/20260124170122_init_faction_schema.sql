@@ -42,7 +42,7 @@ create table cards (
 
   -- Non-creature only
   -- Each entry is a group of creature types (e.g. ['human','warrior'])
-  faction_affinities text[][],
+  faction_affinities jsonb,
 
   created_at timestamptz not null default now(),
 
@@ -67,12 +67,14 @@ create index cards_is_creature_idx
 
 -- Creature equality lookup
 create index cards_faction_identity_id_idx
-  on cards (faction_identity_id);
+  on cards (faction_identity_id)
+  where is_creature = true;
 
 -- Non-creature affinity subset / overlap queries
 create index cards_faction_affinities_gin
   on cards
-  using gin (faction_affinities);
+  using gin (faction_affinities jsonb_path_ops)
+  where is_creature = false;
 
 -- =========================
 -- FORMAT LEGALITIES

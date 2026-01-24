@@ -12,6 +12,6 @@ from cards c
 where c.is_creature = false
   and exists (
     select 1
-    from unnest(c.faction_affinities) as affinity(group_identity)
-    where group_identity <@ :faction_identity
+    from jsonb_array_elements(c.faction_affinities) as affinity_group
+    where affinity_group <@ to_jsonb(:faction_identity::text[])
   );
