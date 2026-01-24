@@ -1,3 +1,7 @@
+-- =========================
+-- FACTION IDENTITIES
+-- =========================
+
 create table faction_identities (
   id uuid primary key default gen_random_uuid(),
 
@@ -17,6 +21,10 @@ create index faction_identities_identity_gin
   on faction_identities
   using gin (identity);
 
+-- =========================
+-- CARDS
+-- =========================
+
 create table cards (
   id uuid primary key default gen_random_uuid(),
 
@@ -33,11 +41,24 @@ create table cards (
     references faction_identities(id),
 
   -- Non-creature only
-  faction_affinity_ids uuid[],
+  -- Each entry is a group of creature types (e.g. ['human','warrior'])
+  faction_affinities text[][],
 
-  -- raw jsonb not null,
+  created_at timestamptz not null default now(),
 
-  created_at timestamptz not null default now()
+  constraint cards_faction_logic_check
+  check (
+    (
+      is_creature = true
+      and faction_identity_id is not null
+      and faction_affinities is null
+    )
+    or
+    (
+      is_creature = false
+      and faction_identity_id is null
+    )
+  )
 );
 
 -- Frequently used filter
@@ -48,10 +69,14 @@ create index cards_is_creature_idx
 create index cards_faction_identity_id_idx
   on cards (faction_identity_id);
 
--- Non-creature containment queries
-create index cards_faction_affinity_ids_gin
+-- Non-creature affinity subset / overlap queries
+create index cards_faction_affinities_gin
   on cards
-  using gin (faction_affinity_ids);
+  using gin (faction_affinities);
+
+-- =========================
+-- FORMAT LEGALITIES
+-- =========================
 
 create type legality_status as enum (
   'legal',
@@ -73,11 +98,3 @@ create table format_legalities (
 
 create index format_legalities_format_status_idx
   on format_legalities (format, status);
-
--- create table faction_legalities (
---   card_id uuid primary key
---     references cards(id)
---     on delete cascade,
-
---   status legality_status not null,
--- );

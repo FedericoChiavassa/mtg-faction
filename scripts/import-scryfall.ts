@@ -31,7 +31,7 @@ type CardInsert = {
   is_creature: boolean;
   mana_value?: number;
   faction_identity_id?: string | null;
-  faction_affinity_ids?: string[] | null;
+  faction_affinities?: string[][] | null;
 };
 
 type ScryfallBulkData = {
@@ -49,6 +49,7 @@ type ScryfallBulkData = {
 type ScryfallCardFace = {
   name: string;
   type_line: string;
+  oracle_text?: string | null;
 };
 
 type ScryfallCard = {
@@ -57,9 +58,10 @@ type ScryfallCard = {
   name: string;
   type_line: string;
   cmc: number;
+  set_type: string;
+  games: string[];
   oracle_text?: string | null;
   card_faces?: ScryfallCardFace[];
-  games?: string[];
 };
 
 // --------------------
@@ -76,8 +78,174 @@ function normalizeText(text: string): string {
     .trim();
 }
 
+// extract subtypes from a single type line
+function extractSubtypes(
+  typeLine: string,
+  creatureTypeSet: Set<string>,
+): string[] {
+  const parts = typeLine.split("—");
+  if (!parts[1]) return [];
+
+  return parts[1]
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .filter((t) => creatureTypeSet.has(t));
+}
+
+// Extract creature types from a type line or double-faced card_faces
+function extractCreatureTypes(
+  typeLine: string,
+  creatureTypeSet: Set<string>,
+  cardFaces?: ScryfallCardFace[],
+): string[] {
+  // Double-faced cards including creatures
+  if (cardFaces && cardFaces.length > 0) {
+    const creatureFaces = cardFaces.filter((face) =>
+      face.type_line.includes("Creature"),
+    );
+
+    // Case 1: one creature, one non-creature
+    if (creatureFaces.length === 1) {
+      return extractSubtypes(creatureFaces[0].type_line, creatureTypeSet);
+    }
+
+    // Case 2: both sides creature
+    if (creatureFaces.length === 2) {
+      const a = extractSubtypes(creatureFaces[0].type_line, creatureTypeSet);
+      const b = extractSubtypes(creatureFaces[1].type_line, creatureTypeSet);
+
+      const aSet = new Set(a);
+      const bSet = new Set(b);
+
+      const aInB = a.every((t) => bSet.has(t));
+      const bInA = b.every((t) => aSet.has(t));
+
+      if (aInB) return b;
+      if (bInA) return a;
+
+      // Invalid: overlapping but neither contains the other
+      return [];
+    }
+  } else {
+    // Single-faced creature
+    if (typeLine.includes("Creature")) {
+      return extractSubtypes(typeLine, creatureTypeSet);
+    }
+  }
+
+  return [];
+}
+
+// Extract creature type groups from text
+function extractCreatureGroupsFromText(
+  text: string,
+  pluralMap: Map<string, string>,
+  singularSet: Set<string>,
+): string[][] {
+  const groups: string[][] = [];
+  const normalized = normalizeText(text);
+
+  const segments = normalized
+    .split(",")
+    .map((g) => g.trim())
+    .filter(Boolean);
+
+  for (const segment of segments) {
+    const words = segment.split(/\s+/);
+    const normalizedWords = words
+      .map((w) => pluralMap.get(w))
+      .filter((w): w is string => !!w && singularSet.has(w));
+
+    if (normalizedWords.length > 0) {
+      groups.push([...normalizedWords].sort());
+    }
+  }
+
+  return groups;
+}
+
+// Remove subset groups (keep only maximal groups)
+function removeSubsets(groups: string[][]): string[][] {
+  if (groups.length === 0) return [];
+
+  // Sort by length descending (largest first)
+  const sorted = [...groups].sort((a, b) => b.length - a.length);
+  const result: string[][] = [];
+
+  for (const group of sorted) {
+    // Check if this group is a subset of any already-added group
+    const isSubset = result.some((existing) =>
+      group.every((type) => new Set(existing).has(type)),
+    );
+    if (!isSubset) {
+      result.push(group);
+    }
+  }
+
+  return result;
+}
+
+// Compute faction affinities for non-creatures
+function computeFactionAffinities(
+  card: ScryfallCard,
+  pluralMap: Map<string, string>,
+  singularSet: Set<string>,
+): string[][] {
+  const sources: string[] = [card.name, card.type_line];
+
+  if (card.oracle_text) {
+    sources.push(card.oracle_text);
+  }
+
+  // Handle double-faced non-creatures
+  if (card.card_faces && !card.type_line.includes("Creature")) {
+    for (const face of card.card_faces) {
+      if (face.oracle_text) {
+        sources.push(face.oracle_text);
+      }
+    }
+  }
+
+  const allGroups: string[][] = [];
+
+  for (const src of sources) {
+    const groups = extractCreatureGroupsFromText(src, pluralMap, singularSet);
+    allGroups.push(...groups);
+  }
+
+  return removeSubsets(allGroups);
+}
+
+// fetch all faction identities with pagination (avoiding 1000 cap)
+async function fetchAllFactionIdentities(select: string | null = null) {
+  const pageSize = 1000;
+  let from = 0;
+  let to = pageSize - 1;
+  const all: any[] = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("faction_identities")
+      .select(select ?? "*")
+      .range(from, to);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+
+    all.push(...data);
+
+    if (data.length < pageSize) break;
+
+    from += pageSize;
+    to += pageSize;
+  }
+
+  return all;
+}
+
 // Fetch all creature types and generate plurals
-async function fetchCreatureTypes(): Promise<{
+async function fetchAllCreatureTypes(): Promise<{
   singularSet: Set<string>;
   pluralMap: Map<string, string>;
 }> {
@@ -112,104 +280,6 @@ async function fetchCreatureTypes(): Promise<{
   return { singularSet, pluralMap };
 }
 
-// extract subtypes from a single type line
-function extractSubtypes(
-  typeLine: string,
-  creatureTypeSet: Set<string>,
-): string[] {
-  const parts = typeLine.split("—");
-  if (!parts[1]) return [];
-
-  return parts[1]
-    .trim()
-    .toLowerCase()
-    .split(" ")
-    .filter((t) => creatureTypeSet.has(t));
-}
-
-// Extract creature types from a type line or double-faced card_faces
-function extractCreatureTypes(
-  typeLine: string,
-  creatureTypeSet: Set<string>,
-  cardFaces?: any[],
-): string[] {
-  const subtypes: string[] = [];
-
-  // Double-faced cards including creatures
-  if (cardFaces && cardFaces.length > 0) {
-    const creatureFaces = cardFaces.filter((face) =>
-      face.type_line.includes("Creature"),
-    );
-
-    // Case 1: one creature, one non-creature
-    if (creatureFaces.length === 1) {
-      return extractSubtypes(creatureFaces[0].type_line, creatureTypeSet);
-    }
-
-    // Case 2: both sides creature
-    if (creatureFaces.length === 2) {
-      const a = extractSubtypes(creatureFaces[0].type_line, creatureTypeSet);
-      const b = extractSubtypes(creatureFaces[1].type_line, creatureTypeSet);
-
-      const aSet = new Set(a);
-      const bSet = new Set(b);
-
-      const aInB = a.every((t) => bSet.has(t));
-      const bInA = b.every((t) => aSet.has(t));
-
-      if (aInB) return b;
-      if (bInA) return a;
-
-      // ❌ Invalid: overlapping but neither contains the other
-      return []; // signal caller to skip card
-    }
-  } else {
-    // Single-faced creature
-    if (typeLine.includes("Creature")) {
-      subtypes.push(...extractSubtypes(typeLine, creatureTypeSet));
-    }
-  }
-
-  return Array.from(new Set(subtypes));
-}
-
-// Generate all non-empty subsets of a list of creature types
-function generateAllNonEmptySubsets(types: string[]): string[][] {
-  const totalSubsets = 1 << types.length;
-  const subsets: string[][] = [];
-
-  for (let i = 1; i < totalSubsets; i++) {
-    // Use bitmask to filter types included in this subset
-    const subset = types.filter((_, index) => (i >> index) & 1);
-    subsets.push(subset);
-  }
-  return subsets;
-}
-
-// Add affinity_subsets for all faction identities
-async function updateFactionSubsets(factionIdentityMap: Map<string, string>) {
-  const allIdentities = await fetchAllFactionIdentities();
-
-  // Helper to create a consistent key for a list of types
-  const getIdentityKey = (types: string[]) => [...types].sort().join("|");
-
-  // Prepare all updates in memory
-  const updates = allIdentities.map((identity) => {
-    const subsets = generateAllNonEmptySubsets(identity.identity);
-    const subsetIds = subsets
-      .map((sub) => factionIdentityMap.get(getIdentityKey(sub)))
-      .filter((id): id is string => !!id);
-
-    return {
-      ...identity,
-      affinity_subsets: subsetIds,
-    };
-  });
-
-  // Perform bulk upserts to minimize network requests
-  await bulkUpsert("faction_identities", updates, "identity");
-}
-
 // Helper to bulk upsert rows in chunks
 async function bulkUpsert(
   table: string,
@@ -222,89 +292,6 @@ async function bulkUpsert(
     const { error } = await supabase.from(table).upsert(batch, { onConflict });
     if (error) throw error;
   }
-}
-
-// Extract creature groups from text
-function extractFactionIdentityIdsFromText(
-  text: string,
-  pluralMap: Map<string, string>,
-  singularSet: Set<string>,
-  factionIdentityMap: Map<string, string>,
-): string[] {
-  const groups: string[] = [];
-  const normalized = normalizeText(text);
-
-  const segments = normalized
-    .split(",")
-    .map((g) => g.trim())
-    .filter(Boolean);
-
-  for (const segment of segments) {
-    const words = segment.split(/\s+/);
-    const normalizedWords = words
-      .map((w) => pluralMap.get(w))
-      .filter((w): w is string => !!w && singularSet.has(w));
-    if (normalizedWords.length === 0) continue;
-
-    normalizedWords.sort(); // Ensure canonical order matches DB
-    const key = normalizedWords.join("|");
-    const factionId = factionIdentityMap.get(key);
-    if (factionId) groups.push(factionId);
-  }
-
-  return groups;
-}
-
-// Compute faction affinities for non-creatures
-function computeFactionAffinitiesForNonCreature(
-  card: ScryfallCard,
-  pluralMap: Map<string, string>,
-  singularSet: Set<string>,
-  factionIdentityMap: Map<string, string>,
-): string[] {
-  const sources = [card.name, card.type_line, card.oracle_text].filter(
-    (v): v is string => Boolean(v),
-  );
-  const factionIdentityIds: string[] = [];
-
-  for (const src of sources) {
-    const groups = extractFactionIdentityIdsFromText(
-      src,
-      pluralMap,
-      singularSet,
-      factionIdentityMap,
-    );
-    factionIdentityIds.push(...groups);
-  }
-
-  return factionIdentityIds;
-}
-
-// fetch all faction identities with pagination (avoiding 1000 cap)
-async function fetchAllFactionIdentities(select: string | null = null) {
-  const pageSize = 1000;
-  let from = 0;
-  let to = pageSize - 1;
-  const all: any[] = [];
-
-  while (true) {
-    const { data, error } = await supabase
-      .from("faction_identities")
-      .select(select ?? "*")
-      .range(from, to);
-
-    if (error) throw error;
-    if (!data || data.length === 0) break;
-
-    all.push(...data);
-
-    if (data.length < pageSize) break;
-
-    from += pageSize;
-    to += pageSize;
-  }
-
-  return all;
 }
 
 // --------------------
@@ -326,16 +313,23 @@ async function importScryfall() {
   const cards = (await cardsRes.json()) as ScryfallCard[];
 
   console.log("Fetching creature types...");
-  const creatureTypeSet = await fetchCreatureTypes();
+  const creatureTypeSet = await fetchAllCreatureTypes();
 
   console.log(`Processing ${cards.length} cards...`);
 
-  // 0. Split cards into creatures and non-creatures, and remove non paper cards
+  // 0. Split cards into creatures and non-creatures
   const creatures: typeof cards = [];
   const nonCreatures: typeof cards = [];
 
   for (const card of cards) {
-    if (card.games?.includes("paper")) {
+    // remove non paper cards, tokens, funny sets
+    if (
+      card.games.includes("paper") &&
+      !card.type_line.includes("Token") &&
+      card.set_type != "funny" &&
+      card.set_type != "token" &&
+      card.set_type != "memorabilia"
+    ) {
       if (card.type_line.includes("Creature")) {
         creatures.push(card);
       } else {
@@ -357,9 +351,11 @@ async function importScryfall() {
 
     if (identity.length === 0) continue; // skip cards without creature identity
 
-    const key = identity.toSorted().join("|");
+    const sortedIdentity = [...identity].sort();
+    const key = sortedIdentity.join("|");
+
     if (!identityMap.has(key)) {
-      identityMap.set(key, identity);
+      identityMap.set(key, sortedIdentity);
     }
 
     creatureInserts.push({
@@ -369,14 +365,14 @@ async function importScryfall() {
       is_creature: true,
       mana_value: c.cmc,
       faction_identity_id: null, // Filled later
-      faction_affinity_ids: null,
+      faction_affinities: null,
       _identityKey: key,
     });
   }
 
   // 2. Bulk Upsert Faction Identities
   const identityRows = Array.from(identityMap.values()).map((identity) => ({
-    identity: identity.toSorted(),
+    identity: identity,
     name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(" "),
   }));
 
@@ -390,7 +386,8 @@ async function importScryfall() {
 
   const factionIdentityMap = new Map<string, string>();
   for (const item of allIdentities) {
-    factionIdentityMap.set(item.identity.sort().join("|"), item.id);
+    const sortedIdentity = [...item.identity].sort();
+    factionIdentityMap.set(sortedIdentity.join("|"), item.id);
   }
 
   // 4. Bulk Upsert Creature Cards
@@ -405,19 +402,16 @@ async function importScryfall() {
   console.log(`Upserting ${finalCreatureInserts.length} creature cards...`);
   await bulkUpsert("cards", finalCreatureInserts, "oracle_id");
 
-  // 5. Add affinity_subsets to faction identities
-  await updateFactionSubsets(factionIdentityMap);
-
-  // 6. Process Non-Creatures
+  // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
   for (const c of nonCreatures) {
-    const factionAffinityIds = computeFactionAffinitiesForNonCreature(
+    const factionAffinities = computeFactionAffinities(
       c,
       creatureTypeSet.pluralMap,
       creatureTypeSet.singularSet,
-      factionIdentityMap,
     );
-    if (factionAffinityIds.length === 0) continue; // skip if no affinities exist
+
+    if (factionAffinities.length === 0) continue; // skip if no affinities exist
 
     nonCreatureInserts.push({
       oracle_id: c.oracle_id,
@@ -426,7 +420,7 @@ async function importScryfall() {
       is_creature: false,
       mana_value: c.cmc,
       faction_identity_id: null,
-      faction_affinity_ids: factionAffinityIds,
+      faction_affinities: factionAffinities,
     });
   }
 
