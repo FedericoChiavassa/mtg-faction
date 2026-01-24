@@ -385,13 +385,14 @@ async function importScryfall() {
   const nonCreatures: typeof cards = [];
 
   for (const card of cards) {
-    // remove non paper cards, tokens, funny sets
+    // remove non paper cards, tokens, funny sets ecc.
     if (
       card.games.includes("paper") &&
       !card.type_line.includes("Token") &&
       card.set_type != "funny" &&
       card.set_type != "token" &&
-      card.set_type != "memorabilia"
+      card.set_type != "memorabilia" &&
+      card.set_type != "minigame"
     ) {
       if (card.type_line.includes("Creature")) {
         creatures.push(card);
