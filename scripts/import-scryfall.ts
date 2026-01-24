@@ -64,39 +64,58 @@ type ScryfallCard = {
   card_faces?: ScryfallCardFace[];
 };
 
+type CreatureTypeSet = {
+  singularSet: Set<string>;
+  pluralMap: Map<string, string>;
+  maxTypeLength: number;
+};
+
 // --------------------
 // Helpers
 // --------------------
 
-function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/\(.*?\)/g, "") // remove reminder text
-    .replace(/['"!]/g, "") // remove noise punctuation
-    .replace(/[.;:]/g, ",") // normalize sentence/clause separators to comma
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-// extract subtypes from a single type line
+// Extract creature subtypes from a single type line
 function extractSubtypes(
   typeLine: string,
-  creatureTypeSet: Set<string>,
+  creatureTypeSet: CreatureTypeSet,
 ): string[] {
+  const { singularSet, maxTypeLength } = creatureTypeSet;
+
   const parts = typeLine.split("—");
   if (!parts[1]) return [];
 
-  return parts[1]
-    .trim()
-    .toLowerCase()
-    .split(" ")
-    .filter((t) => creatureTypeSet.has(t));
+  const tokens = parts[1].trim().toLowerCase().split(/\s+/);
+
+  const result: string[] = [];
+
+  let i = 0;
+  while (i < tokens.length) {
+    let matched = false;
+
+    // Greedy longest-match first
+    for (let len = Math.min(maxTypeLength, tokens.length - i); len > 0; len--) {
+      const candidate = tokens.slice(i, i + len).join(" ");
+
+      if (singularSet.has(candidate)) {
+        result.push(candidate);
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      i++;
+    }
+  }
+
+  return result;
 }
 
 // Extract creature types from a type line or double-faced card_faces
 function extractCreatureTypes(
   typeLine: string,
-  creatureTypeSet: Set<string>,
+  creatureTypeSet: CreatureTypeSet,
   cardFaces?: ScryfallCardFace[],
 ): string[] {
   // Double-faced cards including creatures
@@ -137,32 +156,71 @@ function extractCreatureTypes(
   return [];
 }
 
-// Extract creature type groups from text
-function extractCreatureGroupsFromText(
-  text: string,
-  pluralMap: Map<string, string>,
-  singularSet: Set<string>,
-): string[][] {
-  const groups: string[][] = [];
-  const normalized = normalizeText(text);
+function normalizeTextForCreatureScan(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\(.*?\)/g, "") // remove reminder text
+    .replace(/[.,;:'!?]/g, "|") // remove noise punctuation, add hard separators
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
+// Extract creature type groups from text
+export function extractCreatureGroupsFromText(
+  text: string,
+  creatureTypeSet: CreatureTypeSet,
+): string[][] {
+  const { singularSet, pluralMap, maxTypeLength } = creatureTypeSet;
+  const normalized = normalizeTextForCreatureScan(text);
   const segments = normalized
-    .split(",")
-    .map((g) => g.trim())
+    .split("|")
+    .map((s) => s.trim())
     .filter(Boolean);
 
-  for (const segment of segments) {
-    const words = segment.split(/\s+/);
-    const normalizedWords = words
-      .map((w) => pluralMap.get(w))
-      .filter((w): w is string => !!w && singularSet.has(w));
+  const results: string[][] = [];
 
-    if (normalizedWords.length > 0) {
-      groups.push([...normalizedWords].sort());
+  for (const segment of segments) {
+    const tokens = segment.split(" ");
+    let i = 0;
+    let currentGroup: string[] = [];
+
+    while (i < tokens.length) {
+      let matched = false;
+
+      // Try longest match first
+      for (
+        let len = Math.min(maxTypeLength, tokens.length - i);
+        len > 0;
+        len--
+      ) {
+        const raw = tokens.slice(i, i + len).join(" ");
+        const singular = pluralMap.get(raw);
+
+        if (singular && singularSet.has(singular)) {
+          if (!currentGroup.includes(singular)) {
+            currentGroup.push(singular);
+          }
+          i += len;
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        if (currentGroup.length > 0) {
+          results.push([...currentGroup]);
+          currentGroup = [];
+        }
+        i++;
+      }
+    }
+
+    if (currentGroup.length > 0) {
+      results.push([...currentGroup]);
     }
   }
 
-  return groups;
+  return results;
 }
 
 // Remove subset groups (keep only maximal groups)
@@ -189,8 +247,7 @@ function removeSubsets(groups: string[][]): string[][] {
 // Compute faction affinities for non-creatures
 function computeFactionAffinities(
   card: ScryfallCard,
-  pluralMap: Map<string, string>,
-  singularSet: Set<string>,
+  creatureTypeSet: CreatureTypeSet,
 ): string[][] {
   const sources: string[] = [card.name, card.type_line];
 
@@ -210,7 +267,7 @@ function computeFactionAffinities(
   const allGroups: string[][] = [];
 
   for (const src of sources) {
-    const groups = extractCreatureGroupsFromText(src, pluralMap, singularSet);
+    const groups = extractCreatureGroupsFromText(src, creatureTypeSet);
     allGroups.push(...groups);
   }
 
@@ -248,6 +305,7 @@ async function fetchAllFactionIdentities(select: string | null = null) {
 async function fetchAllCreatureTypes(): Promise<{
   singularSet: Set<string>;
   pluralMap: Map<string, string>;
+  maxTypeLength: number;
 }> {
   const res = await fetch("https://api.scryfall.com/catalog/creature-types");
   const json = (await res.json()) as ScryfallCatalog;
@@ -277,7 +335,12 @@ async function fetchAllCreatureTypes(): Promise<{
     for (const plural of plurals) pluralMap.set(plural, singular);
   }
 
-  return { singularSet, pluralMap };
+  // Max words in any creature type (usually 2: "time lord")
+  const maxTypeLength = Math.max(
+    ...Array.from(singularSet).map((t) => t.split(" ").length),
+  );
+
+  return { singularSet, pluralMap, maxTypeLength };
 }
 
 // Helper to bulk upsert rows in chunks
@@ -345,17 +408,16 @@ async function importScryfall() {
   for (const c of creatures) {
     const identity = extractCreatureTypes(
       c.type_line,
-      creatureTypeSet.singularSet,
+      creatureTypeSet,
       c.card_faces,
     );
 
     if (identity.length === 0) continue; // skip cards without creature identity
 
-    const sortedIdentity = [...identity].sort();
-    const key = sortedIdentity.join("|");
+    const key = identity.toSorted().join("|");
 
     if (!identityMap.has(key)) {
-      identityMap.set(key, sortedIdentity);
+      identityMap.set(key, identity);
     }
 
     creatureInserts.push({
@@ -372,7 +434,7 @@ async function importScryfall() {
 
   // 2. Bulk Upsert Faction Identities
   const identityRows = Array.from(identityMap.values()).map((identity) => ({
-    identity: identity,
+    identity: identity.toSorted(),
     name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(" "),
   }));
 
@@ -386,7 +448,7 @@ async function importScryfall() {
 
   const factionIdentityMap = new Map<string, string>();
   for (const item of allIdentities) {
-    const sortedIdentity = [...item.identity].sort();
+    const sortedIdentity = item.identity.toSorted();
     factionIdentityMap.set(sortedIdentity.join("|"), item.id);
   }
 
@@ -405,11 +467,7 @@ async function importScryfall() {
   // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
   for (const c of nonCreatures) {
-    const factionAffinities = computeFactionAffinities(
-      c,
-      creatureTypeSet.pluralMap,
-      creatureTypeSet.singularSet,
-    );
+    const factionAffinities = computeFactionAffinities(c, creatureTypeSet);
 
     if (factionAffinities.length === 0) continue; // skip if no affinities exist
 
