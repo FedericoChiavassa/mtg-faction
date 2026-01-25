@@ -1,3 +1,37 @@
 # Faction
 
-see [project description](docs/Project%20description.md)
+See [project description here](docs/Project%20description.md)
+
+## Local Development
+
+### Prerequisites
+
+- Node.js
+- Docker
+- Supabase CLI
+
+### 1. Start Supabase
+
+Start the local Supabase instance:
+
+```bash
+supabase start
+```
+
+### 2. Configure Environment
+
+Create a `.env` file in the root directory using the credentials output from `supabase start`:
+
+```env
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+### 3. Run Import Script
+
+Install dependencies and run the import script to populate the database:
+
+```bash
+npm install
+node scripts/import-scryfall.ts
+```
