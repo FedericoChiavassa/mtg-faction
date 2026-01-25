@@ -27,7 +27,15 @@ SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-### 3. Run Import Script
+### 3. Resetting the Database
+
+Completely wipe and reset the local database. This will re-apply any existing migrations:
+
+```bash
+supabase db reset
+```
+
+### 4. Run Import Script
 
 Install dependencies and run the import script to populate the database:
 
