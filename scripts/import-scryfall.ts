@@ -60,6 +60,7 @@ type ScryfallCard = {
   cmc: number;
   set_type: string;
   games: string[];
+  layout: string;
   oracle_text?: string | null;
   card_faces?: ScryfallCardFace[];
 };
@@ -392,7 +393,10 @@ async function importScryfall() {
       card.set_type != "funny" &&
       card.set_type != "token" &&
       card.set_type != "memorabilia" &&
-      card.set_type != "minigame"
+      card.set_type != "minigame" &&
+      card.layout != "planar" &&
+      card.layout != "vanguard" &&
+      card.layout != "scheme"
     ) {
       if (card.type_line.includes("Creature")) {
         creatures.push(card);
