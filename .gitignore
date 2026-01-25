@@ -12,6 +12,8 @@ yarn-error.log*
 
 # Supabase local runtime
 .supabase/
+supabase/.temp/
+supabase/.env
 
 # Docker
 docker-data/
@@ -21,3 +23,4 @@ docker-data/
 .DS_Store
 .vscode/
 .idea/
+Thumbs.db
