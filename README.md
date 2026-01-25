@@ -1,3 +1,3 @@
 # Faction
 
-see [preoject description](docs/Project%20description.md)
+see [project description](docs/Project%20description.md)
