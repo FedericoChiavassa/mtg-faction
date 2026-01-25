@@ -1,3 +1,3 @@
 # Faction
 
-see docs/Project description.md
+see [preoject description](../docs/Project description.md)
