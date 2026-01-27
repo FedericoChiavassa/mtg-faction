@@ -28,7 +28,7 @@ export default defineConfig([
       parserOptions: {
         project: ["./tsconfig.app.json", "tsconfig.node.json"],
         tsconfigRootDir: new URL(".", import.meta.url).pathname,
-        ecmaVersion: 2020,
+        ecmaVersion: "latest",
         sourceType: "module",
       },
     },
