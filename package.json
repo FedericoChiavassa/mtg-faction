@@ -1,12 +1,38 @@
 {
   "name": "mtg-faction",
   "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
   "engines": {
     "node": ">=25.0.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "test": "npm run test --workspaces --if-present",
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "import-scryfall": "node scripts/import-scryfall",
+    "lint": "npm run lint --workspace=frontend --if-present",
+    "format:check": "npm run format:check --workspace=frontend --if-present",
+    "format:fix": "npm run format:fix --workspace=frontend --if-present",
+    "tsc:check": "npm run tsc:check --workspace=frontend --if-present"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,scss,md}": [
+      "npm --prefix frontend run format:fix"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "npm --prefix frontend run lint"
+    ]
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.0",
     "dotenv": "^17.2.3",
     "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.7"
   }
 }

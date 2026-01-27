@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+dist
+build
+coverage
+
+# Supabase generated files
+supabase/.temp
+supabase/.branches
+
+# Environment files
+.env
+.env.*
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Generated or vendored
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
