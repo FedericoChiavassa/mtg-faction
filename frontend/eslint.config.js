@@ -13,7 +13,7 @@ import tsParser from '@typescript-eslint/parser';
 import pluginQuery from '@tanstack/eslint-plugin-query';
 
 export default defineConfig([
-  globalIgnores(['dist', 'routeTree.gen.ts']),
+  globalIgnores(['dist', '**/*.gen.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -86,7 +86,21 @@ export default defineConfig([
       ],
 
       // Import sorting
-      'simple-import-sort/imports': 'error',
+      'simple-import-sort/imports': [
+        'error',
+        {
+          groups: [
+            // React first
+            ['^react', '^@?\\w'],
+            // Internal aliases
+            ['^@/'],
+            // Relative imports
+            ['^\\.'],
+            // Side effects
+            ['^\\u0000'],
+          ],
+        },
+      ],
       'simple-import-sort/exports': 'error',
       'import/first': 'error',
       'import/newline-after-import': 'error',
