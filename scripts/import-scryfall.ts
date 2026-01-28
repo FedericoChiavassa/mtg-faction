@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import fetch from "node-fetch";
-import dotenv from "dotenv";
+import { createClient } from '@supabase/supabase-js';
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -11,7 +11,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env");
+  throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -20,7 +20,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 // Types
 // --------------------
 type ScryfallCatalog = {
-  object: "catalog";
+  object: 'catalog';
   data: string[];
 };
 
@@ -35,7 +35,7 @@ type CardInsert = {
 };
 
 type ScryfallBulkData = {
-  object: "list";
+  object: 'list';
   data: {
     object: string;
     id: string;
@@ -82,7 +82,7 @@ function extractSubtypes(
 ): string[] {
   const { singularSet, maxTypeLength } = creatureTypeSet;
 
-  const parts = typeLine.split("—");
+  const parts = typeLine.split('—');
   if (!parts[1]) return [];
 
   const tokens = parts[1].trim().toLowerCase().split(/\s+/);
@@ -95,7 +95,7 @@ function extractSubtypes(
 
     // Greedy longest-match first
     for (let len = Math.min(maxTypeLength, tokens.length - i); len > 0; len--) {
-      const candidate = tokens.slice(i, i + len).join(" ");
+      const candidate = tokens.slice(i, i + len).join(' ');
 
       if (singularSet.has(candidate)) {
         result.push(candidate);
@@ -122,7 +122,7 @@ function extractCreatureTypes(
   // Double-faced cards including creatures
   if (cardFaces && cardFaces.length > 0) {
     const creatureFaces = cardFaces.filter((face) =>
-      face.type_line.includes("Creature"),
+      face.type_line.includes('Creature'),
     );
 
     // Case 1: one creature, one non-creature
@@ -149,7 +149,7 @@ function extractCreatureTypes(
     }
   } else {
     // Single-faced creature
-    if (typeLine.includes("Creature")) {
+    if (typeLine.includes('Creature')) {
       return extractSubtypes(typeLine, creatureTypeSet);
     }
   }
@@ -160,9 +160,9 @@ function extractCreatureTypes(
 function normalizeTextForCreatureScan(text: string): string {
   return text
     .toLowerCase()
-    .replace(/\(.*?\)/g, "") // remove reminder text
-    .replace(/[.,;:'!?]/g, "|") // remove noise punctuation, add hard separators
-    .replace(/\s+/g, " ")
+    .replace(/\(.*?\)/g, '') // remove reminder text
+    .replace(/[.,;:'!?]/g, '|') // remove noise punctuation, add hard separators
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -174,14 +174,14 @@ export function extractCreatureGroupsFromText(
   const { singularSet, pluralMap, maxTypeLength } = creatureTypeSet;
   const normalized = normalizeTextForCreatureScan(text);
   const segments = normalized
-    .split("|")
+    .split('|')
     .map((s) => s.trim())
     .filter(Boolean);
 
   const results: string[][] = [];
 
   for (const segment of segments) {
-    const tokens = segment.split(" ");
+    const tokens = segment.split(' ');
     let i = 0;
     let currentGroup: string[] = [];
 
@@ -194,7 +194,7 @@ export function extractCreatureGroupsFromText(
         len > 0;
         len--
       ) {
-        const raw = tokens.slice(i, i + len).join(" ");
+        const raw = tokens.slice(i, i + len).join(' ');
         const singular = pluralMap.get(raw);
 
         if (singular && singularSet.has(singular)) {
@@ -257,7 +257,7 @@ function computeFactionAffinities(
   }
 
   // Handle double-faced non-creatures
-  if (card.card_faces && !card.type_line.includes("Creature")) {
+  if (card.card_faces && !card.type_line.includes('Creature')) {
     for (const face of card.card_faces) {
       if (face.oracle_text) {
         sources.push(face.oracle_text);
@@ -284,8 +284,8 @@ async function fetchAllFactionIdentities(select: string | null = null) {
 
   while (true) {
     const { data, error } = await supabase
-      .from("faction_identities")
-      .select(select ?? "*")
+      .from('faction_identities')
+      .select(select ?? '*')
       .range(from, to);
 
     if (error) throw error;
@@ -308,28 +308,28 @@ async function fetchAllCreatureTypes(): Promise<{
   pluralMap: Map<string, string>;
   maxTypeLength: number;
 }> {
-  const res = await fetch("https://api.scryfall.com/catalog/creature-types");
+  const res = await fetch('https://api.scryfall.com/catalog/creature-types');
   const json = (await res.json()) as ScryfallCatalog;
 
   const singularSet = new Set<string>();
   const pluralMap = new Map<string, string>();
 
   const irregularPlurals: Record<string, string[]> = {
-    ox: ["oxen"],
-    mouse: ["mice"],
-    louse: ["lice"],
-    fungus: ["fungi"],
+    ox: ['oxen'],
+    mouse: ['mice'],
+    louse: ['lice'],
+    fungus: ['fungi'],
   };
 
   for (const type of json.data) {
     const t = type.toLowerCase();
     singularSet.add(t);
     pluralMap.set(t, t); // singular → itself
-    pluralMap.set(t + "s", t);
+    pluralMap.set(t + 's', t);
 
-    if (t.endsWith("y")) pluralMap.set(t.slice(0, -1) + "ies", t);
-    if (t.endsWith("f")) pluralMap.set(t.slice(0, -1) + "ves", t);
-    if (t.endsWith("fe")) pluralMap.set(t.slice(0, -2) + "ves", t);
+    if (t.endsWith('y')) pluralMap.set(t.slice(0, -1) + 'ies', t);
+    if (t.endsWith('f')) pluralMap.set(t.slice(0, -1) + 'ves', t);
+    if (t.endsWith('fe')) pluralMap.set(t.slice(0, -2) + 'ves', t);
   }
 
   for (const [singular, plurals] of Object.entries(irregularPlurals)) {
@@ -338,10 +338,14 @@ async function fetchAllCreatureTypes(): Promise<{
 
   // Max words in any creature type (usually 2: "time lord")
   const maxTypeLength = Math.max(
-    ...Array.from(singularSet).map((t) => t.split(" ").length),
+    ...Array.from(singularSet).map((t) => t.split(' ').length),
   );
 
-  return { singularSet, pluralMap, maxTypeLength };
+  return {
+    singularSet,
+    pluralMap,
+    maxTypeLength,
+  };
 }
 
 // Helper to bulk upsert rows in chunks
@@ -353,7 +357,9 @@ async function bulkUpsert(
 ) {
   for (let i = 0; i < rows.length; i += batchSize) {
     const batch = rows.slice(i, i + batchSize);
-    const { error } = await supabase.from(table).upsert(batch, { onConflict });
+    const { error } = await supabase.from(table).upsert(batch, {
+      onConflict,
+    });
     if (error) throw error;
   }
 }
@@ -362,21 +368,21 @@ async function bulkUpsert(
 // Main import
 // --------------------
 async function importScryfall() {
-  console.log("Fetching Scryfall bulk data...");
-  const bulkRes = await fetch("https://api.scryfall.com/bulk-data");
+  console.log('Fetching Scryfall bulk data...');
+  const bulkRes = await fetch('https://api.scryfall.com/bulk-data');
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
   const oracleCardsDataUrl = bulkData.data.find(
-    (d: any) => d.type === "oracle_cards",
+    (d: any) => d.type === 'oracle_cards',
   )?.download_uri;
   if (!oracleCardsDataUrl)
-    throw new Error("Could not find oracle_cards bulk data");
+    throw new Error('Could not find oracle_cards bulk data');
 
-  console.log("Downloading full card data...");
+  console.log('Downloading full card data...');
   const cardsRes = await fetch(oracleCardsDataUrl);
   const cards = (await cardsRes.json()) as ScryfallCard[];
 
-  console.log("Fetching creature types...");
+  console.log('Fetching creature types...');
   const creatureTypeSet = await fetchAllCreatureTypes();
 
   console.log(`Processing ${cards.length} cards...`);
@@ -388,17 +394,17 @@ async function importScryfall() {
   for (const card of cards) {
     // remove non paper cards, tokens, funny sets ecc.
     if (
-      card.games.includes("paper") &&
-      !card.type_line.includes("Token") &&
-      card.set_type != "funny" &&
-      card.set_type != "token" &&
-      card.set_type != "memorabilia" &&
-      card.set_type != "minigame" &&
-      card.layout != "planar" &&
-      card.layout != "vanguard" &&
-      card.layout != "scheme"
+      card.games.includes('paper') &&
+      !card.type_line.includes('Token') &&
+      card.set_type != 'funny' &&
+      card.set_type != 'token' &&
+      card.set_type != 'memorabilia' &&
+      card.set_type != 'minigame' &&
+      card.layout != 'planar' &&
+      card.layout != 'vanguard' &&
+      card.layout != 'scheme'
     ) {
-      if (card.type_line.includes("Creature")) {
+      if (card.type_line.includes('Creature')) {
         creatures.push(card);
       } else {
         nonCreatures.push(card);
@@ -408,7 +414,9 @@ async function importScryfall() {
 
   // 1. Prepare Creature Data & Identities
   const identityMap = new Map<string, string[]>();
-  const creatureInserts: (CardInsert & { _identityKey: string })[] = [];
+  const creatureInserts: (CardInsert & {
+    _identityKey: string;
+  })[] = [];
 
   for (const c of creatures) {
     const identity = extractCreatureTypes(
@@ -419,7 +427,7 @@ async function importScryfall() {
 
     if (identity.length === 0) continue; // skip cards without creature identity
 
-    const key = identity.toSorted().join("|");
+    const key = identity.toSorted().join('|');
 
     if (!identityMap.has(key)) {
       identityMap.set(key, identity);
@@ -440,21 +448,21 @@ async function importScryfall() {
   // 2. Bulk Upsert Faction Identities
   const identityRows = Array.from(identityMap.values()).map((identity) => ({
     identity: identity.toSorted(),
-    name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(" "),
+    name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(' '),
   }));
 
   console.log(`Upserting ${identityRows.length} faction identities...`);
-  await bulkUpsert("faction_identities", identityRows, "identity");
+  await bulkUpsert('faction_identities', identityRows, 'identity');
 
   // 3. Fetch IDs to map back to cards
-  const allIdentities = await fetchAllFactionIdentities("id, identity");
+  const allIdentities = await fetchAllFactionIdentities('id, identity');
 
-  if (!allIdentities) throw new Error("Failed to fetch faction identities");
+  if (!allIdentities) throw new Error('Failed to fetch faction identities');
 
   const factionIdentityMap = new Map<string, string>();
   for (const item of allIdentities) {
     const sortedIdentity = item.identity.toSorted();
-    factionIdentityMap.set(sortedIdentity.join("|"), item.id);
+    factionIdentityMap.set(sortedIdentity.join('|'), item.id);
   }
 
   // 4. Bulk Upsert Creature Cards
@@ -467,7 +475,7 @@ async function importScryfall() {
   });
 
   console.log(`Upserting ${finalCreatureInserts.length} creature cards...`);
-  await bulkUpsert("cards", finalCreatureInserts, "oracle_id");
+  await bulkUpsert('cards', finalCreatureInserts, 'oracle_id');
 
   // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
@@ -488,15 +496,15 @@ async function importScryfall() {
   }
 
   console.log(`Upserting ${nonCreatureInserts.length} non-creature cards...`);
-  await bulkUpsert("cards", nonCreatureInserts, "oracle_id");
+  await bulkUpsert('cards', nonCreatureInserts, 'oracle_id');
 
-  console.log("Import complete!");
+  console.log('Import complete!');
 }
 
 // --------------------
 // Run
 // --------------------
 importScryfall().catch((err) => {
-  console.error("Error importing Scryfall cards:", err);
+  console.error('Error importing Scryfall cards:', err);
   process.exit(1);
 });
