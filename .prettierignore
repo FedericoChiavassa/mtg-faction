@@ -20,3 +20,4 @@ supabase/.branches
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+routeTree.gen.ts

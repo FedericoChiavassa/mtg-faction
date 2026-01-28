@@ -8,11 +8,12 @@ import prettier from 'eslint-config-prettier';
 import reactPlugin from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
+import importPlugin from 'eslint-plugin-import';
 import tsParser from '@typescript-eslint/parser';
 import pluginQuery from '@tanstack/eslint-plugin-query';
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'routeTree.gen.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -40,6 +41,7 @@ export default defineConfig([
       'simple-import-sort': simpleImportSort,
       'unused-imports': unusedImports,
       '@tanstack/query': pluginQuery,
+      import: importPlugin,
     },
     settings: {
       react: {
@@ -86,6 +88,16 @@ export default defineConfig([
       // Import sorting
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
+      'import/first': 'error',
+      'import/newline-after-import': 'error',
+      'import/no-duplicates': 'error',
+    },
+  },
+  {
+    // 👇 shadcn/ui escape hatch
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ]);
