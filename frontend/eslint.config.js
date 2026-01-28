@@ -1,19 +1,23 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import { defineConfig, globalIgnores } from 'eslint/config';
+
+import tseslint from 'typescript-eslint';
+import tsParser from '@typescript-eslint/parser';
+
+import prettier from 'eslint-config-prettier';
+
+import reactPlugin from 'eslint-plugin-react';
+import importPlugin from 'eslint-plugin-import';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
-import { defineConfig, globalIgnores } from 'eslint/config';
-import prettier from 'eslint-config-prettier';
-import reactPlugin from 'eslint-plugin-react';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import unusedImports from 'eslint-plugin-unused-imports';
-import importPlugin from 'eslint-plugin-import';
-import tsParser from '@typescript-eslint/parser';
+import perfectionist from 'eslint-plugin-perfectionist';
 import pluginQuery from '@tanstack/eslint-plugin-query';
+import unusedImports from 'eslint-plugin-unused-imports';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 export default defineConfig([
-  globalIgnores(['dist', '**/*.gen.ts']),
+  globalIgnores(['dist', 'node_modules', 'build', '**/*.gen.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -22,7 +26,6 @@ export default defineConfig([
       reactPlugin.configs.flat.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
-      pluginQuery.configs['flat/recommended'],
       prettier, // MUST be last
     ],
     languageOptions: {
@@ -37,11 +40,12 @@ export default defineConfig([
     },
     plugins: {
       react: reactPlugin,
+      import: importPlugin,
+      perfectionist: perfectionist,
       'react-hooks': reactHooks,
       'simple-import-sort': simpleImportSort,
       'unused-imports': unusedImports,
       '@tanstack/query': pluginQuery,
-      import: importPlugin,
     },
     settings: {
       react: {
@@ -49,8 +53,6 @@ export default defineConfig([
       },
     },
     rules: {
-      // quotes: ["error", "single", { avoidEscape: true }],
-
       // React
       'react/react-in-jsx-scope': 'off', // Not needed with Vite
       'react/jsx-uses-react': 'off',
@@ -60,6 +62,9 @@ export default defineConfig([
       // Hooks
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+
+      // React Query
+      ...pluginQuery.configs['flat/recommended'].rules,
 
       // TypeScript
       '@typescript-eslint/no-unused-vars': [
@@ -105,6 +110,15 @@ export default defineConfig([
       'import/first': 'error',
       'import/newline-after-import': 'error',
       'import/no-duplicates': 'error',
+
+      // Perfectionist rules
+      'perfectionist/sort-jsx-props': [
+        'error',
+        {
+          type: 'line-length',
+          order: 'asc',
+        },
+      ],
     },
   },
   {
