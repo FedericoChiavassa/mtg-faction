@@ -9,6 +9,7 @@ import reactPlugin from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tsParser from '@typescript-eslint/parser';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -20,6 +21,7 @@ export default defineConfig([
       reactPlugin.configs.flat.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
+      pluginQuery.configs['flat/recommended'],
       prettier, // MUST be last
     ],
     languageOptions: {
@@ -37,6 +39,7 @@ export default defineConfig([
       'react-hooks': reactHooks,
       'simple-import-sort': simpleImportSort,
       'unused-imports': unusedImports,
+      '@tanstack/query': pluginQuery,
     },
     settings: {
       react: {
