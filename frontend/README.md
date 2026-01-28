@@ -3,6 +3,7 @@
 - React + TypeScript
 - Vite
 - @vitejs/plugin-react-swc
+- TanStack Router
 - TanStack Query
 - Zustand
 - Tailwind CSS
@@ -11,4 +12,3 @@
 ## Notes
 
 - React Compiler is not enabled
-- ESLint uses the default Vite config
