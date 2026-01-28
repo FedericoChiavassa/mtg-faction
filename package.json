@@ -25,7 +25,7 @@
       "npm --prefix frontend run format:fix"
     ],
     "*.{ts,tsx,js,jsx}": [
-      "npm --prefix frontend run lint:fix"
+      "npm --prefix frontend run lint:check"
     ]
   },
   "dependencies": {
