@@ -13,6 +13,8 @@
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
     "import-scryfall": "node scripts/import-scryfall",
+    "types:gen": "supabase gen types typescript --local --schema public > frontend/src/types/supabase.gen.ts",
+    "types:check": "supabase gen types typescript --local --schema public > /tmp/supabase-types.ts && diff /tmp/supabase-types.ts frontend/src/types/supabase.gen.ts",
     "lint:check": "npm run lint:check --workspace=frontend --if-present",
     "lint:fix": "npm run lint:fix --workspace=frontend --if-present",
     "lint": "npm run lint --workspace=frontend --if-present",
