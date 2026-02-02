@@ -12,7 +12,7 @@
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
-    "import-scryfall": "node scripts/import-scryfall",
+    "import-scryfall": "tsx scripts/import-scryfall.ts",
     "types:gen": "supabase gen types typescript --local --schema public > frontend/src/types/supabase.gen.ts",
     "types:check": "supabase gen types typescript --local --schema public > /tmp/supabase-types.ts && diff /tmp/supabase-types.ts frontend/src/types/supabase.gen.ts",
     "lint:check": "npm run lint:check --workspace=frontend --if-present",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "husky": "^8.0.0",
-    "lint-staged": "^16.2.7"
+    "lint-staged": "^16.2.7",
+    "tsx": "^4.21.0"
   }
 }

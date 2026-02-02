@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import { updateFactionCounts } from './helpers/updateFactionCounts';
+import { bulkUpsert } from './helpers/bulkUpsert';
+import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
 
 dotenv.config();
 
@@ -275,33 +278,6 @@ function computeFactionAffinities(
   return removeSubsets(allGroups);
 }
 
-// fetch all faction identities with pagination (avoiding 1000 cap)
-async function fetchAllFactionIdentities(select: string | null = null) {
-  const pageSize = 1000;
-  let from = 0;
-  let to = pageSize - 1;
-  const all: any[] = [];
-
-  while (true) {
-    const { data, error } = await supabase
-      .from('faction_identities')
-      .select(select ?? '*')
-      .range(from, to);
-
-    if (error) throw error;
-    if (!data || data.length === 0) break;
-
-    all.push(...data);
-
-    if (data.length < pageSize) break;
-
-    from += pageSize;
-    to += pageSize;
-  }
-
-  return all;
-}
-
 // Fetch all creature types and generate plurals
 async function fetchAllCreatureTypes(): Promise<{
   singularSet: Set<string>;
@@ -346,22 +322,6 @@ async function fetchAllCreatureTypes(): Promise<{
     pluralMap,
     maxTypeLength,
   };
-}
-
-// Helper to bulk upsert rows in chunks
-async function bulkUpsert(
-  table: string,
-  rows: any[],
-  onConflict: string,
-  batchSize = 1000,
-) {
-  for (let i = 0; i < rows.length; i += batchSize) {
-    const batch = rows.slice(i, i + batchSize);
-    const { error } = await supabase.from(table).upsert(batch, {
-      onConflict,
-    });
-    if (error) throw error;
-  }
 }
 
 // --------------------
@@ -452,10 +412,17 @@ async function importScryfall() {
   }));
 
   console.log(`Upserting ${identityRows.length} faction identities...`);
-  await bulkUpsert('faction_identities', identityRows, 'identity');
+  await bulkUpsert(supabase, {
+    table: 'faction_identities',
+    rows: identityRows,
+    onConflict: 'identity',
+  });
 
   // 3. Fetch IDs to map back to cards
-  const allIdentities = await fetchAllFactionIdentities('id, identity');
+  const allIdentities = await fetchAllFactionIdentities(
+    supabase,
+    'id, identity',
+  );
 
   if (!allIdentities) throw new Error('Failed to fetch faction identities');
 
@@ -475,7 +442,11 @@ async function importScryfall() {
   });
 
   console.log(`Upserting ${finalCreatureInserts.length} creature cards...`);
-  await bulkUpsert('cards', finalCreatureInserts, 'oracle_id');
+  await bulkUpsert(supabase, {
+    table: 'cards',
+    rows: finalCreatureInserts,
+    onConflict: 'oracle_id',
+  });
 
   // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
@@ -496,7 +467,11 @@ async function importScryfall() {
   }
 
   console.log(`Upserting ${nonCreatureInserts.length} non-creature cards...`);
-  await bulkUpsert('cards', nonCreatureInserts, 'oracle_id');
+  await bulkUpsert(supabase, {
+    table: 'cards',
+    rows: nonCreatureInserts,
+    onConflict: 'oracle_id',
+  });
 
   console.log('Import complete!');
 }
@@ -504,7 +479,12 @@ async function importScryfall() {
 // --------------------
 // Run
 // --------------------
-importScryfall().catch((err) => {
+async function run() {
+  await importScryfall();
+  await updateFactionCounts(supabase);
+}
+
+run().catch((err) => {
   console.error('Error importing Scryfall cards:', err);
   process.exit(1);
 });

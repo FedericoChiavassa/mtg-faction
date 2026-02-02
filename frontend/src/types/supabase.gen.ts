@@ -55,22 +55,34 @@ export type Database = {
       };
       faction_identities: {
         Row: {
+          count: number;
           created_at: string;
+          creatures_count: number;
           id: string;
           identity: string[];
+          lands_count: number;
           name: string;
+          non_creatures_count: number;
         };
         Insert: {
+          count?: number;
           created_at?: string;
+          creatures_count?: number;
           id?: string;
           identity: string[];
+          lands_count?: number;
           name: string;
+          non_creatures_count?: number;
         };
         Update: {
+          count?: number;
           created_at?: string;
+          creatures_count?: number;
           id?: string;
           identity?: string[];
+          lands_count?: number;
           name?: string;
+          non_creatures_count?: number;
         };
         Relationships: [];
       };
