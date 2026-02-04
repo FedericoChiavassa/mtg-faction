@@ -11,8 +11,8 @@
     "build": "tsc -b && vite build",
     "test": "echo \"No tests yet\"",
     "tsc:check": "tsc --noEmit",
-    "format:fix": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:fix": "prettier --write . --ignore-path ../.prettierignore",
+    "format:check": "prettier --check . --ignore-path ../.prettierignore",
     "lint:fix": "eslint . --fix",
     "lint:check": "eslint .",
     "preview": "vite preview"
