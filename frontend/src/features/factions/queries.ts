@@ -1,6 +1,6 @@
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { type FactionsResponse, fetchFactions } from './api';
+import { fetchFactions } from './api';
 
 export const factionKeys = {
   all: ['factions'] as const,
@@ -15,8 +15,8 @@ export function useFactions({
 }: {
   page: number;
   pageSize: number;
-} & Omit<UseQueryOptions<FactionsResponse>, 'queryKey' | 'queryFn'>) {
-  return useQuery<FactionsResponse>({
+}) {
+  return useQuery({
     queryKey: factionKeys.paged(page, pageSize),
     queryFn: () => fetchFactions({ page, pageSize }),
     ...options,

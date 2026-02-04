@@ -27,7 +27,8 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@db/types": ["../supabase/types/database.gen.ts"]
     }
   },
   "include": ["src"]

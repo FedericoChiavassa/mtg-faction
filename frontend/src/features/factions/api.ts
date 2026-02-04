@@ -1,22 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/types/supabase.gen';
-
-type FactionRow = Database['public']['Tables']['faction_identities']['Row'];
-
-type Faction = Pick<
-  FactionRow,
-  | 'id'
-  | 'name'
-  | 'count'
-  | 'creatures_count'
-  | 'non_creatures_count'
-  | 'lands_count'
->;
-
-export type FactionsResponse = {
-  data: Faction[];
-  count: number | null;
-};
 
 export async function fetchFactions({
   page,
@@ -41,5 +23,5 @@ export async function fetchFactions({
     throw error;
   }
 
-  return { data: data as Faction[], count };
+  return { data, count };
 }

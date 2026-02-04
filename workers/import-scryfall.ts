@@ -1,10 +1,12 @@
+import dotenv from 'dotenv';
+import type { Database } from '@db/types';
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-import { updateFactionCounts } from './helpers/updateFactionCounts';
+
 import { bulkUpsert } from './helpers/bulkUpsert';
-import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
 import { extractCreatureGroupsFromText } from './helpers/extractCreatureGroupsFromText';
+import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
+import { updateFactionCounts } from './helpers/updateFactionCounts';
 
 dotenv.config();
 
@@ -18,7 +20,10 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+);
 
 // --------------------
 // Types
@@ -268,7 +273,7 @@ async function importScryfall() {
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
   const oracleCardsDataUrl = bulkData.data.find(
-    (d: any) => d.type === 'oracle_cards',
+    (d) => d.type === 'oracle_cards',
   )?.download_uri;
   if (!oracleCardsDataUrl)
     throw new Error('Could not find oracle_cards bulk data');

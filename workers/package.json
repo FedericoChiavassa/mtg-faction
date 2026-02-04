@@ -1,0 +1,20 @@
+{
+  "name": "workers",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "eslint.config.js",
+  "scripts": {
+    "test": "echo \"No tests yet\"",
+    "import-scryfall": "tsx import-scryfall.ts",
+    "tsc:check": "tsc --noEmit",
+    "format:fix": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.94.1",
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2"
+  }
+}

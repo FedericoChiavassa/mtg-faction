@@ -1,4 +1,5 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type BulkUpsertOptions = {
   table: string;

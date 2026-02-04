@@ -1,9 +1,10 @@
 // --------------------
 // Helper: Generate all subsets of an array
 
-import { SupabaseClient } from '@supabase/supabase-js';
-import { fetchAllFactionIdentities } from './fetchAllFactionIdentities';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import { bulkUpsert } from './bulkUpsert';
+import { fetchAllFactionIdentities } from './fetchAllFactionIdentities';
 
 // --------------------
 function generateSubsets(arr: string[]): string[][] {

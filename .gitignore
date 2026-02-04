@@ -11,8 +11,8 @@ yarn-error.log*
 !.env.example
 
 # Supabase local runtime
-.supabase/
 supabase/.temp/
+supabase/.branches/
 supabase/.env
 
 # Docker
@@ -24,3 +24,5 @@ docker-data/
 .vscode/
 .idea/
 Thumbs.db
+
+**/*:Zone.Identifier

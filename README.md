@@ -12,7 +12,7 @@ See [project description here](docs/Project%20description.md)
 
 #### VS Code setup (optional)
 
-Copy `.vscode/settings.example.json` to `.vscode/settings.json` for the recommended editor configuration.
+Copy `docs/vscode-settings.example.json` to `.vscode/settings.json` for the recommended editor configuration.
 
 ### 1. Start Supabase
 
