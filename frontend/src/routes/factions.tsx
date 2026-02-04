@@ -41,12 +41,32 @@ function FactionsRoute() {
           <p className="text-red-500">Failed to load factions</p>
         ) : (
           <ul className="space-y-2">
-            {factions.map((faction) => (
+            {factions.map((faction, index) => (
               <li
                 key={faction.id}
                 className="rounded border p-3 transition hover:bg-gray-50"
               >
-                {faction.name}
+                <div className="flex gap-6">
+                  <div className="flex-1 font-semibold">
+                    {index + 1 + page * PAGE_SIZE} - {faction.name}
+                  </div>
+                  <div className="flex-col items-center justify-between">
+                    <div>Total</div>
+                    <div>{faction.count}</div>
+                  </div>
+                  <div className="flex-col items-center justify-between">
+                    <div>Creatures</div>
+                    <div>{faction.creatures_count}</div>
+                  </div>
+                  <div className="flex-col items-center justify-between">
+                    <div>Non Creatures</div>
+                    <div>{faction.non_creatures_count}</div>
+                  </div>
+                  <div className="flex-col items-center justify-between">
+                    <div>Lands</div>
+                    <div>{faction.lands_count}</div>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>

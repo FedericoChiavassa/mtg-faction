@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { updateFactionCounts } from './helpers/updateFactionCounts';
 import { bulkUpsert } from './helpers/bulkUpsert';
 import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
+import { extractCreatureGroupsFromText } from './helpers/extractCreatureGroupsFromText';
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ type ScryfallCard = {
   layout: string;
   oracle_text?: string | null;
   card_faces?: ScryfallCardFace[];
+  promo_types?: string[];
 };
 
 type CreatureTypeSet = {
@@ -158,73 +160,6 @@ function extractCreatureTypes(
   }
 
   return [];
-}
-
-function normalizeTextForCreatureScan(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/\(.*?\)/g, '') // remove reminder text
-    .replace(/[.,;:'!?]/g, '|') // remove noise punctuation, add hard separators
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// Extract creature type groups from text
-export function extractCreatureGroupsFromText(
-  text: string,
-  creatureTypeSet: CreatureTypeSet,
-): string[][] {
-  const { singularSet, pluralMap, maxTypeLength } = creatureTypeSet;
-  const normalized = normalizeTextForCreatureScan(text);
-  const segments = normalized
-    .split('|')
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const results: string[][] = [];
-
-  for (const segment of segments) {
-    const tokens = segment.split(' ');
-    let i = 0;
-    let currentGroup: string[] = [];
-
-    while (i < tokens.length) {
-      let matched = false;
-
-      // Try longest match first
-      for (
-        let len = Math.min(maxTypeLength, tokens.length - i);
-        len > 0;
-        len--
-      ) {
-        const raw = tokens.slice(i, i + len).join(' ');
-        const singular = pluralMap.get(raw);
-
-        if (singular && singularSet.has(singular)) {
-          if (!currentGroup.includes(singular)) {
-            currentGroup.push(singular);
-          }
-          i += len;
-          matched = true;
-          break;
-        }
-      }
-
-      if (!matched) {
-        if (currentGroup.length > 0) {
-          results.push([...currentGroup]);
-          currentGroup = [];
-        }
-        i++;
-      }
-    }
-
-    if (currentGroup.length > 0) {
-      results.push([...currentGroup]);
-    }
-  }
-
-  return results;
 }
 
 // Remove subset groups (keep only maximal groups)
@@ -362,7 +297,8 @@ async function importScryfall() {
       card.set_type != 'minigame' &&
       card.layout != 'planar' &&
       card.layout != 'vanguard' &&
-      card.layout != 'scheme'
+      card.layout != 'scheme' &&
+      !card.promo_types?.includes('playtest')
     ) {
       if (card.type_line.includes('Creature')) {
         creatures.push(card);
