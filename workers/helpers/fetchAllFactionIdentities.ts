@@ -1,9 +1,7 @@
-import type { Database } from '@db/types';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from 'lib/createClient';
 
 // fetch all faction identities with pagination (avoiding 1000 cap)
 export async function fetchAllFactionIdentities<S extends string = '*'>(
-  supabase: SupabaseClient<Database>,
   select: (S & string) | null = null,
 ) {
   const pageSize = 1000;
@@ -12,14 +10,13 @@ export async function fetchAllFactionIdentities<S extends string = '*'>(
 
   const query = supabase
     .from('faction_identities')
-    .select((select ?? '*') as S)
-    .range(from, to);
+    .select((select ?? '*') as S);
 
   type Row = NonNullable<Awaited<typeof query>['data']>[number];
   const all: Row[] = [];
 
   while (true) {
-    const { data, error } = await query;
+    const { data, error } = await query.range(from, to);
 
     if (error) throw error;
     if (!data || data.length === 0) break;

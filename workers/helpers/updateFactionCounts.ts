@@ -1,7 +1,7 @@
 // --------------------
 // Helper: Generate all subsets of an array
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from 'lib/createClient';
 
 import { bulkUpsert } from './bulkUpsert';
 import { fetchAllFactionIdentities } from './fetchAllFactionIdentities';
@@ -30,11 +30,11 @@ function makeSubsetKey(subset: string[]): string {
 // --------------------
 // Update faction counts
 // --------------------
-export async function updateFactionCounts(supabase: SupabaseClient) {
-  console.log('Updating faction counts...');
+export async function updateFactionCounts() {
+  console.log('\nUpdating faction counts...');
 
   // Fetch all faction identities
-  const allIdentities = await fetchAllFactionIdentities(supabase);
+  const allIdentities = await fetchAllFactionIdentities();
   if (!allIdentities) throw new Error('Failed to fetch faction identities');
 
   console.log(`Building subset index for ${allIdentities.length} factions...`);
@@ -152,11 +152,11 @@ export async function updateFactionCounts(supabase: SupabaseClient) {
     ...countsMap.get(faction.id)!,
   }));
 
-  await bulkUpsert(supabase, {
+  await bulkUpsert({
     table: 'faction_identities',
     rows: updates,
     onConflict: 'id',
   });
 
-  console.log('Faction counts updated!');
+  console.log('\nFaction counts updated!');
 }

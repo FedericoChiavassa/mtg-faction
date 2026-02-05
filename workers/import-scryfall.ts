@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-import type { Database } from '@db/types';
-import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
 
 import { bulkUpsert } from './helpers/bulkUpsert';
@@ -8,22 +5,17 @@ import { extractCreatureGroupsFromText } from './helpers/extractCreatureGroupsFr
 import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
 import { updateFactionCounts } from './helpers/updateFactionCounts';
 
-dotenv.config();
-
 // --------------------
-// Supabase client
+// Memory Monitoring
 // --------------------
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env');
+function logMemoryUsage(label: string) {
+  const used = process.memoryUsage();
+  console.log(`\n[${label}] Memory Usage:`);
+  console.log(`  RSS: ${Math.round(used.rss / 1024 / 1024)} MB`);
+  console.log(`  Heap Total: ${Math.round(used.heapTotal / 1024 / 1024)} MB`);
+  console.log(`  Heap Used: ${Math.round(used.heapUsed / 1024 / 1024)} MB`);
+  console.log(`  External: ${Math.round(used.external / 1024 / 1024)} MB`);
 }
-
-const supabase = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
-);
 
 // --------------------
 // Types
@@ -39,6 +31,8 @@ type CardInsert = {
   type_line: string;
   is_creature: boolean;
   mana_value?: number;
+  normal_img_url: string;
+  normal_img_url_2?: string | null;
   faction_identity_id?: string | null;
   faction_affinities?: string[][] | null;
 };
@@ -59,6 +53,14 @@ type ScryfallCardFace = {
   name: string;
   type_line: string;
   oracle_text?: string | null;
+  image_uris?: {
+    small: string;
+    normal: string;
+    large: string;
+    png: string;
+    art_crop: string;
+    border_crop: string;
+  };
 };
 
 type ScryfallCard = {
@@ -73,6 +75,14 @@ type ScryfallCard = {
   oracle_text?: string | null;
   card_faces?: ScryfallCardFace[];
   promo_types?: string[];
+  image_uris?: {
+    small: string;
+    normal: string;
+    large: string;
+    png: string;
+    art_crop: string;
+    border_crop: string;
+  };
 };
 
 type CreatureTypeSet = {
@@ -264,11 +274,32 @@ async function fetchAllCreatureTypes(): Promise<{
   };
 }
 
+// Filter valid cards
+function isValidCard(card: ScryfallCard): boolean {
+  return (
+    card.games.includes('paper') &&
+    !card.type_line.includes('Token') &&
+    card.set_type !== 'funny' &&
+    card.set_type !== 'token' &&
+    card.set_type !== 'memorabilia' &&
+    card.set_type !== 'minigame' &&
+    card.layout !== 'planar' &&
+    card.layout !== 'vanguard' &&
+    card.layout !== 'scheme' &&
+    !card.promo_types?.includes('playtest')
+  );
+}
+
+function identityKey(identity: string[]): string {
+  return identity.toSorted().join('|');
+}
+
 // --------------------
 // Main import
 // --------------------
 async function importScryfall() {
-  console.log('Fetching Scryfall bulk data...');
+  console.log('\n=== START ===');
+  console.log('\nFetching Scryfall bulk data...');
   const bulkRes = await fetch('https://api.scryfall.com/bulk-data');
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
@@ -280,31 +311,19 @@ async function importScryfall() {
 
   console.log('Downloading full card data...');
   const cardsRes = await fetch(oracleCardsDataUrl);
-  const cards = (await cardsRes.json()) as ScryfallCard[];
+  const allCards = (await cardsRes.json()) as ScryfallCard[];
 
   console.log('Fetching creature types...');
   const creatureTypeSet = await fetchAllCreatureTypes();
 
-  console.log(`Processing ${cards.length} cards...`);
+  console.log(`\nProcessing ${allCards.length} cards...`);
 
   // 0. Split cards into creatures and non-creatures
-  const creatures: typeof cards = [];
-  const nonCreatures: typeof cards = [];
+  const creatures: typeof allCards = [];
+  const nonCreatures: typeof allCards = [];
 
-  for (const card of cards) {
-    // remove non paper cards, tokens, funny sets ecc.
-    if (
-      card.games.includes('paper') &&
-      !card.type_line.includes('Token') &&
-      card.set_type != 'funny' &&
-      card.set_type != 'token' &&
-      card.set_type != 'memorabilia' &&
-      card.set_type != 'minigame' &&
-      card.layout != 'planar' &&
-      card.layout != 'vanguard' &&
-      card.layout != 'scheme' &&
-      !card.promo_types?.includes('playtest')
-    ) {
+  for (const card of allCards) {
+    if (isValidCard(card)) {
       if (card.type_line.includes('Creature')) {
         creatures.push(card);
       } else {
@@ -312,6 +331,9 @@ async function importScryfall() {
       }
     }
   }
+
+  // Cleanup
+  allCards.length = 0;
 
   // 1. Prepare Creature Data & Identities
   const identityMap = new Map<string, string[]>();
@@ -328,7 +350,7 @@ async function importScryfall() {
 
     if (identity.length === 0) continue; // skip cards without creature identity
 
-    const key = identity.toSorted().join('|');
+    const key = identityKey(identity);
 
     if (!identityMap.has(key)) {
       identityMap.set(key, identity);
@@ -342,6 +364,9 @@ async function importScryfall() {
       mana_value: c.cmc,
       faction_identity_id: null, // Filled later
       faction_affinities: null,
+      normal_img_url:
+        c.image_uris?.normal ?? c.card_faces?.[0]?.image_uris?.normal ?? '',
+      normal_img_url_2: c.card_faces?.[1]?.image_uris?.normal ?? null,
       _identityKey: key,
     });
   }
@@ -353,24 +378,20 @@ async function importScryfall() {
   }));
 
   console.log(`Upserting ${identityRows.length} faction identities...`);
-  await bulkUpsert(supabase, {
+  await bulkUpsert({
     table: 'faction_identities',
     rows: identityRows,
     onConflict: 'identity',
   });
 
-  // 3. Fetch IDs to map back to cards
-  const allIdentities = await fetchAllFactionIdentities(
-    supabase,
-    'id, identity',
-  );
+  // 3. Fetch faction IDs to map back to crature cards
+  const allIdentities = await fetchAllFactionIdentities('id, identity');
 
   if (!allIdentities) throw new Error('Failed to fetch faction identities');
 
   const factionIdentityMap = new Map<string, string>();
   for (const item of allIdentities) {
-    const sortedIdentity = item.identity.toSorted();
-    factionIdentityMap.set(sortedIdentity.join('|'), item.id);
+    factionIdentityMap.set(identityKey(item.identity), item.id);
   }
 
   // 4. Bulk Upsert Creature Cards
@@ -383,11 +404,16 @@ async function importScryfall() {
   });
 
   console.log(`Upserting ${finalCreatureInserts.length} creature cards...`);
-  await bulkUpsert(supabase, {
+  await bulkUpsert({
     table: 'cards',
     rows: finalCreatureInserts,
     onConflict: 'oracle_id',
   });
+
+  // Cleanup
+  identityMap.clear();
+  creatureInserts.length = 0;
+  finalCreatureInserts.length = 0;
 
   // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
@@ -404,25 +430,37 @@ async function importScryfall() {
       mana_value: c.cmc,
       faction_identity_id: null,
       faction_affinities: factionAffinities,
+      normal_img_url:
+        c.image_uris?.normal ?? c.card_faces?.[0]?.image_uris?.normal ?? '',
+      normal_img_url_2: c.card_faces?.[1]?.image_uris?.normal ?? null,
     });
   }
 
   console.log(`Upserting ${nonCreatureInserts.length} non-creature cards...`);
-  await bulkUpsert(supabase, {
+  await bulkUpsert({
     table: 'cards',
     rows: nonCreatureInserts,
     onConflict: 'oracle_id',
   });
 
-  console.log('Import complete!');
+  // Cleanup
+  nonCreatureInserts.length = 0;
+
+  console.log('\nImport complete!');
 }
 
 // --------------------
 // Run
 // --------------------
 async function run() {
+  const start = performance.now();
   await importScryfall();
-  await updateFactionCounts(supabase);
+  await updateFactionCounts();
+  logMemoryUsage('END');
+  console.log(
+    `\n🏁 Total runtime: ${((performance.now() - start) / 1000).toFixed(2)}s`,
+  );
+  console.log('\n=== END ===');
 }
 
 run().catch((err) => {
