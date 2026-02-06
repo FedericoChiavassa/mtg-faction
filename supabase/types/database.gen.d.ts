@@ -18,6 +18,8 @@ export type Database = {
           is_creature: boolean;
           mana_value: number | null;
           name: string;
+          normal_img_url: string;
+          normal_img_url_2: string | null;
           oracle_id: string;
           type_line: string;
         };
@@ -29,6 +31,8 @@ export type Database = {
           is_creature: boolean;
           mana_value?: number | null;
           name: string;
+          normal_img_url: string;
+          normal_img_url_2?: string | null;
           oracle_id: string;
           type_line: string;
         };
@@ -40,6 +44,8 @@ export type Database = {
           is_creature?: boolean;
           mana_value?: number | null;
           name?: string;
+          normal_img_url?: string;
+          normal_img_url_2?: string | null;
           oracle_id?: string;
           type_line?: string;
         };
@@ -117,7 +123,28 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_cards_for_faction: {
+        Args: { p_faction_id: string };
+        Returns: {
+          created_at: string;
+          faction_affinities: Json | null;
+          faction_identity_id: string | null;
+          id: string;
+          is_creature: boolean;
+          mana_value: number | null;
+          name: string;
+          normal_img_url: string;
+          normal_img_url_2: string | null;
+          oracle_id: string;
+          type_line: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'cards';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
     };
     Enums: {
       legality_status: 'legal' | 'not_legal' | 'banned' | 'restricted';

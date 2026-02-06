@@ -20,5 +20,5 @@ or
 supabase gen types typescript \
   --local \
   --schema public \
-  > supabase/types/database.gen.ts
+  > supabase/types/database.gen.d.ts
 ```

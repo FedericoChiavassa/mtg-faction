@@ -2,15 +2,15 @@
   // Mark auto generated files as readonly
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true,
-    "supabase/types/database.gen.ts": true
+    "supabase/types/database.gen.d.ts": true
   },
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true,
-    "supabase/types/database.gen.ts": true
+    "supabase/types/database.gen.d.ts": true
   },
   "search.exclude": {
     "**/routeTree.gen.ts": true,
-    "supabase/types/database.gen.ts": true
+    "supabase/types/database.gen.d.ts": true
   },
 
   // Tailwind

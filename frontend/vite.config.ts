@@ -3,6 +3,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { defineConfig } from 'vite';
+import checker from 'vite-plugin-checker';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +14,15 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
+    checker({
+      typescript: {
+        tsconfigPath: './tsconfig.app.json',
+      },
+      eslint: {
+        useFlatConfig: true,
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      },
+    }),
     tailwindcss(),
   ],
   resolve: {

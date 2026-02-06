@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
 import { fetchFactions } from './api';
 
@@ -15,7 +15,10 @@ export function useFactions({
 }: {
   page: number;
   pageSize: number;
-}) {
+} & Omit<
+  UseQueryOptions<Awaited<ReturnType<typeof fetchFactions>>>,
+  'queryKey' | 'queryFn'
+>) {
   return useQuery({
     queryKey: factionKeys.paged(page, pageSize),
     queryFn: () => fetchFactions({ page, pageSize }),
