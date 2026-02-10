@@ -34,7 +34,7 @@ create table cards (
   type_line text not null,
   is_creature boolean not null,
 
-  mana_value numeric,
+  mana_value numeric not null,
 
   -- Creature-only
   faction_identity_id uuid

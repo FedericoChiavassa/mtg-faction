@@ -141,7 +141,7 @@ function extractCreatureTypes(
 ): string[] {
   // Double-faced cards including creatures
   if (cardFaces && cardFaces.length > 0) {
-    const creatureFaces = cardFaces.filter((face) =>
+    const creatureFaces = cardFaces.filter(face =>
       face.type_line.includes('Creature'),
     );
 
@@ -158,8 +158,8 @@ function extractCreatureTypes(
       const aSet = new Set(a);
       const bSet = new Set(b);
 
-      const aInB = a.every((t) => bSet.has(t));
-      const bInA = b.every((t) => aSet.has(t));
+      const aInB = a.every(t => bSet.has(t));
+      const bInA = b.every(t => aSet.has(t));
 
       if (aInB) return b;
       if (bInA) return a;
@@ -187,8 +187,8 @@ function removeSubsets(groups: string[][]): string[][] {
 
   for (const group of sorted) {
     // Check if this group is a subset of any already-added group
-    const isSubset = result.some((existing) =>
-      group.every((type) => new Set(existing).has(type)),
+    const isSubset = result.some(existing =>
+      group.every(type => new Set(existing).has(type)),
     );
     if (!isSubset) {
       result.push(group);
@@ -264,7 +264,7 @@ async function fetchAllCreatureTypes(): Promise<{
 
   // Max words in any creature type (usually 2: "time lord")
   const maxTypeLength = Math.max(
-    ...Array.from(singularSet).map((t) => t.split(' ').length),
+    ...Array.from(singularSet).map(t => t.split(' ').length),
   );
 
   return {
@@ -279,6 +279,7 @@ function isValidCard(card: ScryfallCard): boolean {
   return (
     card.games.includes('paper') &&
     !card.type_line.includes('Token') &&
+    !card.type_line.includes('Conspiracy') &&
     card.set_type !== 'funny' &&
     card.set_type !== 'token' &&
     card.set_type !== 'memorabilia' &&
@@ -304,7 +305,7 @@ async function importScryfall() {
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
   const oracleCardsDataUrl = bulkData.data.find(
-    (d) => d.type === 'oracle_cards',
+    d => d.type === 'oracle_cards',
   )?.download_uri;
   if (!oracleCardsDataUrl)
     throw new Error('Could not find oracle_cards bulk data');
@@ -372,9 +373,9 @@ async function importScryfall() {
   }
 
   // 2. Bulk Upsert Faction Identities
-  const identityRows = Array.from(identityMap.values()).map((identity) => ({
+  const identityRows = Array.from(identityMap.values()).map(identity => ({
     identity: identity.toSorted(),
-    name: identity.map((s) => s[0].toUpperCase() + s.slice(1)).join(' '),
+    name: identity.map(s => s[0].toUpperCase() + s.slice(1)).join(' '),
   }));
 
   console.log(`Upserting ${identityRows.length} faction identities...`);
@@ -395,7 +396,7 @@ async function importScryfall() {
   }
 
   // 4. Bulk Upsert Creature Cards
-  const finalCreatureInserts = creatureInserts.map((c) => {
+  const finalCreatureInserts = creatureInserts.map(c => {
     const { _identityKey, ...rest } = c;
     return {
       ...rest,
@@ -463,7 +464,7 @@ async function run() {
   console.log('\n=== END ===');
 }
 
-run().catch((err) => {
+run().catch(err => {
   console.error('Error importing Scryfall cards:', err);
   process.exit(1);
 });

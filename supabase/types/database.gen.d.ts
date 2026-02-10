@@ -16,7 +16,7 @@ export type Database = {
           faction_identity_id: string | null;
           id: string;
           is_creature: boolean;
-          mana_value: number | null;
+          mana_value: number;
           name: string;
           normal_img_url: string;
           normal_img_url_2: string | null;
@@ -29,7 +29,7 @@ export type Database = {
           faction_identity_id?: string | null;
           id?: string;
           is_creature: boolean;
-          mana_value?: number | null;
+          mana_value: number;
           name: string;
           normal_img_url: string;
           normal_img_url_2?: string | null;
@@ -42,7 +42,7 @@ export type Database = {
           faction_identity_id?: string | null;
           id?: string;
           is_creature?: boolean;
-          mana_value?: number | null;
+          mana_value?: number;
           name?: string;
           normal_img_url?: string;
           normal_img_url_2?: string | null;
@@ -66,6 +66,7 @@ export type Database = {
           creatures_count: number;
           id: string;
           identity: string[];
+          identity_count: number;
           lands_count: number;
           name: string;
           non_creatures_count: number;
@@ -76,6 +77,7 @@ export type Database = {
           creatures_count?: number;
           id?: string;
           identity: string[];
+          identity_count?: number;
           lands_count?: number;
           name: string;
           non_creatures_count?: number;
@@ -86,6 +88,7 @@ export type Database = {
           creatures_count?: number;
           id?: string;
           identity?: string[];
+          identity_count?: number;
           lands_count?: number;
           name?: string;
           non_creatures_count?: number;
@@ -120,27 +123,44 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      card_summary_view: {
+        Row: {
+          mana_value: number | null;
+          name: string | null;
+          normal_img_url: string | null;
+          normal_img_url_2: string | null;
+          oracle_id: string | null;
+        };
+        Insert: {
+          mana_value?: number | null;
+          name?: string | null;
+          normal_img_url?: string | null;
+          normal_img_url_2?: string | null;
+          oracle_id?: string | null;
+        };
+        Update: {
+          mana_value?: number | null;
+          name?: string | null;
+          normal_img_url?: string | null;
+          normal_img_url_2?: string | null;
+          oracle_id?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       get_cards_for_faction: {
         Args: { p_faction_id: string };
         Returns: {
-          created_at: string;
-          faction_affinities: Json | null;
-          faction_identity_id: string | null;
-          id: string;
-          is_creature: boolean;
           mana_value: number | null;
-          name: string;
-          normal_img_url: string;
+          name: string | null;
+          normal_img_url: string | null;
           normal_img_url_2: string | null;
-          oracle_id: string;
-          type_line: string;
+          oracle_id: string | null;
         }[];
         SetofOptions: {
           from: '*';
-          to: 'cards';
+          to: 'card_summary_view';
           isOneToOne: false;
           isSetofReturn: true;
         };

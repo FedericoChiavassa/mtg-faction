@@ -1,9 +1,10 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { fetchFactions } from './api';
+import { fetchAllFactions, fetchFactions } from './api';
 
 export const factionKeys = {
   all: ['factions'] as const,
+  list: () => [...factionKeys.all, 'list'] as const,
   paged: (page: number, pageSize: number) =>
     [...factionKeys.all, page, pageSize] as const,
 };
@@ -22,6 +23,15 @@ export function useFactions({
   return useQuery({
     queryKey: factionKeys.paged(page, pageSize),
     queryFn: () => fetchFactions({ page, pageSize }),
+    ...options,
+  });
+}
+
+export function useAllFactions(options = {}) {
+  return useQuery({
+    queryKey: factionKeys.list(),
+    queryFn: fetchAllFactions,
+    staleTime: Infinity,
     ...options,
   });
 }

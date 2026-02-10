@@ -147,7 +147,7 @@ export async function updateFactionCounts() {
 
   // Bulk update all faction counts
   console.log('Writing faction counts to database...');
-  const updates = allIdentities.map((faction) => ({
+  const updates = allIdentities.map(({ identity_count: _, ...faction }) => ({
     ...faction,
     ...countsMap.get(faction.id)!,
   }));

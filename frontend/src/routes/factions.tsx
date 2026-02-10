@@ -77,7 +77,7 @@ function FactionsRoute() {
       <div className="mt-6 flex justify-between">
         <button
           disabled={page === 0}
-          onClick={() => setPage((old) => Math.max(old - 1, 0))}
+          onClick={() => setPage(old => Math.max(old - 1, 0))}
           className="rounded border bg-gray-100 px-4 py-2 disabled:opacity-50"
         >
           Previous
@@ -90,7 +90,7 @@ function FactionsRoute() {
           className="rounded border bg-gray-100 px-4 py-2 disabled:opacity-50"
           onClick={() => {
             if (!isPlaceholderData && hasMore) {
-              setPage((old) => old + 1);
+              setPage(old => old + 1);
             }
           }}
         >

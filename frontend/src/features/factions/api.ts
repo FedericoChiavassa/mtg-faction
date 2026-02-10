@@ -1,3 +1,5 @@
+import type { QueryData } from '@supabase/supabase-js';
+
 import { supabase } from '@/lib/supabase';
 
 export async function fetchFactions({
@@ -24,4 +26,32 @@ export async function fetchFactions({
   }
 
   return { data, count };
+}
+
+export async function fetchAllFactions() {
+  const batchSize = 1000;
+  let from = 0;
+  let fetched;
+
+  const query = supabase
+    .from('faction_identities')
+    .select('id, name, identity, count, identity_count');
+
+  type Rows = QueryData<typeof query>;
+  let allData: Rows = [];
+
+  do {
+    const { data, error } = await query
+      .order('identity_count', { ascending: true })
+      .order('name', { ascending: true })
+      .range(from, from + batchSize - 1);
+
+    if (error) throw error;
+
+    fetched = data.length;
+    allData = allData.concat(data);
+    from += batchSize;
+  } while (fetched === batchSize);
+
+  return allData;
 }

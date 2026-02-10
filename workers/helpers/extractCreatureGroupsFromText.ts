@@ -90,7 +90,7 @@ export function extractCreatureGroupsFromText(
   const normalized = normalizeTextForCreatureScan(text);
   const segments = normalized
     .split('|')
-    .map((s) => s.trim())
+    .map(s => s.trim())
     .filter(Boolean);
 
   const results: string[][] = [];
