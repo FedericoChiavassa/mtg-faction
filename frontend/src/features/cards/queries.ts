@@ -1,4 +1,6 @@
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+
+import type { QueryOptionsFromFn } from '@/lib/query/types';
 
 import { fetchCards } from './api';
 
@@ -17,10 +19,7 @@ export function useCards({
   factionId: string;
   page: number;
   pageSize: number;
-} & Omit<
-  UseQueryOptions<Awaited<ReturnType<typeof fetchCards>>>,
-  'queryKey' | 'queryFn'
->) {
+} & QueryOptionsFromFn<typeof fetchCards>) {
   return useQuery({
     queryKey: cardKeys.paged(factionId, page, pageSize),
     queryFn: () =>
