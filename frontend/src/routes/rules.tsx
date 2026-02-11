@@ -9,7 +9,6 @@ export const Route = createFileRoute('/rules')({
 
 function RulesRoute() {
   const [count, setCount] = useState(0);
-  console.log('🚀 ~ Index ~ useState:', useState);
 
   return (
     <>
