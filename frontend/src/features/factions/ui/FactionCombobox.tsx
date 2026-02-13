@@ -1,13 +1,6 @@
 import { useState } from 'react';
 
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from '@/components/ui/combobox';
+import { VirtualizedCombobox } from '@/components/virtualized-combobox';
 
 import { matchesFaction } from '../lib/factionMatcher';
 import { useAllFactions } from '../queries';
@@ -28,11 +21,12 @@ export function FactionCombobox({
 }: FactionComboboxProps) {
   const [internalValue, setInternalValue] = useState<Faction | null>(null);
 
-  const { data: factionList, isLoading, isError, error } = useAllFactions();
+  const { data: factionList } = useAllFactions();
 
   const value = controlledValue ?? internalValue;
 
-  const handleValueChange = (newValue: Faction | null) => {
+  const handleValueChange = (value: string | null) => {
+    const newValue = factionList?.find(faction => faction.id === value) ?? null;
     if (controlledValue === undefined) {
       setInternalValue(newValue);
     }
@@ -40,41 +34,13 @@ export function FactionCombobox({
   };
 
   return (
-    <Combobox
-      value={value}
+    <VirtualizedCombobox
+      value={value?.id}
       filter={matchesFaction}
-      items={factionList ?? []}
+      options={factionList ?? []}
+      triggerPlaceholder={placeholder}
       onValueChange={handleValueChange}
-      itemToStringLabel={value => value?.name}
-    >
-      <ComboboxInput placeholder={placeholder} />
-      <ComboboxContent>
-        {isLoading && (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            Loading factions...
-          </div>
-        )}
-
-        {isError && (
-          <div className="p-4 text-sm text-destructive">
-            Failed to load factions:{' '}
-            {error instanceof Error ? error.message : 'Unknown error'}
-          </div>
-        )}
-
-        {!isLoading && !isError && (
-          <>
-            <ComboboxEmpty>No factions found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item: Faction) => (
-                <ComboboxItem value={item} key={item.id}>
-                  {item.name}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </>
-        )}
-      </ComboboxContent>
-    </Combobox>
+      searchPlaceholder="Search a faction..."
+    />
   );
 }

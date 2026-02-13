@@ -87,7 +87,7 @@ export default defineConfig([
             // React first
             ['^react', '^@?\\w'],
             // Internal aliases
-            ['^@/'],
+            ['^@/lib', '^@/'],
             // Relative imports
             ['^\\.'],
             // Side effects

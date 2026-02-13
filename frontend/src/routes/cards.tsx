@@ -45,7 +45,7 @@ function CardsRoute() {
           {totalCount > 0 && <p>Total cards: {totalCount}</p>}
         </div>
 
-        <div className="p-6">
+        <div className="flex justify-center p-6">
           <FactionCombobox
             value={faction}
             onValueChange={handleFactionChange}
