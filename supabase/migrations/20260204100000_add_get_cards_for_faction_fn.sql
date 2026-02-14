@@ -56,4 +56,4 @@ begin
             where affinity_group <@ to_jsonb(v_faction_identity)
           );
 end;
-$$ language plpgsql stable;
+$$ language plpgsql stable security invoker;
