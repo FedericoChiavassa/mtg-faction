@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@db/types": ["../supabase/types/database.d.ts"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -15,3 +15,6 @@ where c.is_creature = false
     from jsonb_array_elements(c.faction_affinities) as affinity_group
     where affinity_group <@ to_jsonb(:faction_identity::text[])
   );
+
+-- example for (:faction_identity::text[])
+-- (ARRAY['human', 'wizard']::text[])

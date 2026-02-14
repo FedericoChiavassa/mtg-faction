@@ -1,12 +1,54 @@
 {
   "name": "mtg-faction",
   "type": "module",
+  "workspaces": [
+    "frontend",
+    "workers"
+  ],
   "engines": {
     "node": ">=25.0.0"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.91.0",
-    "dotenv": "^17.2.3",
-    "node-fetch": "^3.3.2"
+  "scripts": {
+    "prepare": "husky",
+    "test": "npm run test --workspaces --if-present",
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "import-scryfall": "npm run import-scryfall --workspace=workers",
+    "types:gen": "npx supabase gen types typescript --local --schema public > supabase/types/database.gen.d.ts",
+    "types:check": "npx supabase gen types typescript --local --schema public > /tmp/supabase-types.ts && diff -u /tmp/supabase-types.ts supabase/types/database.gen.d.ts",
+    "lint:check": "npm run lint:check --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "format:check": "npm run format:check --workspaces --if-present",
+    "format:fix": "npm run format:fix --workspaces --if-present",
+    "tsc:check": "npm run tsc:check --workspaces --if-present"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,scss,md}": [
+      "npm --prefix frontend run format:fix",
+      "npm --prefix workers run format:fix"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "npm --prefix frontend run lint:check",
+      "npm --prefix workers run lint:check"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^17.3.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "supabase": "^2.76.8",
+    "tsx": "^4.21.0",
+    "type-fest": "^5.4.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
   }
 }
