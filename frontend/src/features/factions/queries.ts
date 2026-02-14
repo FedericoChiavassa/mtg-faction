@@ -26,7 +26,11 @@ export function useFactions({
   });
 }
 
-export function useAllFactions(
+export type FactionList = NonNullable<
+  ReturnType<typeof useFactionsList>['data']
+>[number];
+
+export function useFactionsList(
   options: QueryOptionsFromFn<typeof fetchAllFactions> = {},
 ) {
   return useQuery({

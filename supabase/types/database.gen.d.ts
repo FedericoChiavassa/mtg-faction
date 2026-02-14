@@ -150,7 +150,7 @@ export type Database = {
     };
     Functions: {
       get_cards_for_faction: {
-        Args: { p_faction_id: string };
+        Args: { p_creature_filter?: boolean; p_faction_id: string };
         Returns: {
           mana_value: number | null;
           name: string | null;

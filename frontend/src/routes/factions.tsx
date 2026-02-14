@@ -51,10 +51,6 @@ function FactionsRoute() {
                     {index + 1 + page * PAGE_SIZE} - {faction.name}
                   </div>
                   <div className="flex-col items-center justify-between">
-                    <div>Total</div>
-                    <div>{faction.count}</div>
-                  </div>
-                  <div className="flex-col items-center justify-between">
                     <div>Creatures</div>
                     <div>{faction.creatures_count}</div>
                   </div>
@@ -65,6 +61,10 @@ function FactionsRoute() {
                   <div className="flex-col items-center justify-between">
                     <div>Lands</div>
                     <div>{faction.lands_count}</div>
+                  </div>
+                  <div className="flex-col items-center justify-between">
+                    <div>Total</div>
+                    <div>{faction.count}</div>
                   </div>
                 </div>
               </li>

@@ -3,14 +3,11 @@ import { useState } from 'react';
 import { VirtualizedCombobox } from '@/components/virtualized-combobox';
 
 import { matchesFaction } from '../lib/factionMatcher';
-import { useAllFactions } from '../queries';
-
-// Extract the faction type
-type Faction = NonNullable<ReturnType<typeof useAllFactions>['data']>[number];
+import { type FactionList, useFactionsList } from '../queries';
 
 export type FactionComboboxProps = {
-  value?: Faction | null;
-  onValueChange?: (value: Faction | null) => void;
+  value?: FactionList | null;
+  onValueChange?: (value: FactionList | null) => void;
   placeholder?: string;
 };
 
@@ -19,9 +16,9 @@ export function FactionCombobox({
   onValueChange,
   placeholder = 'Select a faction',
 }: FactionComboboxProps) {
-  const [internalValue, setInternalValue] = useState<Faction | null>(null);
+  const [internalValue, setInternalValue] = useState<FactionList | null>(null);
 
-  const { data: factionList } = useAllFactions();
+  const { data: factionList } = useFactionsList();
 
   const value = controlledValue ?? internalValue;
 

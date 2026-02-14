@@ -4,9 +4,9 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { useCards } from '@/features/cards/queries';
 import {
-  FactionCombobox,
-  type FactionComboboxProps,
-} from '@/features/factions/ui/FactionCombobox';
+  CardsFilterForm,
+  type CardsFilterValues,
+} from '@/features/cards/ui/CardsFilterForm';
 
 export const Route = createFileRoute('/cards')({
   component: CardsRoute,
@@ -15,11 +15,14 @@ export const Route = createFileRoute('/cards')({
 const PAGE_SIZE = 60;
 
 function CardsRoute() {
-  const [faction, setFaction] = useState<FactionComboboxProps['value']>(null);
+  const [faction, setFaction] = useState<CardsFilterValues['faction']>(null);
+  const [isCreature, setIsCreature] =
+    useState<CardsFilterValues['isCreature']>(undefined);
   const [page, setPage] = useState(0);
 
   const { data, isLoading, isError, isPlaceholderData } = useCards({
     factionId: faction?.id ?? '',
+    isCreature,
     page,
     pageSize: PAGE_SIZE,
     placeholderData: keepPreviousData,
@@ -31,8 +34,12 @@ function CardsRoute() {
 
   const hasMore = page < totalPages - 1;
 
-  const handleFactionChange = (f: FactionComboboxProps['value']) => {
-    setFaction(f);
+  const handleFilterSubmit = (values: {
+    faction: typeof faction;
+    isCreature: typeof isCreature;
+  }) => {
+    setFaction(values.faction);
+    setIsCreature(values.isCreature);
     setPage(0);
   };
 
@@ -41,14 +48,13 @@ function CardsRoute() {
       <div>
         {/* Page Header */}
         <div className="mb-6 text-center">
-          <h3 className="text-3xl font-bold">Cards Page</h3>
           {totalCount > 0 && <p>Total cards: {totalCount}</p>}
         </div>
 
         <div className="flex justify-center p-6">
-          <FactionCombobox
-            value={faction}
-            onValueChange={handleFactionChange}
+          <CardsFilterForm
+            onChange={handleFilterSubmit}
+            initialValues={{ faction, isCreature: undefined }}
           />
         </div>
 
