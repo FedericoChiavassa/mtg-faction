@@ -28,7 +28,7 @@ Create a `.env` file in the root directory using the credentials output from `su
 
 ```env
 SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_SECRET_KEY=your-service-role-key
 ```
 
 ### 3. Resetting the Database

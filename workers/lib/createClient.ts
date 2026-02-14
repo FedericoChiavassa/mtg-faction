@@ -9,13 +9,13 @@ dotenv.config();
 
 // --------------------
 const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY!;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing in .env');
+if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+  throw new Error('SUPABASE_URL or SUPABASE_SECRET_KEY missing in .env');
 }
 
 export const supabase = createClient<Database>(
   SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_SECRET_KEY,
 );
