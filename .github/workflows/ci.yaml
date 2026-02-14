@@ -1,4 +1,5 @@
 name: CI
+
 on:
   pull_request:
     branches: [main]
@@ -6,8 +7,13 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-format:
+  # -----------------------------
+  # 0️⃣ Setup cache and install deps
+  # -----------------------------
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache.outputs.cache-hit }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,25 +22,107 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 25
-          cache: 'npm'
+
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm ci
 
+  # -----------------------------
+  # 1️⃣ Lint & formatting
+  # -----------------------------
+  lint-format:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - name: Restore node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: ESLint check
+        run: npm run lint:check
+
+  # -----------------------------
+  # 2️⃣ Type generation & TypeScript check
+  # -----------------------------
+  typescript:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - name: Restore node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Start Supabase (local)
+        id: supabase
         run: npx supabase start
 
-      - name: Check Supabase generated types are up to date
+      - name: Check Supabase types
         run: npm run types:check
 
       - name: TypeScript check
         run: npm run tsc:check
 
-      - name: Check formatting
-        run: npm run format:check
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
 
-      - name: Check linting
-        run: npm run lint:check
+  # -----------------------------
+  # 3️⃣ Tests
+  # -----------------------------
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Test
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - name: Restore node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Run tests
         run: npm run test

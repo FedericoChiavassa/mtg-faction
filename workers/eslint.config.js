@@ -11,7 +11,13 @@ import importPlugin from 'eslint-plugin-import';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'build', '**/*.gen.ts']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    'build',
+    '**/*.gen.ts',
+    '**/*.gen.d.ts',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
