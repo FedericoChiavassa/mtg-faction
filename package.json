@@ -9,7 +9,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "prepare": "is-ci || husky",
+    "prepare": "test \"$NODE_ENV\" = \"production\" || test \"$CI\" = \"true\" || husky",
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
