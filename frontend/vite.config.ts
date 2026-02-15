@@ -1,3 +1,4 @@
+// frontend/vite.config.ts
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react-swc';
@@ -5,8 +6,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 
-// https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     // Make sure that '@tanstack/router-plugin' is passed before '@vitejs/plugin-react'
     tanstackRouter({
@@ -14,15 +14,16 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
-    checker({
-      typescript: {
-        tsconfigPath: './tsconfig.app.json',
-      },
-      eslint: {
-        useFlatConfig: true,
-        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-      },
-    }),
+    mode === 'development' &&
+      checker({
+        typescript: {
+          tsconfigPath: './tsconfig.app.json',
+        },
+        eslint: {
+          useFlatConfig: true,
+          lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+        },
+      }),
     tailwindcss(),
   ],
   resolve: {
@@ -30,4 +31,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-});
+}));
