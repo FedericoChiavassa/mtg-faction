@@ -6,10 +6,10 @@
     "workers"
   ],
   "engines": {
-    "node": ">=24.0.0"
+    "node": "24.x"
   },
   "scripts": {
-    "prepare": "husky",
+    "prepare": "node .husky/install.mjs",
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
@@ -42,7 +42,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^17.3.0",
-    "husky": "^8.0.0",
+    "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "supabase": "^2.76.8",
