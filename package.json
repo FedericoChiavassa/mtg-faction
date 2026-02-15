@@ -9,7 +9,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "prepare": "node .husky/install.mjs",
+    "prepare": "is-ci || husky",
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
@@ -31,6 +31,9 @@
       "npm --prefix frontend run lint:check",
       "npm --prefix workers run lint:check"
     ]
+  },
+  "dependencies": {
+    "is-ci": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
