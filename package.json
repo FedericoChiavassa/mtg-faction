@@ -9,7 +9,7 @@
     "node": "24.x"
   },
   "scripts": {
-    "prepare": "test \"$NODE_ENV\" = \"production\" || test \"$CI\" = \"true\" || husky",
+    "prepare": "(test \"$NODE_ENV\" = \"production\" || test \"$CI\" = \"true\" || npx --no-install husky) || true",
     "test": "npm run test --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "build": "npm run build --workspace=frontend",
