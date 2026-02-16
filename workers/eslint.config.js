@@ -41,6 +41,7 @@ export default defineConfig([
     },
     rules: {
       // TypeScript
+      '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

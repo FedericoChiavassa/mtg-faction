@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
+import { highlightText } from '@/lib/highlightText';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,12 +16,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandLoading,
 } from '@/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Option = {
   id: string;
@@ -32,6 +35,7 @@ type VirtualizedCommandProps<T extends Option = Option> = {
   options: T[];
   placeholder: string;
   selectedOption: string;
+  loading?: boolean;
   filter?: (option: T, search: string) => boolean;
   onSelectOption?: (option: string) => void;
 };
@@ -39,11 +43,13 @@ type VirtualizedCommandProps<T extends Option = Option> = {
 const VirtualizedCommand = <T extends Option = Option>({
   height,
   options,
-  filter,
   placeholder,
   selectedOption,
+  loading,
+  filter,
   onSelectOption,
 }: VirtualizedCommandProps<T>) => {
+  const [search, setSearch] = useState('');
   const [filteredOptions, setFilteredOptions] = useState<T[]>(options);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [isKeyboardNavActive, setIsKeyboardNavActive] = useState(false);
@@ -55,6 +61,7 @@ const VirtualizedCommand = <T extends Option = Option>({
     count: filteredOptions.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 35,
+    enabled: !!options.length,
   });
 
   const virtualOptions = virtualizer.getVirtualItems();
@@ -69,13 +76,13 @@ const VirtualizedCommand = <T extends Option = Option>({
   );
 
   const updateFilteredOptions = useCallback(
-    (search: string) => {
+    (newSearch: string) => {
       if (filter) {
-        setFilteredOptions(options.filter(option => filter(option, search)));
+        setFilteredOptions(options.filter(option => filter(option, newSearch)));
       } else {
         setFilteredOptions(
           options.filter(option =>
-            option.name.toLowerCase().includes(search.toLowerCase() ?? []),
+            option.name.toLowerCase().includes(newSearch.toLowerCase() ?? []),
           ),
         );
       }
@@ -84,11 +91,18 @@ const VirtualizedCommand = <T extends Option = Option>({
   );
 
   const handleSearch = useCallback(
-    (search: string) => {
-      setIsKeyboardNavActive(false);
-      updateFilteredOptions(search);
+    (newSearch: string) => {
+      setIsKeyboardNavActive(true);
+      updateFilteredOptions(newSearch);
+      setSearch(prev => {
+        if (newSearch.trim() !== prev.trim()) {
+          setFocusedIndex(0);
+          scrollToIndex(0);
+        }
+        return newSearch;
+      });
     },
-    [updateFilteredOptions],
+    [scrollToIndex, updateFilteredOptions],
   );
 
   const handleKeyDown = useCallback(
@@ -98,8 +112,7 @@ const VirtualizedCommand = <T extends Option = Option>({
           event.preventDefault();
           setIsKeyboardNavActive(true);
           setFocusedIndex(prev => {
-            const newIndex =
-              prev === -1 ? 0 : Math.min(prev + 1, filteredOptions.length - 1);
+            const newIndex = prev >= filteredOptions.length - 1 ? 0 : prev + 1;
             scrollToIndex(newIndex);
             return newIndex;
           });
@@ -109,8 +122,7 @@ const VirtualizedCommand = <T extends Option = Option>({
           event.preventDefault();
           setIsKeyboardNavActive(true);
           setFocusedIndex(prev => {
-            const newIndex =
-              prev === -1 ? filteredOptions.length - 1 : Math.max(prev - 1, 0);
+            const newIndex = prev <= 0 ? filteredOptions.length - 1 : prev - 1;
             scrollToIndex(newIndex);
             return newIndex;
           });
@@ -131,25 +143,37 @@ const VirtualizedCommand = <T extends Option = Option>({
   );
 
   useEffect(() => {
-    if (selectedOption) {
-      const option = filteredOptions.find(
+    if (selectedOption && !search) {
+      const matchingOption = filteredOptions.find(
         option => option.id === selectedOption,
       );
-      if (option) {
-        const index = filteredOptions.indexOf(option);
+      if (matchingOption) {
+        const index = filteredOptions.indexOf(matchingOption);
         setFocusedIndex(index);
         virtualizer.scrollToIndex(index, {
           align: 'center',
         });
       }
     }
-  }, [selectedOption, filteredOptions, virtualizer]);
+  }, [selectedOption, filteredOptions, virtualizer, search]);
+
+  useEffect(() => {
+    if (options) {
+      setFilteredOptions(options);
+    }
+  }, [options]);
 
   return (
     <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-      <CommandInput placeholder={placeholder} onValueChange={handleSearch} />
+      <CommandInput
+        readOnly={loading}
+        className="pl-3.5!"
+        placeholder={placeholder}
+        onValueChange={handleSearch}
+      />
       <CommandList
         ref={parentRef}
+        className={cn(loading && 'overflow-hidden!')}
         onMouseDown={() => setIsKeyboardNavActive(false)}
         onMouseMove={() => setIsKeyboardNavActive(false)}
         style={{
@@ -158,7 +182,8 @@ const VirtualizedCommand = <T extends Option = Option>({
           overflow: 'auto',
         }}
       >
-        <CommandEmpty>No item found.</CommandEmpty>
+        {!loading && <CommandEmpty>No item found.</CommandEmpty>}
+        {loading && <LoadingList />}
         <CommandGroup>
           <div
             style={{
@@ -167,42 +192,47 @@ const VirtualizedCommand = <T extends Option = Option>({
               position: 'relative',
             }}
           >
-            {virtualOptions.map(virtualOption => (
-              <CommandItem
-                onSelect={onSelectOption}
-                // disabled={isKeyboardNavActive} // greys out options - unsure of its purpose so commented out for now
-                key={filteredOptions[virtualOption.index].id}
-                value={filteredOptions[virtualOption.index].id}
-                onMouseLeave={() => !isKeyboardNavActive && setFocusedIndex(-1)}
-                onMouseEnter={() =>
-                  !isKeyboardNavActive && setFocusedIndex(virtualOption.index)
-                }
-                style={{
-                  height: `${virtualOption.size}px`,
-                  transform: `translateY(${virtualOption.start}px)`,
-                }}
-                className={cn(
-                  'absolute top-0 left-0 w-full bg-transparent',
-                  focusedIndex === virtualOption.index &&
-                    'bg-accent text-accent-foreground',
-                  isKeyboardNavActive &&
-                    focusedIndex !== virtualOption.index &&
-                    'aria-selected:bg-transparent aria-selected:text-primary',
-                )}
-              >
-                <Check
+            {virtualOptions.map(virtualOption => {
+              const option = filteredOptions[virtualOption.index];
+              return (
+                <CommandItem
+                  key={option.id}
+                  value={option.id}
+                  onSelect={onSelectOption}
+                  disabled={isKeyboardNavActive}
+                  onMouseLeave={() =>
+                    !isKeyboardNavActive && setFocusedIndex(-1)
+                  }
+                  onMouseEnter={() =>
+                    !isKeyboardNavActive && setFocusedIndex(virtualOption.index)
+                  }
+                  style={{
+                    height: `${virtualOption.size}px`,
+                    transform: `translateY(${virtualOption.start}px)`,
+                  }}
                   className={cn(
-                    'mr-2 h-4 w-4',
-                    selectedOption === filteredOptions[virtualOption.index].id
-                      ? 'opacity-100'
-                      : 'opacity-0',
+                    'opacity-100!',
+                    'absolute top-0 left-0 w-full bg-transparent',
+                    focusedIndex === virtualOption.index &&
+                      'bg-accent! text-accent-foreground',
+                    focusedIndex !== virtualOption.index &&
+                      'bg-transparent! aria-selected:text-primary',
                   )}
-                />
-                <span className="w-75 truncate">
-                  {filteredOptions[virtualOption.index].name}
-                </span>
-              </CommandItem>
-            ))}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      selectedOption === option.id
+                        ? 'opacity-100'
+                        : 'opacity-0',
+                    )}
+                  />
+                  <span className="w-75 truncate">
+                    {highlightText(option.name, search)}
+                  </span>
+                </CommandItem>
+              );
+            })}
           </div>
         </CommandGroup>
       </CommandList>
@@ -219,6 +249,7 @@ type VirtualizedComboboxProps<T extends Option = Option> = {
   searchPlaceholder?: string;
   width?: string;
   height?: string;
+  loading?: boolean;
 };
 
 export function VirtualizedCombobox<T extends Option = Option>({
@@ -230,6 +261,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
   searchPlaceholder = 'Search items...',
   width = '400px',
   height = '400px',
+  loading,
 }: VirtualizedComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] =
@@ -272,11 +304,43 @@ export function VirtualizedCombobox<T extends Option = Option>({
           height={height}
           filter={filter}
           options={options}
+          loading={loading}
           selectedOption={value}
           placeholder={searchPlaceholder}
           onSelectOption={handleValueChange}
         />
       </PopoverContent>
     </Popover>
+  );
+}
+
+function LoadingList() {
+  return (
+    <CommandLoading className="p-1 *:[div]:flex *:[div]:flex-col">
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/8 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/7 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/6 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/9 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/7 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/6 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/7 rounded-sm" />
+      </div>
+      <div className="flex h-8.75 w-full items-center pl-11">
+        <Skeleton className="h-4.75 w-1/6 rounded-sm" />
+      </div>
+    </CommandLoading>
   );
 }

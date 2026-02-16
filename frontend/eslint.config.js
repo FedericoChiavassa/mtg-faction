@@ -71,6 +71,7 @@ export default defineConfig([
       ...pluginQuery.configs['flat/recommended'].rules,
 
       // TypeScript
+      '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
