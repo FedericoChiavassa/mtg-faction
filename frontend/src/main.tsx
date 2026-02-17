@@ -4,7 +4,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 
-import { queryClient } from './lib/query/client';
+import { queryClient } from '@/lib/query/client';
+import { ThemeProvider } from '@/components/theme-provider';
+
 import { routeTree } from './routeTree.gen';
 
 const router = createRouter({ routeTree });
@@ -23,8 +25,10 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ThemeProvider>
+          <RouterProvider router={router} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </ThemeProvider>
       </QueryClientProvider>
     </StrictMode>,
   );

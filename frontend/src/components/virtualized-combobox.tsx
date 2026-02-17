@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
-import { highlightText } from '@/lib/highlightText';
+import { highlightText } from '@/lib/highlight-text';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {

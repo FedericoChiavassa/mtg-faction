@@ -4,6 +4,7 @@ import { Swords } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/Container';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -17,8 +18,8 @@ const linkStyle = cva(
 
 export function Navbar() {
   return (
-    <NavigationMenu className="sticky top-0 z-100 flex h-12 w-full max-w-none flex-row items-center border-b border-border/40 bg-background">
-      <Container className="w-full">
+    <NavigationMenu className="sticky top-0 z-50 flex h-12 w-full max-w-none flex-row items-center border-b border-border/40 bg-background">
+      <Container className="flex w-full">
         <NavigationMenuList className="justify-start">
           <NavigationMenuItem>
             <NavigationMenuLink
@@ -69,6 +70,7 @@ export function Navbar() {
             />
           </NavigationMenuItem>
         </NavigationMenuList>
+        <ThemeToggle />
       </Container>
     </NavigationMenu>
   );

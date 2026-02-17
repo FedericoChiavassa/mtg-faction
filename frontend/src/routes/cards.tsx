@@ -67,14 +67,11 @@ function CardsRoute() {
           ) : (
             <div className="grid max-w-250 grid-cols-2 gap-1.5 md:grid-cols-3 lg:grid-cols-4">
               {cards.map(card => (
-                <div
-                  key={card.oracle_id}
-                  className="rounded transition hover:bg-gray-50"
-                >
+                <div key={card.oracle_id}>
                   <img
                     alt={card.name}
                     src={card.normal_img_url}
-                    className="rounded-md shadow-lg/20"
+                    className="rounded-[4.75%/3.5%] shadow-lg/20"
                   ></img>
                 </div>
               ))}
