@@ -17,61 +17,59 @@ const linkStyle = cva(
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-100 flex h-12 w-full flex-row items-center border-b border-border/40 bg-background">
+    <NavigationMenu className="sticky top-0 z-100 flex h-12 w-full max-w-none flex-row items-center border-b border-border/40 bg-background">
       <Container className="w-full">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link
-                    to="/"
-                    className="hover:bg-muted focus:not-hover:bg-transparent"
-                  >
-                    <Swords className="size-5" />
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link to="/rules" className={cn(linkStyle())}>
-                    Rules
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link to="/factions" className={cn(linkStyle())}>
-                    Factions
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link to="/cards" className={cn(linkStyle())}>
-                    Cards
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link to="/about" className={cn(linkStyle())}>
-                    About
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <NavigationMenuList className="justify-start">
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              render={
+                <Link
+                  to="/"
+                  className="hover:bg-muted focus:not-hover:bg-transparent"
+                >
+                  <Swords className="size-5" />
+                </Link>
+              }
+            />
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              render={
+                <Link to="/rules" className={cn(linkStyle())}>
+                  Rules
+                </Link>
+              }
+            />
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              render={
+                <Link to="/factions" className={cn(linkStyle())}>
+                  Factions
+                </Link>
+              }
+            />
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              render={
+                <Link to="/cards" className={cn(linkStyle())}>
+                  Cards
+                </Link>
+              }
+            />
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              render={
+                <Link to="/about" className={cn(linkStyle())}>
+                  About
+                </Link>
+              }
+            />
+          </NavigationMenuItem>
+        </NavigationMenuList>
       </Container>
-    </header>
+    </NavigationMenu>
   );
 }
