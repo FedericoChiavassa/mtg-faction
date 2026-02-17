@@ -18,12 +18,13 @@ export function FactionCombobox({
 }: FactionComboboxProps) {
   const [internalValue, setInternalValue] = useState<FactionList | null>(null);
 
-  const { data: factionList } = useFactionsList();
+  const { data: factionList, isLoading } = useFactionsList();
 
   const value = controlledValue ?? internalValue;
 
-  const handleValueChange = (value: string | null) => {
-    const newValue = factionList?.find(faction => faction.id === value) ?? null;
+  const handleValueChange = (optionId: string | null) => {
+    const newValue =
+      factionList?.find(faction => faction.id === optionId) ?? null;
     if (controlledValue === undefined) {
       setInternalValue(newValue);
     }
@@ -33,6 +34,7 @@ export function FactionCombobox({
   return (
     <VirtualizedCombobox
       value={value?.id}
+      loading={isLoading}
       filter={matchesFaction}
       options={factionList ?? []}
       triggerPlaceholder={placeholder}

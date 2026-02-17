@@ -115,6 +115,19 @@ function CommandEmpty({
   );
 }
 
+function CommandLoading({
+  className,
+  ...props
+}: React.ComponentProps<typeof CommandPrimitive.Loading>) {
+  return (
+    <CommandPrimitive.Loading
+      data-slot="command-loading"
+      className={cn('py-6 text-center text-sm', className)}
+      {...props}
+    />
+  );
+}
+
 function CommandGroup({
   className,
   ...props
@@ -188,6 +201,7 @@ export {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandLoading,
   CommandSeparator,
   CommandShortcut,
 };

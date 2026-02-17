@@ -26,7 +26,7 @@ function FactionsRoute() {
   const hasMore = page < totalPages - 1;
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
+    <div className="mx-auto py-6">
       {/* Page Header */}
       <div className="mb-6 text-center">
         <h3 className="text-3xl font-bold">Factions Page</h3>
