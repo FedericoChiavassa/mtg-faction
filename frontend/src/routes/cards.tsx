@@ -6,7 +6,7 @@ import { useCards } from '@/features/cards/queries';
 import {
   CardsFilterForm,
   type CardsFilterValues,
-} from '@/features/cards/ui/CardsFilterForm';
+} from '@/features/cards/ui/cards-filter-form';
 
 export const Route = createFileRoute('/cards')({
   component: CardsRoute,

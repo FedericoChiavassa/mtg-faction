@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
 import type { FactionList } from '@/features/factions/queries';
-import { FactionCombobox } from '@/features/factions/ui/FactionCombobox';
+import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 
-import { IsCreatureRadio } from './IsCreatureRadio';
+import { IsCreatureRadio } from './is-creature-radio';
 
 export type CardsFilterValues = {
   faction: FactionList | null;

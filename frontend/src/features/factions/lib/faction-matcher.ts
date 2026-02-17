@@ -1,7 +1,7 @@
-import type { fetchAllFactions } from '@/features/factions/api';
+import type { fetchFactionList } from '@/features/factions/api';
 
-export function matchesFaction(
-  faction: Awaited<ReturnType<typeof fetchAllFactions>>[number],
+export function searchMatchesFaction(
+  faction: Awaited<ReturnType<typeof fetchFactionList>>[number],
   search: string,
 ) {
   const q = search.toLowerCase().trim();

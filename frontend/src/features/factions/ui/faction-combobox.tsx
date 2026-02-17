@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 import { VirtualizedCombobox } from '@/components/virtualized-combobox';
 
-import { matchesFaction } from '../lib/factionMatcher';
-import { type FactionList, useFactionsList } from '../queries';
+import { searchMatchesFaction } from '../lib/faction-matcher';
+import { type FactionList, useFactionList } from '../queries';
 
 export type FactionComboboxProps = {
   value?: FactionList | null;
@@ -18,7 +18,7 @@ export function FactionCombobox({
 }: FactionComboboxProps) {
   const [internalValue, setInternalValue] = useState<FactionList | null>(null);
 
-  const { data: factionList, isLoading } = useFactionsList();
+  const { data: factionList, isLoading } = useFactionList();
 
   const value = controlledValue ?? internalValue;
 
@@ -35,8 +35,8 @@ export function FactionCombobox({
     <VirtualizedCombobox
       value={value?.id}
       loading={isLoading}
-      filter={matchesFaction}
       options={factionList ?? []}
+      filter={searchMatchesFaction}
       triggerPlaceholder={placeholder}
       onValueChange={handleValueChange}
       searchPlaceholder="Search a faction..."

@@ -28,7 +28,7 @@ export async function fetchFactions({
   return { data, count };
 }
 
-export async function fetchAllFactions() {
+export async function fetchFactionList() {
   const batchSize = 1000;
   let from = 0;
   let fetched;

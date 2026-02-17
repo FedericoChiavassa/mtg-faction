@@ -3,7 +3,7 @@ import { cva } from 'class-variance-authority';
 import { Swords } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Container } from '@/components/layout/Container';
+import { Container } from '@/components/layout/container';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
   NavigationMenu,
