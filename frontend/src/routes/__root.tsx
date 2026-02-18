@@ -1,15 +1,12 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-import { Container } from '@/components/layout/container';
-import { Navbar } from '@/components/layout/navbar';
+import { SiteHeader } from '@/components/layout/site-header';
 
 const RootLayout = () => (
   <>
-    <Navbar />
-    <Container>
-      <Outlet />
-    </Container>
+    <SiteHeader />
+    <Outlet />
     <TanStackRouterDevtools />
   </>
 );
