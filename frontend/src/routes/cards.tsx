@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 
+import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
 import { SubHeader } from '@/components/layout/site-header';
+import { SitePagination } from '@/components/layout/site-pagination';
 import { useCards } from '@/features/cards/queries';
 import {
   CardsFilterForm,
   type CardsFilterValues,
 } from '@/features/cards/ui/cards-filter-form';
+import { useIsScrolled } from '@/hooks/use-is-scrolled';
 
 export const Route = createFileRoute('/cards')({
   component: CardsRoute,
@@ -20,12 +23,13 @@ function CardsRoute() {
   const [faction, setFaction] = useState<CardsFilterValues['faction']>(null);
   const [isCreature, setIsCreature] =
     useState<CardsFilterValues['isCreature']>(undefined);
-  const [page, setPage] = useState(0);
+  const [queryPage, setQueryPage] = useState(0);
+  const isScrolled = useIsScrolled();
 
   const { data, isLoading, isError, isPlaceholderData } = useCards({
     factionId: faction?.id ?? '',
     isCreature,
-    page,
+    page: queryPage,
     pageSize: PAGE_SIZE,
     placeholderData: keepPreviousData,
   });
@@ -34,37 +38,55 @@ function CardsRoute() {
   const totalCount = data?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const hasMore = page < totalPages - 1;
-
   const handleFilterSubmit = (values: {
     faction: typeof faction;
     isCreature: typeof isCreature;
   }) => {
     setFaction(values.faction);
     setIsCreature(values.isCreature);
-    setPage(0);
+    setQueryPage(0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   return (
     <>
-      <SubHeader>
-        <ul className="flex gap-4 text-sm font-medium">Todo</ul>
+      <SubHeader
+        className={cn(
+          'h-16 items-center',
+          isScrolled ? 'border-b' : 'border-b-transparent',
+        )}
+      >
+        <CardsFilterForm
+          onChange={handleFilterSubmit}
+          initialValues={{ faction, isCreature: undefined }}
+        />
+
+        <div className="ml-auto flex items-center">
+          {faction && (
+            <SitePagination
+              showBoundaries
+              variant="compact"
+              totalPages={totalPages}
+              currentPage={queryPage + 1}
+              className="justify-end py-6"
+              disabled={isPlaceholderData}
+              onPageChange={page => setQueryPage(page - 1)}
+            >
+              <span className="text-xs whitespace-nowrap">
+                <span>
+                  {Math.min(PAGE_SIZE * queryPage + 1, totalCount)}-
+                  {Math.min(PAGE_SIZE * (queryPage + 1), totalCount)} of{' '}
+                  <span className="font-bold">{totalCount}</span> cards
+                </span>
+              </span>
+            </SitePagination>
+          )}
+        </div>
       </SubHeader>
+
       <Container>
-        <div className="align-center flex justify-center py-6 text-3xl font-bold">
+        <div className="flex justify-center pt-2 pb-12">
           <div>
-            {/* Page Header */}
-            <div className="mb-6 text-center">
-              {totalCount > 0 && <p>Total cards: {totalCount}</p>}
-            </div>
-
-            <div className="flex justify-center p-6">
-              <CardsFilterForm
-                onChange={handleFilterSubmit}
-                initialValues={{ faction, isCreature: undefined }}
-              />
-            </div>
-
             {/* Cards List */}
             <div className="relative">
               {isLoading ? (
@@ -86,30 +108,16 @@ function CardsRoute() {
               )}
             </div>
 
-            {/* Pagination */}
-            <div className="mt-6 flex justify-between">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage(old => Math.max(old - 1, 0))}
-                className="rounded border bg-gray-100 px-4 py-2 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-lg">
-                Page {page + 1} of {totalPages}
-              </span>
-              <button
-                disabled={isPlaceholderData || !hasMore}
-                className="rounded border bg-gray-100 px-4 py-2 disabled:opacity-50"
-                onClick={() => {
-                  if (!isPlaceholderData && hasMore) {
-                    setPage(old => old + 1);
-                  }
-                }}
-              >
-                Next
-              </button>
-            </div>
+            {totalPages > 1 && (
+              <SitePagination
+                showBoundaries
+                totalPages={totalPages}
+                currentPage={queryPage + 1}
+                className="justify-end py-6"
+                disabled={isPlaceholderData}
+                onPageChange={page => setQueryPage(page - 1)}
+              />
+            )}
           </div>
         </div>
       </Container>

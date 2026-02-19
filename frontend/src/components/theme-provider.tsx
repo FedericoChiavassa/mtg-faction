@@ -34,6 +34,7 @@ export function ThemeProvider({
     const root = window.document.documentElement;
 
     root.classList.remove('light', 'dark');
+    root.classList.add('disable-transitions');
 
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
@@ -46,6 +47,14 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
+    // Remove the class after a tiny delay
+    // Using window.getComputedStyle forces a "reflow"
+    // ensuring the change is instant before re-enabling transitions.
+    window.setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      window.getComputedStyle(root).opacity; // Force reflow
+      root.classList.remove('disable-transitions');
+    }, 0);
   }, [theme]);
 
   const value = {

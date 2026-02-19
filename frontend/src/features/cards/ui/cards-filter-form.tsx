@@ -4,7 +4,7 @@ import { useForm } from '@tanstack/react-form';
 import type { FactionList } from '@/features/factions/queries';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 
-import { IsCreatureRadio } from './is-creature-radio';
+import { CardTypeToggle } from './card-type-toggle';
 
 export type CardsFilterValues = {
   faction: FactionList | null;
@@ -42,7 +42,7 @@ export function CardsFilterForm({
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex items-center gap-4"
       onSubmit={e => {
         e.preventDefault();
         void form.handleSubmit();
@@ -53,6 +53,7 @@ export function CardsFilterForm({
         // eslint-disable-next-line react/no-children-prop
         children={field => (
           <FactionCombobox
+            size="sm"
             value={field.state.value}
             onValueChange={faction => {
               field.handleChange(faction);
@@ -65,7 +66,7 @@ export function CardsFilterForm({
         name="isCreature"
         // eslint-disable-next-line react/no-children-prop
         children={field => (
-          <IsCreatureRadio
+          <CardTypeToggle
             value={field.state.value}
             onValueChange={isCreature => {
               field.handleChange(isCreature);

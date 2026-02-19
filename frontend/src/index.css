@@ -129,4 +129,14 @@
     @apply font-sans;
     scrollbar-gutter: stable;
   }
+
+  .disable-transitions *:not(.preserve-animation-on-theme-change),
+  .disable-transitions *::before,
+  .disable-transitions *::after {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+  }
 }

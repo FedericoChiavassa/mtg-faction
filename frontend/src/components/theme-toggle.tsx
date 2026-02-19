@@ -15,8 +15,8 @@ export function ThemeToggle({ className }: { className?: string }) {
       className={cn('duration-0', className)}
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
     >
-      <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-transform duration-500 dark:scale-0 dark:-rotate-90" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-transform duration-500 dark:scale-100 dark:rotate-0" />
+      <Sun className="preserve-animation-on-theme-change h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-transform duration-500 dark:scale-0 dark:-rotate-90" />
+      <Moon className="preserve-animation-on-theme-change absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-transform duration-500 dark:scale-100 dark:rotate-0" />
     </Button>
   );
 }
