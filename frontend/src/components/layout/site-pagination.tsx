@@ -179,3 +179,23 @@ export function SitePagination({
     </Pagination>
   );
 }
+
+export function CardPaginationCount({
+  pageSize,
+  page,
+  totalCount,
+}: {
+  pageSize: number;
+  page: number;
+  totalCount: number;
+}) {
+  return (
+    <span className="text-xs whitespace-nowrap">
+      <span>
+        {Math.min(pageSize * (page - 1) + 1, totalCount)}-
+        {Math.min(pageSize * page, totalCount)} of{' '}
+        <span className="font-bold">{totalCount}</span> cards
+      </span>
+    </span>
+  );
+}

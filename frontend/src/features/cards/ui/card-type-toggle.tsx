@@ -1,34 +1,27 @@
 import { FieldSet } from '@/components/ui/field';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
+export type CardTypeValue = 'all' | 'creature' | 'non-creature';
+
 export function CardTypeToggle({
   value,
   onValueChange,
 }: {
-  value: boolean | undefined;
-  onValueChange: (value: boolean | undefined) => void;
+  value: CardTypeValue;
+  onValueChange: (value: CardTypeValue) => void;
 }) {
-  const toggleValue =
-    value === undefined ? 'all' : value === true ? 'creature' : 'non-creature';
-
-  const handleChange = ([val]: string[]) => {
+  const handleChange = ([val]: CardTypeValue[]) => {
     if (!val) return;
 
-    if (val === 'all') {
-      onValueChange(undefined);
-    } else if (val === 'creature') {
-      onValueChange(true);
-    } else {
-      onValueChange(false);
-    }
+    onValueChange(val);
   };
 
   return (
     <FieldSet>
       <ToggleGroup
         size="sm"
+        value={[value]}
         variant="outline"
-        value={[toggleValue]}
         onValueChange={handleChange}
       >
         <ToggleGroupItem

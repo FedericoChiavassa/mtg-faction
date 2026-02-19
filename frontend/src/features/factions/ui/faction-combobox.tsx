@@ -6,11 +6,11 @@ import {
 } from '@/components/virtualized-combobox';
 
 import { searchMatchesFaction } from '../lib/faction-matcher';
-import { type FactionList, useFactionList } from '../queries';
+import { useFactionList } from '../queries';
 
 export type FactionComboboxProps = {
-  value?: FactionList | null;
-  onValueChange?: (value: FactionList | null) => void;
+  value?: string | null;
+  onValueChange?: (value: string | null) => void;
   placeholder?: string;
   size?: VirtualizedComboboxProps['size'];
 };
@@ -21,15 +21,14 @@ export function FactionCombobox({
   placeholder = 'Select a faction',
   size,
 }: FactionComboboxProps) {
-  const [internalValue, setInternalValue] = useState<FactionList | null>(null);
+  const [internalValue, setInternalValue] =
+    useState<FactionComboboxProps['value']>(null);
 
   const { data: factionList, isLoading } = useFactionList();
 
   const value = controlledValue ?? internalValue;
 
-  const handleValueChange = (optionId: string | null) => {
-    const newValue =
-      factionList?.find(faction => faction.id === optionId) ?? null;
+  const handleValueChange = (newValue: string | null) => {
     if (controlledValue === undefined) {
       setInternalValue(newValue);
     }
@@ -39,7 +38,7 @@ export function FactionCombobox({
   return (
     <VirtualizedCombobox
       size={size}
-      value={value?.id}
+      value={value}
       loading={isLoading}
       options={factionList ?? []}
       filter={searchMatchesFaction}

@@ -242,7 +242,7 @@ const VirtualizedCommand = <T extends Option = Option>({
 };
 
 export type VirtualizedComboboxProps<T extends Option = Option> = {
-  value?: string;
+  value?: string | null;
   onValueChange?: (value: string) => void;
   options: T[];
   filter?: (option: T, search: string) => boolean;
@@ -298,7 +298,8 @@ export function VirtualizedCombobox<T extends Option = Option>({
       >
         <span className="truncate">
           {value
-            ? options.find(option => option.id === value)?.name
+            ? (options.find(option => option.id === value)?.name ??
+              triggerPlaceholder)
             : triggerPlaceholder}
         </span>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
