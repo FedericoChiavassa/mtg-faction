@@ -12,13 +12,13 @@ export async function fetchCards({
   pageSize?: number;
 }) {
   if (!faction) {
-    return { data: [], count: 0 };
+    return { data: [], count: 0, outOfRange: false };
   }
 
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, error, count } = await supabase
+  const { data, error, count, status } = await supabase
     .rpc(
       'get_cards_for_faction',
       { p_faction_id: faction, p_creature_filter: isCreature },
@@ -30,8 +30,12 @@ export async function fetchCards({
     .range(from, to);
 
   if (error) {
+    if (status === 416 || error.code === 'PGRST103') {
+      return { data: [], count: 0, outOfRange: true };
+    }
+
     throw error;
   }
 
-  return { data, count };
+  return { data: data ?? [], count: count ?? 0, outOfRange: false };
 }

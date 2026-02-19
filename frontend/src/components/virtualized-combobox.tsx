@@ -4,11 +4,12 @@
 import type { KeyboardEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import type { VariantProps } from 'class-variance-authority';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
-import { highlightText } from '@/lib/highlightText';
+import { highlightText } from '@/lib/highlight-text';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button, type buttonVariants } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -240,8 +241,8 @@ const VirtualizedCommand = <T extends Option = Option>({
   );
 };
 
-type VirtualizedComboboxProps<T extends Option = Option> = {
-  value?: string;
+export type VirtualizedComboboxProps<T extends Option = Option> = {
+  value?: string | null;
   onValueChange?: (value: string) => void;
   options: T[];
   filter?: (option: T, search: string) => boolean;
@@ -250,6 +251,7 @@ type VirtualizedComboboxProps<T extends Option = Option> = {
   width?: string;
   height?: string;
   loading?: boolean;
+  size?: VariantProps<typeof buttonVariants>['size'];
 };
 
 export function VirtualizedCombobox<T extends Option = Option>({
@@ -262,6 +264,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
   width = '400px',
   height = '400px',
   loading,
+  size,
 }: VirtualizedComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] =
@@ -282,6 +285,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
       <PopoverTrigger
         render={
           <Button
+            size={size}
             role="combobox"
             variant="outline"
             aria-expanded={open}
@@ -294,7 +298,8 @@ export function VirtualizedCombobox<T extends Option = Option>({
       >
         <span className="truncate">
           {value
-            ? options.find(option => option.id === value)?.name
+            ? (options.find(option => option.id === value)?.name ??
+              triggerPlaceholder)
             : triggerPlaceholder}
         </span>
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

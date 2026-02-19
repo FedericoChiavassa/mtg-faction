@@ -1,24 +1,23 @@
 import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
-import type { FactionList } from '@/features/factions/queries';
-import { FactionCombobox } from '@/features/factions/ui/FactionCombobox';
+import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 
-import { IsCreatureRadio } from './IsCreatureRadio';
+import { CardTypeToggle, type CardTypeValue } from './card-type-toggle';
 
-export type CardsFilterValues = {
-  faction: FactionList | null;
-  isCreature: boolean | undefined;
+export type CardFilterValues = {
+  faction: string | null | undefined;
+  cardType: CardTypeValue;
 };
 
 type Props = {
-  initialValues?: CardsFilterValues;
-  onSubmit?: (values: CardsFilterValues) => void;
-  onChange?: (values: CardsFilterValues) => void;
+  initialValues?: CardFilterValues;
+  onSubmit?: (values: CardFilterValues) => void;
+  onChange?: (values: CardFilterValues) => void;
 };
 
-export function CardsFilterForm({
-  initialValues = { faction: null, isCreature: undefined },
+export function CardFilterForm({
+  initialValues = { faction: null, cardType: 'all' },
   onSubmit,
   onChange,
 }: Props) {
@@ -42,7 +41,7 @@ export function CardsFilterForm({
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex items-center gap-4"
       onSubmit={e => {
         e.preventDefault();
         void form.handleSubmit();
@@ -53,6 +52,7 @@ export function CardsFilterForm({
         // eslint-disable-next-line react/no-children-prop
         children={field => (
           <FactionCombobox
+            size="sm"
             value={field.state.value}
             onValueChange={faction => {
               field.handleChange(faction);
@@ -62,13 +62,13 @@ export function CardsFilterForm({
       />
 
       <form.Field
-        name="isCreature"
+        name="cardType"
         // eslint-disable-next-line react/no-children-prop
         children={field => (
-          <IsCreatureRadio
+          <CardTypeToggle
             value={field.state.value}
-            onValueChange={isCreature => {
-              field.handleChange(isCreature);
+            onValueChange={cardType => {
+              field.handleChange(cardType);
             }}
           />
         )}

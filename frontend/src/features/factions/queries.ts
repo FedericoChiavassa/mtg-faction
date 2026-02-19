@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { QueryOptionsFromFn } from '@/lib/query/types';
 
-import { fetchAllFactions, fetchFactions } from './api';
+import { fetchFactionList, fetchFactions } from './api';
 
 export const factionKeys = {
   all: ['factions'] as const,
@@ -27,15 +27,15 @@ export function useFactions({
 }
 
 export type FactionList = NonNullable<
-  ReturnType<typeof useFactionsList>['data']
+  ReturnType<typeof useFactionList>['data']
 >[number];
 
-export function useFactionsList(
-  options: QueryOptionsFromFn<typeof fetchAllFactions> = {},
+export function useFactionList(
+  options: QueryOptionsFromFn<typeof fetchFactionList> = {},
 ) {
   return useQuery({
     queryKey: factionKeys.list(),
-    queryFn: fetchAllFactions,
+    queryFn: fetchFactionList,
     staleTime: Infinity,
     ...options,
   });
