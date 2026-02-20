@@ -32,23 +32,27 @@ type Option = {
 };
 
 type VirtualizedCommandProps<T extends Option = Option> = {
-  height: string;
+  height?: string;
   options: T[];
-  placeholder: string;
+  placeholder?: string;
   selectedOption: string;
   loading?: boolean;
   filter?: (option: T, search: string) => boolean;
   onSelectOption?: (option: string) => void;
+  className?: string;
+  autofocus?: boolean;
 };
 
-const VirtualizedCommand = <T extends Option = Option>({
-  height,
+export const VirtualizedCommand = <T extends Option = Option>({
+  height = '400px',
   options,
-  placeholder,
+  placeholder = 'Search items...',
   selectedOption,
   loading,
   filter,
   onSelectOption,
+  className,
+  autofocus = false,
 }: VirtualizedCommandProps<T>) => {
   const [search, setSearch] = useState('');
   const [filteredOptions, setFilteredOptions] = useState<T[]>(options);
@@ -165,10 +169,15 @@ const VirtualizedCommand = <T extends Option = Option>({
   }, [options]);
 
   return (
-    <Command shouldFilter={false} onKeyDown={handleKeyDown}>
+    <Command
+      shouldFilter={false}
+      className={className}
+      onKeyDown={handleKeyDown}
+    >
       <CommandInput
         readOnly={loading}
         className="pl-3.5!"
+        autoFocus={autofocus}
         placeholder={placeholder}
         onValueChange={handleSearch}
       />
@@ -181,6 +190,7 @@ const VirtualizedCommand = <T extends Option = Option>({
           height: height,
           width: '100%',
           overflow: 'auto',
+          scrollbarColor: 'var(--muted-foreground) transparent',
         }}
       >
         {!loading && <CommandEmpty>No item found.</CommandEmpty>}
@@ -252,6 +262,7 @@ export type VirtualizedComboboxProps<T extends Option = Option> = {
   height?: string;
   loading?: boolean;
   size?: VariantProps<typeof buttonVariants>['size'];
+  className?: string;
 };
 
 export function VirtualizedCombobox<T extends Option = Option>({
@@ -265,6 +276,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
   height = '400px',
   loading,
   size,
+  className,
 }: VirtualizedComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] =
@@ -289,7 +301,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
             role="combobox"
             variant="outline"
             aria-expanded={open}
-            className="justify-between"
+            className={cn('justify-between', className)}
             style={{
               width: width,
             }}

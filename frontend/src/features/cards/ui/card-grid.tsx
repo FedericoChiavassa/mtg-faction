@@ -1,6 +1,14 @@
 import { useState } from 'react';
+import { Frown, FunnelX } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import type { fetchCards } from '../api';
@@ -9,10 +17,12 @@ export function CardGrid({
   cards,
   isLoading,
   isError,
+  isPlaceholderData,
 }: {
   cards: Awaited<ReturnType<typeof fetchCards>>['data'];
   isLoading: boolean;
   isError: boolean;
+  isPlaceholderData: boolean;
 }) {
   if (isLoading) {
     return (
@@ -29,12 +39,41 @@ export function CardGrid({
 
   if (isError) {
     return (
-      <p className="py-6 text-center text-destructive">Failed to load cards</p>
+      <Empty className="pt-6">
+        <EmptyHeader>
+          <EmptyMedia variant="icon" className="size-16">
+            <Frown className="size-8" />
+          </EmptyMedia>
+          <EmptyTitle>Oops!</EmptyTitle>
+          <EmptyDescription className="text-destructive">
+            Something went wrong
+          </EmptyDescription>
+          <EmptyDescription>Failed to load cards</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  if (!cards.length) {
+    return (
+      <Empty className="pt-6">
+        <EmptyHeader>
+          <EmptyMedia variant="icon" className="size-16">
+            <FunnelX className="size-8" />
+          </EmptyMedia>
+          <EmptyTitle>No cards found</EmptyTitle>
+          <EmptyDescription>
+            Your filters didn&apos;t match any cards — Try changing filters
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   return (
-    <Grid>
+    <Grid
+      className={cn(isPlaceholderData && 'pointer-events-none animate-pulse')}
+    >
       {cards.map((card, index) => (
         <Card card={card} index={index} key={card.oracle_id} />
       ))}
@@ -42,9 +81,20 @@ export function CardGrid({
   );
 }
 
-function Grid({ children }: { children: React.ReactNode }) {
+function Grid({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="grid w-full max-w-250 grid-cols-2 gap-1.5 md:grid-cols-3 lg:grid-cols-4">
+    <div
+      className={cn(
+        'grid w-full max-w-250 grid-cols-2 gap-1.5 md:grid-cols-3 lg:grid-cols-4',
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -62,10 +112,12 @@ function Card({
 
   return (
     <div className="relative aspect-488/680 w-full overflow-hidden rounded-[4.75%/3.5%]">
-      {isLoading && <div className="absolute inset-0 animate-pulse bg-muted" />}
+      {isLoading && (
+        <div className="absolute inset-0 animate-pulse bg-muted select-none" />
+      )}
 
       {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+        <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground select-none">
           Image not found
         </div>
       )}
@@ -81,10 +133,10 @@ function Card({
             setHasError(true);
           }}
           className={cn(
-            'rounded-[4.75%/3.5%] shadow-lg/20',
+            'cursor-pointer rounded-[4.75%/3.5%] shadow-lg/20 select-none',
             isLoading ? 'opacity-0' : 'opacity-100',
           )}
-        ></img>
+        />
       )}
     </div>
   );
