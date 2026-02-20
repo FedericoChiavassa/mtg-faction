@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { Shuffle } from 'lucide-react';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
@@ -10,12 +11,17 @@ import {
   CardPaginationCount,
   SitePagination,
 } from '@/components/layout/site-pagination';
+import { Button } from '@/components/ui/button';
+import { Empty, EmptyDescription } from '@/components/ui/empty';
+import { Spinner } from '@/components/ui/spinner';
 import { useCards } from '@/features/cards/queries';
 import {
   CardFilterForm,
   type CardFilterValues,
 } from '@/features/cards/ui/card-filter-form';
 import { CardGrid } from '@/features/cards/ui/card-grid';
+import { useFactionList } from '@/features/factions/queries';
+import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 import { useIsScrolled } from '@/hooks/use-is-scrolled';
 
 export const Route = createFileRoute('/cards')({
@@ -35,6 +41,8 @@ function CardsRoute() {
   const type = search.type ?? 'all';
   const isScrolled = useIsScrolled();
   const navigate = Route.useNavigate();
+  const { data: factionList, isLoading: isFactionListLoading } =
+    useFactionList();
 
   const { data, isLoading, isError, isPlaceholderData } = useCards({
     factionId: faction ?? '',
@@ -75,50 +83,104 @@ function CardsRoute() {
 
   return (
     <>
-      <SubHeader
-        className={cn(
-          'h-16 items-center',
-          isScrolled ? 'border-b' : 'border-b-transparent',
-        )}
-      >
-        <CardFilterForm
-          onChange={handleFilterSubmit}
-          initialValues={{ faction, cardType: 'all' }}
-        />
-
-        <div className="ml-auto flex items-center">
-          {faction && (
-            <SitePagination
-              showBoundaries
-              variant="compact"
-              currentPage={page}
-              totalPages={totalPages}
-              className="justify-end py-6"
-              disabled={isPlaceholderData}
-              onPageChange={newPage =>
-                void navigate({
-                  search: prev =>
-                    buildCardsSearch({
-                      ...prev,
-                      page: newPage,
-                    }),
-                })
-              }
-            >
-              <CardPaginationCount
-                page={page}
-                pageSize={PAGE_SIZE}
-                totalCount={totalCount}
-              />
-            </SitePagination>
+      {faction && (
+        <SubHeader
+          className={cn(
+            'h-16 items-center',
+            isScrolled ? 'border-b' : 'border-b-transparent',
           )}
-        </div>
-      </SubHeader>
+        >
+          <CardFilterForm
+            onChange={handleFilterSubmit}
+            initialValues={{ faction, cardType: type }}
+          />
 
-      <Container className="flex flex-col pt-2 pb-12">
-        <CardGrid cards={cards} isError={isError} isLoading={isLoading} />
+          <div className="ml-auto flex items-center">
+            {faction && (
+              <SitePagination
+                showBoundaries
+                variant="compact"
+                currentPage={page}
+                totalPages={totalPages}
+                className="justify-end py-6"
+                disabled={isPlaceholderData}
+                onPageChange={newPage =>
+                  void navigate({
+                    search: prev =>
+                      buildCardsSearch({
+                        ...prev,
+                        page: newPage,
+                      }),
+                  })
+                }
+              >
+                <CardPaginationCount
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  totalCount={totalCount}
+                />
+              </SitePagination>
+            )}
+          </div>
+        </SubHeader>
+      )}
 
-        {totalPages > 1 && (
+      <Container className="flex flex-1 flex-col pt-2 pb-12">
+        {faction ? (
+          <CardGrid
+            cards={cards}
+            isError={isError}
+            isLoading={isLoading}
+            isPlaceholderData={isPlaceholderData}
+          />
+        ) : (
+          <div className="flex flex-1 flex-col justify-start">
+            <FactionCombobox
+              hasPopover={false}
+              placeholder="Select a faction..."
+              className="mx-auto mt-2 max-w-none"
+              onValueChange={selectedFaction => {
+                void navigate({
+                  search: buildCardsSearch({
+                    faction: selectedFaction,
+                    type: 'all',
+                    page: 1,
+                  }),
+                });
+              }}
+            />
+            <Empty className="justify-start gap-6 pt-6">
+              <EmptyDescription className="text-xs italic">
+                Select a faction to browse its cards
+              </EmptyDescription>
+              <EmptyDescription>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="cursor-pointer"
+                  disabled={isFactionListLoading}
+                  onClick={() => {
+                    void navigate({
+                      search: buildCardsSearch({
+                        faction:
+                          factionList?.[
+                            Math.floor(Math.random() * factionList.length)
+                          ].id,
+                        type: 'all',
+                        page: 1,
+                      }),
+                    });
+                  }}
+                >
+                  random faction{' '}
+                  {isFactionListLoading ? <Spinner /> : <Shuffle />}
+                </Button>
+              </EmptyDescription>
+            </Empty>
+          </div>
+        )}
+
+        {totalPages > 1 && faction && (
           <SitePagination
             showBoundaries
             currentPage={page}

@@ -6,7 +6,9 @@ import { SiteHeader } from '@/components/layout/site-header';
 const RootLayout = () => (
   <>
     <SiteHeader />
-    <Outlet />
+    <main className="flex flex-1 flex-col">
+      <Outlet />
+    </main>
     <TanStackRouterDevtools />
   </>
 );

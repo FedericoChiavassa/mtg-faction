@@ -9,7 +9,7 @@ export function Container({ children, className }: ContainerProps) {
   return (
     <div
       data-slot="container"
-      className={cn('mx-auto max-w-262 px-6', className)}
+      className={cn('mx-auto w-full max-w-262 px-6', className)}
     >
       {children}
     </div>
