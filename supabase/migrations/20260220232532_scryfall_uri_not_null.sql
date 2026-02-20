@@ -1,0 +1,1 @@
+ALTER TABLE cards ALTER COLUMN scryfall_uri SET NOT NULL;

@@ -21,6 +21,7 @@ export type Database = {
           normal_img_url: string
           normal_img_url_2: string | null
           oracle_id: string
+          scryfall_uri: string
           type_line: string
         }
         Insert: {
@@ -34,6 +35,7 @@ export type Database = {
           normal_img_url: string
           normal_img_url_2?: string | null
           oracle_id: string
+          scryfall_uri: string
           type_line: string
         }
         Update: {
@@ -47,6 +49,7 @@ export type Database = {
           normal_img_url?: string
           normal_img_url_2?: string | null
           oracle_id?: string
+          scryfall_uri?: string
           type_line?: string
         }
         Relationships: [
@@ -130,6 +133,7 @@ export type Database = {
           normal_img_url: string | null
           normal_img_url_2: string | null
           oracle_id: string | null
+          scryfall_uri: string | null
         }
         Insert: {
           mana_value?: number | null
@@ -137,6 +141,7 @@ export type Database = {
           normal_img_url?: string | null
           normal_img_url_2?: string | null
           oracle_id?: string | null
+          scryfall_uri?: string | null
         }
         Update: {
           mana_value?: number | null
@@ -144,6 +149,7 @@ export type Database = {
           normal_img_url?: string | null
           normal_img_url_2?: string | null
           oracle_id?: string | null
+          scryfall_uri?: string | null
         }
         Relationships: []
       }
@@ -157,6 +163,7 @@ export type Database = {
           normal_img_url: string | null
           normal_img_url_2: string | null
           oracle_id: string | null
+          scryfall_uri: string | null
         }[]
         SetofOptions: {
           from: "*"

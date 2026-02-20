@@ -27,6 +27,7 @@ type ScryfallCatalog = {
 
 type CardInsert = {
   oracle_id: string;
+  scryfall_uri: string;
   name: string;
   type_line: string;
   is_creature: boolean;
@@ -66,6 +67,7 @@ type ScryfallCardFace = {
 type ScryfallCard = {
   id: string;
   oracle_id: string;
+  scryfall_uri: string;
   name: string;
   type_line: string;
   cmc: number;
@@ -359,6 +361,7 @@ async function importScryfall() {
 
     creatureInserts.push({
       oracle_id: c.oracle_id,
+      scryfall_uri: c.scryfall_uri,
       name: c.name,
       type_line: c.type_line,
       is_creature: true,
@@ -425,6 +428,7 @@ async function importScryfall() {
 
     nonCreatureInserts.push({
       oracle_id: c.oracle_id,
+      scryfall_uri: c.scryfall_uri,
       name: c.name,
       type_line: c.type_line,
       is_creature: false,

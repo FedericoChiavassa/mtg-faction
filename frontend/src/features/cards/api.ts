@@ -24,7 +24,9 @@ export async function fetchCards({
       { p_faction_id: faction, p_creature_filter: isCreature },
       { count: 'exact' },
     )
-    .select('oracle_id, name, mana_value, normal_img_url, normal_img_url_2')
+    .select(
+      'oracle_id, name, mana_value, normal_img_url, normal_img_url_2, scryfall_uri',
+    )
     .order('mana_value', { ascending: true })
     .order('name')
     .range(from, to);
