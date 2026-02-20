@@ -123,20 +123,27 @@ function Card({
       )}
 
       {!hasError && (
-        <img
-          alt={card.name}
-          src={card.normal_img_url}
-          onLoad={() => setIsLoading(false)}
-          loading={index < 12 ? 'eager' : 'lazy'}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
-          className={cn(
-            'cursor-pointer rounded-[4.75%/3.5%] shadow-lg/20 select-none',
-            isLoading ? 'opacity-0' : 'opacity-100',
-          )}
-        />
+        <a
+          target="_blank"
+          rel="noreferrer"
+          className="select-none"
+          href={card.scryfall_uri}
+        >
+          <img
+            alt={card.name}
+            src={card.normal_img_url}
+            onLoad={() => setIsLoading(false)}
+            loading={index < 12 ? 'eager' : 'lazy'}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+            className={cn(
+              'cursor-pointer rounded-[4.75%/3.5%] shadow-lg/20',
+              isLoading ? 'opacity-0' : 'opacity-100',
+            )}
+          />
+        </a>
       )}
     </div>
   );

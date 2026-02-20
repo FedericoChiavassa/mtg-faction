@@ -17,6 +17,7 @@ type CardsByFaction = ObjectMerge<
     name: NN<CardsRow['name']>;
     normal_img_url: NN<CardsRow['normal_img_url']>;
     oracle_id: NN<CardsRow['oracle_id']>;
+    scryfall_uri: NN<CardsRow['scryfall_uri']>;
   }
 >[];
 
