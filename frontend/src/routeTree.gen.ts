@@ -9,30 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RulesRouteImport } from './routes/rules'
-import { Route as FactionsRouteImport } from './routes/factions'
-import { Route as CardsRouteImport } from './routes/cards'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRulesRouteImport } from './routes/_app/rules'
+import { Route as AppFactionsRouteImport } from './routes/_app/factions'
+import { Route as AppCardsRouteImport } from './routes/_app/cards'
+import { Route as AppAboutRouteImport } from './routes/_app/about'
 
-const RulesRoute = RulesRouteImport.update({
-  id: '/rules',
-  path: '/rules',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FactionsRoute = FactionsRouteImport.update({
-  id: '/factions',
-  path: '/factions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CardsRoute = CardsRouteImport.update({
-  id: '/cards',
-  path: '/cards',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,73 +25,77 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRulesRoute = AppRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppFactionsRoute = AppFactionsRouteImport.update({
+  id: '/factions',
+  path: '/factions',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCardsRoute = AppCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAboutRoute = AppAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/cards': typeof CardsRoute
-  '/factions': typeof FactionsRoute
-  '/rules': typeof RulesRoute
+  '/about': typeof AppAboutRoute
+  '/cards': typeof AppCardsRoute
+  '/factions': typeof AppFactionsRoute
+  '/rules': typeof AppRulesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/cards': typeof CardsRoute
-  '/factions': typeof FactionsRoute
-  '/rules': typeof RulesRoute
+  '/about': typeof AppAboutRoute
+  '/cards': typeof AppCardsRoute
+  '/factions': typeof AppFactionsRoute
+  '/rules': typeof AppRulesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/cards': typeof CardsRoute
-  '/factions': typeof FactionsRoute
-  '/rules': typeof RulesRoute
+  '/_app': typeof AppRouteRouteWithChildren
+  '/_app/about': typeof AppAboutRoute
+  '/_app/cards': typeof AppCardsRoute
+  '/_app/factions': typeof AppFactionsRoute
+  '/_app/rules': typeof AppRulesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/about' | '/cards' | '/factions' | '/rules'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/about' | '/cards' | '/factions' | '/rules'
-  id: '__root__' | '/' | '/about' | '/cards' | '/factions' | '/rules'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/about'
+    | '/_app/cards'
+    | '/_app/factions'
+    | '/_app/rules'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  CardsRoute: typeof CardsRoute
-  FactionsRoute: typeof FactionsRoute
-  RulesRoute: typeof RulesRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/rules': {
-      id: '/rules'
-      path: '/rules'
-      fullPath: '/rules'
-      preLoaderRoute: typeof RulesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/factions': {
-      id: '/factions'
-      path: '/factions'
-      fullPath: '/factions'
-      preLoaderRoute: typeof FactionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cards': {
-      id: '/cards'
-      path: '/cards'
-      fullPath: '/cards'
-      preLoaderRoute: typeof CardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,15 +105,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/rules': {
+      id: '/_app/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof AppRulesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/factions': {
+      id: '/_app/factions'
+      path: '/factions'
+      fullPath: '/factions'
+      preLoaderRoute: typeof AppFactionsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/cards': {
+      id: '/_app/cards'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof AppCardsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/about': {
+      id: '/_app/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AppAboutRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppAboutRoute: typeof AppAboutRoute
+  AppCardsRoute: typeof AppCardsRoute
+  AppFactionsRoute: typeof AppFactionsRoute
+  AppRulesRoute: typeof AppRulesRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAboutRoute: AppAboutRoute,
+  AppCardsRoute: AppCardsRoute,
+  AppFactionsRoute: AppFactionsRoute,
+  AppRulesRoute: AppRulesRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  CardsRoute: CardsRoute,
-  FactionsRoute: FactionsRoute,
-  RulesRoute: RulesRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

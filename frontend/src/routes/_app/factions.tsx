@@ -6,7 +6,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Container } from '@/components/layout/container';
 import { useFactions } from '@/features/factions/queries';
 
-export const Route = createFileRoute('/factions')({
+export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
 });
 

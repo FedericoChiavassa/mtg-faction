@@ -24,7 +24,7 @@ import { useFactionList } from '@/features/factions/queries';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 import { useIsScrolled } from '@/hooks/use-is-scrolled';
 
-export const Route = createFileRoute('/cards')({
+export const Route = createFileRoute('/_app/cards')({
   component: CardsRoute,
   validateSearch: z.object({
     faction: z.string().optional().nullable(),

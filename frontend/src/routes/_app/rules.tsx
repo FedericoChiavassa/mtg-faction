@@ -2,15 +2,15 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { Container } from '@/components/layout/container';
 
-export const Route = createFileRoute('/about')({
-  component: AboutRoute,
+export const Route = createFileRoute('/_app/rules')({
+  component: RulesRoute,
 });
 
-function AboutRoute() {
+function RulesRoute() {
   return (
     <Container>
       <div className="flex justify-center py-6 text-3xl font-bold">
-        <h3>About Page</h3>
+        <h3>Rules Page</h3>
       </div>
     </Container>
   );
