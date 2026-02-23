@@ -16,6 +16,11 @@ declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
+
+  // https://github.com/TanStack/router/discussions/1342#discussioncomment-8848490
+  interface HistoryState {
+    disablePlaceholderData?: boolean;
+  }
 }
 
 // Render the app
