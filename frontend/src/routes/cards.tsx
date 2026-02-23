@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { createFileRoute, useRouterState } from '@tanstack/react-router';
+import { createFileRoute, Link, useRouterState } from '@tanstack/react-router';
 import { Shuffle } from 'lucide-react';
 import { z } from 'zod';
 
@@ -166,23 +166,24 @@ function CardsRoute() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="cursor-pointer"
+                  className="no-underline!"
                   disabled={isFactionListLoading}
-                  onClick={() => {
-                    void navigate({
-                      search: buildCardsSearch({
-                        faction:
-                          factionList?.[
-                            Math.floor(Math.random() * factionList.length)
-                          ].id,
-                        type: 'all',
-                        page: 1,
-                      }),
-                      state: {
-                        disablePlaceholderData: true,
-                      },
-                    });
-                  }}
+                  render={
+                    <Link
+                      to="/cards"
+                      state={{ disablePlaceholderData: true }}
+                      search={() =>
+                        buildCardsSearch({
+                          faction:
+                            factionList?.[
+                              Math.floor(Math.random() * factionList.length)
+                            ].id,
+                          type: 'all',
+                          page: 1,
+                        })
+                      }
+                    />
+                  }
                 >
                   Random faction{' '}
                   {isFactionListLoading ? <Spinner /> : <Shuffle />}

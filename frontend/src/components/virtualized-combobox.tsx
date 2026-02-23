@@ -273,7 +273,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
   filter,
   triggerPlaceholder = 'Select an item',
   searchPlaceholder = 'Search items...',
-  width = '400px',
+  width = '370px',
   height = '400px',
   loading,
   size,

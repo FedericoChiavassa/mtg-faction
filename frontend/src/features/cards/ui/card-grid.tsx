@@ -155,7 +155,7 @@ function Card({
                 alt={card.name}
                 src={card.normal_img_url}
                 onLoad={() => setIsLoadingA(false)}
-                loading={index < 12 ? 'eager' : 'lazy'}
+                loading={index < 8 ? 'eager' : 'lazy'}
                 onError={() => {
                   setIsLoadingA(false);
                   setHasErrorA(true);

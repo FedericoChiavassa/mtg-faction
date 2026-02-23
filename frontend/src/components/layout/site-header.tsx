@@ -41,11 +41,7 @@ export function SiteHeader() {
             <NavigationMenuItem>
               <NavigationMenuLink
                 render={
-                  <Link
-                    to="/rules"
-                    className={cn(linkStyle())}
-                    activeProps={{ className: 'bg-muted' }}
-                  >
+                  <Link to="/rules" className={cn(linkStyle())}>
                     Rules
                   </Link>
                 }
