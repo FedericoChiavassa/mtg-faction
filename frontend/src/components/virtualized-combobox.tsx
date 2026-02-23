@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 
 type Option = {
   id: string;
@@ -314,7 +315,11 @@ export function VirtualizedCombobox<T extends Option = Option>({
               triggerPlaceholder)
             : triggerPlaceholder}
         </span>
-        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        {loading ? (
+          <Spinner className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        ) : (
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        )}
       </PopoverTrigger>
       <PopoverContent className="p-0" style={{ width: width }}>
         <VirtualizedCommand

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { Shuffle } from 'lucide-react';
 import { z } from 'zod';
 
@@ -43,6 +43,9 @@ function CardsRoute() {
   const navigate = Route.useNavigate();
   const { data: factionList, isLoading: isFactionListLoading } =
     useFactionList();
+  const { disablePlaceholderData = false } = useRouterState({
+    select: s => s.location.state,
+  });
 
   const { data, isLoading, isError, isPlaceholderData } = useCards({
     factionId: faction ?? '',
@@ -50,7 +53,7 @@ function CardsRoute() {
       type === 'creature' ? true : type === 'non-creature' ? false : undefined,
     page: page - 1, // query starts from 0
     pageSize: PAGE_SIZE,
-    placeholderData: keepPreviousData,
+    placeholderData: disablePlaceholderData ? undefined : keepPreviousData,
   });
 
   const cards = data?.data ?? [];
@@ -68,6 +71,9 @@ function CardsRoute() {
         type: cardType,
         page: 1,
       }),
+      state: {
+        disablePlaceholderData: newFaction !== faction,
+      },
     });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -146,6 +152,9 @@ function CardsRoute() {
                     type: 'all',
                     page: 1,
                   }),
+                  state: {
+                    disablePlaceholderData: selectedFaction !== faction,
+                  },
                 });
               }}
             />
@@ -169,10 +178,13 @@ function CardsRoute() {
                         type: 'all',
                         page: 1,
                       }),
+                      state: {
+                        disablePlaceholderData: true,
+                      },
                     });
                   }}
                 >
-                  random faction{' '}
+                  Random faction{' '}
                   {isFactionListLoading ? <Spinner /> : <Shuffle />}
                 </Button>
               </EmptyDescription>
