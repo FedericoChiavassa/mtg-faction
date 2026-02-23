@@ -10,7 +10,7 @@ function AboutRoute() {
   return (
     <Container>
       <div className="flex justify-center py-6 text-3xl font-bold">
-        <h3>About Page</h3>
+        <h3>What is Faction?</h3>
       </div>
     </Container>
   );

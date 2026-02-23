@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { ArrowRight, Shuffle } from 'lucide-react';
 
 import { Container } from '@/components/layout/container';
+import { SiteFooter } from '@/components/layout/site-footer';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -19,13 +20,11 @@ function HomeRoute() {
 
   return (
     <>
-      <BackgroundMagicAura />
-
       <Container className="absolute z-50 flex h-12 items-center self-center bg-transparent">
         <ThemeToggle className="-mr-2 ml-auto" />
       </Container>
 
-      <section className="relative h-dvh w-full overflow-hidden py-28 text-center">
+      <main className="relative flex min-h-dvh w-full flex-col overflow-hidden pt-60 pb-28 text-center">
         <div className="relative z-10 mx-auto max-w-3xl px-6">
           <h1 className="text-5xl font-bold tracking-tight md:text-6xl">
             Faction
@@ -55,7 +54,7 @@ function HomeRoute() {
             <Button
               size="icon"
               variant="outline"
-              title="Random faction"
+              title="Random faction cards"
               disabled={isFactionListLoading}
               render={
                 <Link
@@ -84,32 +83,48 @@ function HomeRoute() {
               Read the Rules
             </Button>
           </div>
+
+          <div className="mt-14">
+            <Button
+              size="xs"
+              variant="link"
+              render={<Link to={'/about'} />}
+              className="text-muted-foreground"
+            >
+              What is Faction?
+            </Button>
+          </div>
         </div>
-      </section>
+      </main>
+
+      <SiteFooter />
+
+      {/* <BackgroundMagicAura /> */}
     </>
   );
 }
 
-function BackgroundMagicAura() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-    >
-      {/* White */}
-      <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-yellow-200/10 blur-3xl" />
+// function BackgroundMagicAura() {
+//   return (
+//     <div
+//       aria-hidden
+//       data-slot="background-magic-aura"
+//       className="pointer-events-none absolute inset-0 overflow-hidden"
+//     >
+//       {/* White */}
+//       <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-yellow-200/10 blur-3xl" />
 
-      {/* Blue */}
-      <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
+//       {/* Blue */}
+//       <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
 
-      {/* Black */}
-      <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-purple-900/10 blur-3xl" />
+//       {/* Black */}
+//       <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-purple-900/10 blur-3xl" />
 
-      {/* Red */}
-      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
+//       {/* Red */}
+//       <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
 
-      {/* Green (center glow) */}
-      <div className="absolute top-1/2 left-1/2 h-128 w-lg -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/5 blur-3xl" />
-    </div>
-  );
-}
+//       {/* Green (center glow) */}
+//       <div className="absolute top-1/2 left-1/2 h-128 w-lg -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/5 blur-3xl" />
+//     </div>
+//   );
+// }
