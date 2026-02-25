@@ -11,6 +11,10 @@ export const factionKeys = {
     [...factionKeys.all, page, pageSize] as const,
 };
 
+export type Faction = NonNullable<
+  Awaited<ReturnType<typeof useFactions>>['data']
+>['data'][number];
+
 export function useFactions({
   page,
   pageSize,

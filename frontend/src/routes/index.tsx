@@ -91,7 +91,7 @@ function HomeRoute() {
               render={<Link to={'/about'} />}
               className="text-muted-foreground"
             >
-              What is Faction?
+              About the format
             </Button>
           </div>
         </div>

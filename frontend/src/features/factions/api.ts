@@ -25,7 +25,7 @@ export async function fetchFactions({
     throw error;
   }
 
-  return { data, count };
+  return { data, count, currentPage: page };
 }
 
 export async function fetchFactionList() {

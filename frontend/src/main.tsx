@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import type { RowData } from '@tanstack/react-table';
 
 import { queryClient } from '@/lib/query/client';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -20,6 +21,16 @@ declare module '@tanstack/react-router' {
   // https://github.com/TanStack/router/discussions/1342#discussioncomment-8848490
   interface HistoryState {
     disablePlaceholderData?: boolean;
+  }
+}
+
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface TableMeta<TData extends RowData> {
+    paginationState: {
+      pageIndex: number;
+      pageSize: number;
+    };
   }
 }
 
