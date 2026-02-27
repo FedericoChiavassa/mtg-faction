@@ -7,8 +7,11 @@ import { fetchFactionList, fetchFactions } from './api';
 export const factionKeys = {
   all: ['factions'] as const,
   list: () => [...factionKeys.all, 'list'] as const,
-  paged: (page: number, pageSize: number) =>
-    [...factionKeys.all, page, pageSize] as const,
+  paged: (
+    page: number,
+    pageSize: number,
+    sortBy: Parameters<typeof useFactions>[0]['sortBy'],
+  ) => [...factionKeys.all, page, pageSize, sortBy] as const,
 };
 
 export type Faction = NonNullable<
@@ -18,14 +21,16 @@ export type Faction = NonNullable<
 export function useFactions({
   page,
   pageSize,
+  sortBy,
   ...options
 }: {
   page: number;
   pageSize: number;
+  sortBy?: Parameters<typeof fetchFactions>[0]['sortBy'];
 } & QueryOptionsFromFn<typeof fetchFactions>) {
   return useQuery({
-    queryKey: factionKeys.paged(page, pageSize),
-    queryFn: () => fetchFactions({ page, pageSize }),
+    queryKey: factionKeys.paged(page, pageSize, sortBy),
+    queryFn: () => fetchFactions({ page, pageSize, sortBy }),
     ...options,
   });
 }

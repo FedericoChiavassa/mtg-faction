@@ -3,6 +3,8 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  type OnChangeFn,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 
@@ -19,6 +21,9 @@ import {
 } from '@/components/ui/table';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 
+import { isSortingDesc } from '../../lib/faction-sorting';
+import type { useFactions } from '../../queries';
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -29,12 +34,16 @@ interface DataTableProps<TData, TValue> {
     pageSize: number;
     pageCount: number;
   };
+  sortBy?: Parameters<typeof useFactions>[0]['sortBy'];
+  onSortingChange?: OnChangeFn<SortingState>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   pagination,
+  sortBy = 'count',
+  onSortingChange,
   isLoading = false,
   isPlaceholderData = false,
 }: DataTableProps<TData, TValue>) {
@@ -46,11 +55,13 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     pageCount,
-    state: { pagination },
-    manualPagination: true,
-    meta: {
-      paginationState: pagination,
+    state: {
+      pagination,
+      sorting: [{ id: sortBy, desc: isSortingDesc(sortBy) }],
     },
+    manualPagination: true,
+    manualSorting: true,
+    onSortingChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -66,11 +77,12 @@ export function DataTable<TData, TValue>({
       <Table className="table-fixed">
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
+            <TableRow noHoverHighlight key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
                   <TableHead
                     key={header.id}
+                    className="relative"
                     style={{ width: header.getSize() }}
                   >
                     {header.isPlaceholder
@@ -95,7 +107,7 @@ export function DataTable<TData, TValue>({
                 data-state={row.getIsSelected() && 'selected'}
               >
                 {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="relative">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -145,7 +157,7 @@ function LoadingRow<TData, TValue>({
         return (
           <TableCell key={`cell-${rowIndex}-${colIndex}`}>
             <Skeleton
-              className={cn(`h-5 ${widthClass}`, colIndex > 1 && 'ml-auto')}
+              className={cn(`h-5 ${widthClass}`, colIndex > 1 && 'mx-auto')}
             />
           </TableCell>
         );

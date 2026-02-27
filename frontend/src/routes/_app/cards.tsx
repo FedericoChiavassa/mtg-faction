@@ -61,7 +61,7 @@ function CardsRoute() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const outOfRange = data?.outOfRange;
 
-  const handleFilterSubmit = ({
+  const handleFilterChange = ({
     faction: newFaction,
     cardType,
   }: CardFilterValues) => {
@@ -97,7 +97,7 @@ function CardsRoute() {
           )}
         >
           <CardFilterForm
-            onChange={handleFilterSubmit}
+            onChange={handleFilterChange}
             initialValues={{ faction, cardType: type }}
           />
 
@@ -166,6 +166,7 @@ function CardsRoute() {
                 <Button
                   size="sm"
                   variant="secondary"
+                  nativeButton={false}
                   className="no-underline!"
                   disabled={isFactionListLoading}
                   render={
