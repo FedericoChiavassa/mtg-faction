@@ -6,10 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import type { useFactions } from '@/features/factions/queries';
 
+import { FactionSlider } from './faction-slider';
 import { FactionSortBySelect } from './faction-sort-by-select';
 
 export type FactionFilterValues = {
   sortBy: Parameters<typeof useFactions>[0]['sortBy'] | null;
+  minCards: number;
+  minCreatures: number;
+  minNonCreatures: number;
 };
 
 type Props = {
@@ -21,6 +25,9 @@ type Props = {
 export function FactionFilterForm({
   initialValues = {
     sortBy: 'count',
+    minCards: 0,
+    minCreatures: 0,
+    minNonCreatures: 0,
   },
   onSubmit,
   onChange,
@@ -71,6 +78,50 @@ export function FactionFilterForm({
                 )}
               />
             </FieldGroup>
+            <FieldGroup>
+              <form.Field
+                name="minCards"
+                // eslint-disable-next-line react/no-children-prop
+                children={field => (
+                  <Field>
+                    <FactionSlider
+                      label="Cards"
+                      value={field.state.value}
+                      id="faction-slider-min-cards"
+                      onChange={val => field.handleChange(val)}
+                    />
+                  </Field>
+                )}
+              />
+              <form.Field
+                name="minCreatures"
+                // eslint-disable-next-line react/no-children-prop
+                children={field => (
+                  <Field>
+                    <FactionSlider
+                      label="Creatures"
+                      value={field.state.value}
+                      id="faction-slider-min-creatures"
+                      onChange={val => field.handleChange(val)}
+                    />
+                  </Field>
+                )}
+              />
+              <form.Field
+                name="minNonCreatures"
+                // eslint-disable-next-line react/no-children-prop
+                children={field => (
+                  <Field>
+                    <FactionSlider
+                      label="Non Creatures"
+                      value={field.state.value}
+                      id="faction-slider-min-non-creatures"
+                      onChange={val => field.handleChange(val)}
+                    />
+                  </Field>
+                )}
+              />
+            </FieldGroup>
           </div>
 
           <div className="space-y-6">
@@ -90,6 +141,13 @@ export function FactionFilterForm({
             render={<Link to="/factions" />}
           >
             Reset
+          </Button>
+          <Button
+            size="sm"
+            type="submit"
+            onClick={() => void form.handleSubmit()}
+          >
+            Submit
           </Button>
         </div>
       </form>

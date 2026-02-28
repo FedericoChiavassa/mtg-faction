@@ -6,9 +6,15 @@ export async function fetchFactions({
   page,
   pageSize,
   sortBy = 'count',
+  minCards = 0,
+  minCreatures = 0,
+  minNonCreatures = 0,
 }: {
   page: number;
   pageSize: number;
+  minCards?: number;
+  minCreatures?: number;
+  minNonCreatures?: number;
   sortBy?:
     | 'name'
     | 'count'
@@ -27,6 +33,16 @@ export async function fetchFactions({
         count: 'exact',
       },
     );
+
+  if (minCards > 0) {
+    query = query.gte('count', minCards);
+  }
+  if (minCreatures > 0) {
+    query = query.gte('creatures_count', minCreatures);
+  }
+  if (minNonCreatures > 0) {
+    query = query.gte('non_creatures_count', minNonCreatures);
+  }
 
   switch (sortBy) {
     case 'identity_count':

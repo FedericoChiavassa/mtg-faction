@@ -29,19 +29,32 @@ export const Route = createFileRoute('/_app/factions')({
       ])
       .catch('count')
       .optional(),
+    minCards: z.coerce.number().int().min(0).catch(0).optional(),
+    minCreatures: z.coerce.number().int().min(0).catch(0).optional(),
+    minNonCreatures: z.coerce.number().int().min(0).catch(0).optional(),
   }),
 });
 
 const PAGE_SIZE = 10;
+const TEMPORARY_DISABLE_FORM = true;
 
 function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
-  const { page = 1, sortBy = 'count' } = search;
+  const {
+    page = 1,
+    sortBy = 'count',
+    minCards = 0,
+    minCreatures = 0,
+    minNonCreatures = 0,
+  } = search;
   const { data, isLoading, isPlaceholderData } = useFactions({
     page: page - 1, // query starts from 0
     pageSize: PAGE_SIZE,
-    sortBy: search.sortBy,
+    sortBy,
+    minCards,
+    minCreatures,
+    minNonCreatures,
     placeholderData: keepPreviousData,
   });
 
@@ -54,11 +67,24 @@ function FactionsRoute() {
 
   const handleFilterChange = (values: FactionFilterValues) => {
     void navigate({
-      search: {
+      search: prev => ({
+        ...prev,
         ...(values.sortBy !== 'count' && {
           sortBy: values.sortBy ?? undefined,
         }),
-      },
+      }),
+    });
+  };
+
+  const handleFilterSubmit = (values: FactionFilterValues) => {
+    void navigate({
+      search: prev => ({
+        ...prev,
+        minCards: values.minCards > 0 ? values.minCards : undefined,
+        minCreatures: values.minCreatures > 0 ? values.minCreatures : undefined,
+        minNonCreatures:
+          values.minNonCreatures > 0 ? values.minNonCreatures : undefined,
+      }),
     });
   };
 
@@ -80,15 +106,18 @@ function FactionsRoute() {
   return (
     <Container>
       <div className="mx-auto py-10">
-        <FactionFilterForm
-          initialValues={{ sortBy }}
-          onChange={handleFilterChange}
-        />
+        {!TEMPORARY_DISABLE_FORM && (
+          <FactionFilterForm
+            onChange={handleFilterChange}
+            onSubmit={handleFilterSubmit}
+            initialValues={{ sortBy, minCards, minCreatures, minNonCreatures }}
+          />
+        )}
 
         <div className="mb-4 ml-auto flex w-max items-center gap-1 text-xs text-muted-foreground">
-          Total Factions:{' '}
+          Results:{' '}
           {totalCount > 0 ? (
-            <span className="mr-2 min-w-7.5 font-medium text-foreground">
+            <span className="mr-2 font-medium text-foreground">
               {totalCount}
             </span>
           ) : (

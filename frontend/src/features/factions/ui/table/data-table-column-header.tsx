@@ -1,5 +1,10 @@
-import { type Column } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, type LucideIcon } from 'lucide-react';
+import { type Column, type Table } from '@tanstack/react-table';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpNarrowWide,
+  type LucideIcon,
+} from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -11,6 +16,7 @@ interface DataTableColumnHeaderProps<
 > extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  table?: Table<TData>;
   icon?: LucideIcon;
   align?: 'left' | 'center' | 'right';
 }
@@ -18,6 +24,7 @@ interface DataTableColumnHeaderProps<
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
+  table,
   icon: Icon,
   className,
   align = 'left',
@@ -25,6 +32,10 @@ export function DataTableColumnHeader<TData, TValue>({
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
+
+  const showArrowUpNarrowWide =
+    table?.getState().sorting?.[0]?.id === 'identity_count' &&
+    column.id === 'name';
 
   return (
     <div
@@ -39,16 +50,29 @@ export function DataTableColumnHeader<TData, TValue>({
       <Button
         size="sm"
         variant="ghost"
-        onClick={() => column.toggleSorting(isSortingDesc(column.id))}
         className={cn(
           'h-8 data-[state=open]:bg-accent',
           align === 'left' && '-ml-3',
           align === 'right' && '-mr-3',
+          !!column.getIsSorted() &&
+            column.id !== 'name' &&
+            'pointer-events-none',
         )}
+        onClick={() => {
+          if (column.id === 'name') {
+            if (column.getIsSorted()) {
+              return table?.setSorting([{ id: 'identity_count', desc: false }]);
+            }
+            return table?.setSorting([{ id: 'name', desc: false }]);
+          }
+          column.toggleSorting(isSortingDesc(column.id));
+        }}
       >
         {Icon && <Icon className="size-4" />}
         <span>{title}</span>
-        {column.getIsSorted() === 'desc' ? (
+        {showArrowUpNarrowWide ? (
+          <ArrowUpNarrowWide />
+        ) : column.getIsSorted() === 'desc' ? (
           <ArrowDown />
         ) : column.getIsSorted() === 'asc' ? (
           <ArrowUp />

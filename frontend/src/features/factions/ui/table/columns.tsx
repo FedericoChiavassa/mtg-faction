@@ -37,8 +37,8 @@ export const columns: ColumnDef<Faction, any>[] = [
     },
   }),
   columnHelper.accessor('name', {
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Faction" />
+    header: ({ column, table }) => (
+      <DataTableColumnHeader table={table} column={column} title="Faction" />
     ),
     cell: info => (
       <Button
