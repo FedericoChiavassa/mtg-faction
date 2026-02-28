@@ -5,27 +5,73 @@ import { supabase } from '@/lib/supabase';
 export async function fetchFactions({
   page,
   pageSize,
+  sortBy = 'count',
+  minCards = 0,
+  minCreatures = 0,
+  minNonCreatures = 0,
 }: {
   page: number;
   pageSize: number;
+  minCards?: number;
+  minCreatures?: number;
+  minNonCreatures?: number;
+  sortBy?:
+    | 'name'
+    | 'count'
+    | 'creatures_count'
+    | 'non_creatures_count'
+    | 'identity_count';
 }) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from('faction_identities')
     .select(
-      'id, name, count, creatures_count, non_creatures_count, lands_count',
-      { count: 'exact' },
-    )
-    .order('creatures_count', { ascending: false })
-    .range(from, to);
+      'id, name, count, creatures_count, non_creatures_count, identity_count',
+      {
+        count: 'exact',
+      },
+    );
+
+  if (minCards > 0) {
+    query = query.gte('count', minCards);
+  }
+  if (minCreatures > 0) {
+    query = query.gte('creatures_count', minCreatures);
+  }
+  if (minNonCreatures > 0) {
+    query = query.gte('non_creatures_count', minNonCreatures);
+  }
+
+  switch (sortBy) {
+    case 'identity_count':
+      query = query
+        .order('identity_count', { ascending: true })
+        .order('name', { ascending: true });
+      break;
+    case 'creatures_count':
+    case 'non_creatures_count':
+      query = query
+        .order(sortBy, { ascending: false })
+        .order('count', { ascending: false });
+      break;
+    case 'name':
+      query = query.order('name', { ascending: true });
+      break;
+    case 'count':
+    default: {
+      query = query.order('count', { ascending: false });
+    }
+  }
+
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     throw error;
   }
 
-  return { data, count };
+  return { data, count, currentPage: page };
 }
 
 export async function fetchFactionList() {

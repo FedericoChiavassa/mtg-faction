@@ -54,6 +54,7 @@ function HomeRoute() {
             <Button
               size="icon"
               variant="outline"
+              nativeButton={false}
               title="Random faction cards"
               disabled={isFactionListLoading}
               render={
@@ -74,12 +75,21 @@ function HomeRoute() {
           </div>
 
           <div className="mt-10 flex justify-center gap-4">
-            <Button size="lg" render={<Link to={'/factions'} />}>
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link to={'/factions'} />}
+            >
               Explore Factions
               <ArrowRight />
             </Button>
 
-            <Button size="lg" variant="outline" render={<Link to={'/rules'} />}>
+            <Button
+              size="lg"
+              variant="outline"
+              nativeButton={false}
+              render={<Link to={'/rules'} />}
+            >
               Read the Rules
             </Button>
           </div>
@@ -88,10 +98,11 @@ function HomeRoute() {
             <Button
               size="xs"
               variant="link"
+              nativeButton={false}
               render={<Link to={'/about'} />}
               className="text-muted-foreground"
             >
-              What is Faction?
+              About the format
             </Button>
           </div>
         </div>

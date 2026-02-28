@@ -7,21 +7,35 @@ import { fetchFactionList, fetchFactions } from './api';
 export const factionKeys = {
   all: ['factions'] as const,
   list: () => [...factionKeys.all, 'list'] as const,
-  paged: (page: number, pageSize: number) =>
-    [...factionKeys.all, page, pageSize] as const,
+  paged: (params: Parameters<typeof useFactions>[0]) =>
+    [...factionKeys.all, 'paged', params] as const,
 };
+
+export type Faction = NonNullable<
+  Awaited<ReturnType<typeof useFactions>>['data']
+>['data'][number];
 
 export function useFactions({
   page,
   pageSize,
+  sortBy,
+  minCards,
+  minCreatures,
+  minNonCreatures,
   ...options
-}: {
-  page: number;
-  pageSize: number;
-} & QueryOptionsFromFn<typeof fetchFactions>) {
+}: Parameters<typeof fetchFactions>[0] &
+  QueryOptionsFromFn<typeof fetchFactions>) {
+  const params = {
+    page,
+    pageSize,
+    sortBy,
+    minCards,
+    minCreatures,
+    minNonCreatures,
+  };
   return useQuery({
-    queryKey: factionKeys.paged(page, pageSize),
-    queryFn: () => fetchFactions({ page, pageSize }),
+    queryKey: factionKeys.paged(params),
+    queryFn: () => fetchFactions(params),
     ...options,
   });
 }

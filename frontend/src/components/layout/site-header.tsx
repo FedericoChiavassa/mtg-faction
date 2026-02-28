@@ -36,8 +36,8 @@ export function SiteHeader() {
             <NavigationMenuItem>
               <NavigationMenuLink
                 render={
-                  <Link to="/cards" className={cn(linkStyle())}>
-                    Cards
+                  <Link to="/factions" className={cn(linkStyle())}>
+                    Factions
                   </Link>
                 }
               />
@@ -46,8 +46,8 @@ export function SiteHeader() {
             <NavigationMenuItem>
               <NavigationMenuLink
                 render={
-                  <Link to="/factions" className={cn(linkStyle())}>
-                    Factions
+                  <Link to="/cards" className={cn(linkStyle())}>
+                    Cards
                   </Link>
                 }
               />

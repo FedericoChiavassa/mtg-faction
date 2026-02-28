@@ -139,7 +139,7 @@ function Card({
         <a
           target="_blank"
           rel="noreferrer"
-          href={card.scryfall_uri}
+          href={`${card.scryfall_uri}${isFlipped ? '&back' : ''}`}
           className="block rounded-[4.75%/3.5%] select-none perspective-[2500px]"
         >
           {/* 1. THE FLIPPER CONTAINER */}

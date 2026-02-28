@@ -20,6 +20,7 @@ interface SitePaginationProps {
   className?: string;
   children?: React.ReactNode;
   showBoundaries?: boolean;
+  size?: 'default' | 'xs' | 'sm' | 'lg';
 }
 
 export function SitePagination({
@@ -31,9 +32,24 @@ export function SitePagination({
   className,
   children,
   showBoundaries = false,
+  size,
 }: SitePaginationProps) {
   const isFirst = currentPage <= 1;
   const isLast = currentPage >= totalPages;
+
+  const defaultBoundariesSize = variant === 'compact' ? 'icon-sm' : 'icon';
+  const boundariesSize =
+    !size || variant === 'compact'
+      ? defaultBoundariesSize
+      : size === 'default'
+        ? 'icon'
+        : (`icon-${size}` as const);
+
+  const defaultPrevNextSize = variant === 'compact' ? 'icon-sm' : 'default';
+  const PrevNextSize =
+    !size || variant === 'compact' ? defaultPrevNextSize : size;
+
+  const pageLinkSize = size ?? 'default';
 
   const renderDefaultLinks = () => {
     const pages: (number | 'ellipsis-start' | 'ellipsis-end')[] = [];
@@ -76,7 +92,13 @@ export function SitePagination({
   };
 
   return (
-    <Pagination className={cn('select-none', className)}>
+    <Pagination
+      className={cn(
+        'select-none',
+        disabled && 'disable-transitions',
+        className,
+      )}
+    >
       <PaginationContent
         className={cn(
           disabled && 'pointer-events-none opacity-50 transition-opacity',
@@ -86,9 +108,9 @@ export function SitePagination({
         {showBoundaries && (
           <PaginationItem>
             <PaginationLink
+              size={boundariesSize}
               aria-label="Go to first page"
               onClick={() => !isFirst && onPageChange(1)}
-              size={variant === 'compact' ? 'icon-sm' : 'icon'}
               className={cn(
                 'cursor-pointer',
                 isFirst && 'pointer-events-none opacity-50',
@@ -102,13 +124,14 @@ export function SitePagination({
         {/* Previous Button */}
         <PaginationItem>
           <PaginationPrevious
+            size={PrevNextSize}
             aria-disabled={isFirst}
             tabIndex={isFirst ? -1 : undefined}
             text={variant === 'compact' ? '' : undefined}
-            size={variant === 'compact' ? 'icon-sm' : 'default'}
             onClick={() => !isFirst && onPageChange(currentPage - 1)}
             className={cn(
               'cursor-pointer',
+              size === 'sm' && 'text-xs',
               isFirst && 'pointer-events-none opacity-50',
               variant === 'compact' && 'text-xs font-normal',
             )}
@@ -132,9 +155,13 @@ export function SitePagination({
                 <PaginationEllipsis />
               ) : (
                 <PaginationLink
-                  className="cursor-pointer"
+                  size={pageLinkSize}
                   isActive={currentPage === page}
                   onClick={() => onPageChange(page as number)}
+                  className={cn(
+                    'cursor-pointer tabular-nums',
+                    size === 'sm' && 'text-xs',
+                  )}
                 >
                   {page}
                 </PaginationLink>
@@ -146,13 +173,14 @@ export function SitePagination({
         {/* Next Button */}
         <PaginationItem>
           <PaginationNext
+            size={PrevNextSize}
             aria-disabled={isLast}
             tabIndex={isLast ? -1 : undefined}
             text={variant === 'compact' ? '' : undefined}
-            size={variant === 'compact' ? 'icon-sm' : 'default'}
             onClick={() => !isLast && onPageChange(currentPage + 1)}
             className={cn(
               'cursor-pointer',
+              size === 'sm' && 'text-xs',
               isLast && 'pointer-events-none opacity-50',
               variant === 'compact' && 'text-xs font-normal',
             )}
@@ -163,8 +191,8 @@ export function SitePagination({
         {showBoundaries && (
           <PaginationItem>
             <PaginationLink
+              size={boundariesSize}
               aria-label="Go to last page"
-              size={variant === 'compact' ? 'icon-sm' : 'icon'}
               onClick={() => !isLast && onPageChange(totalPages)}
               className={cn(
                 'cursor-pointer',
@@ -192,9 +220,14 @@ export function CardPaginationCount({
   return (
     <span className="text-xs whitespace-nowrap">
       <span>
-        {Math.min(pageSize * (page - 1) + 1, totalCount)}-
-        {Math.min(pageSize * page, totalCount)} of{' '}
-        <span className="font-bold">{totalCount}</span> cards
+        <span className="tabular-nums">
+          {Math.min(pageSize * (page - 1) + 1, totalCount)}
+        </span>
+        -
+        <span className="tabular-nums">
+          {Math.min(pageSize * page, totalCount)}
+        </span>{' '}
+        of <span className="font-bold tabular-nums">{totalCount}</span> cards
       </span>
     </span>
   );
