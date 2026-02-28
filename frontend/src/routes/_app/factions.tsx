@@ -99,7 +99,9 @@ function FactionsRoute() {
       | undefined;
 
     if (newSortBy) {
-      void navigate({ search: prev => ({ ...prev, sortBy: newSortBy }) });
+      void navigate({
+        search: prev => ({ ...prev, sortBy: newSortBy, page: 1 }),
+      });
     }
   };
 
