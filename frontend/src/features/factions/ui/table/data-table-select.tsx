@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export type DataTableSelectOption<T extends string | number> = {
+type DataTableSelectOption<T extends string | number> = {
   value: T;
   label: React.ReactNode;
 };

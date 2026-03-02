@@ -11,9 +11,10 @@ type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
   className?: string;
   stats?: FactionStats;
+  isDirty?: boolean;
 };
 
-export function FactionFilterForm({ form, className, stats }: Props) {
+export function FactionFilterForm({ form, className, stats, isDirty }: Props) {
   return (
     <div className={className}>
       <form
@@ -79,20 +80,18 @@ export function FactionFilterForm({ form, className, stats }: Props) {
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <Button
-            size="sm"
-            type="reset"
-            variant="outline"
-            nativeButton={false}
-            className="no-underline!"
-            render={<Link to="/factions" />}
-            onClick={e => {
-              e.stopPropagation();
-              void form.reset();
-            }}
-          >
-            Reset
-          </Button>
+          {isDirty && (
+            <Button
+              size="sm"
+              type="reset"
+              variant="outline"
+              nativeButton={false}
+              className="no-underline!"
+              render={<Link to="/factions" />}
+            >
+              Reset
+            </Button>
+          )}
           <Button size="sm" type="submit">
             Submit
           </Button>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
@@ -12,39 +12,30 @@ import { Field, FieldLabel } from '@/components/ui/field';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  DEFAULT_PER_PAGE,
-  DEFAULT_SORT_BY,
   type FactionFilterValues,
   useFactionForm,
 } from '@/features/factions/hooks/use-faction-form';
+import {
+  DEFAULT_PER_PAGE,
+  DEFAULT_SORT_BY,
+  PER_PAGE_OPTIONS,
+  perPageSchema,
+  SORT_BY_OPTIONS,
+  sortBySchema,
+} from '@/features/factions/lib/faction-table.const';
 import { useFactions, useFactionStats } from '@/features/factions/queries';
 import { FactionFilterForm } from '@/features/factions/ui/faction-filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
 import { DataTable } from '@/features/factions/ui/table/data-table';
-import {
-  DataTableSelect,
-  type DataTableSelectOption,
-} from '@/features/factions/ui/table/data-table-select';
+import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
   validateSearch: z.object({
     page: z.coerce.number().int().min(1).catch(1).optional(),
-    perPage: z
-      .union([z.literal(10), z.literal(15), z.literal(20)])
-      .catch(DEFAULT_PER_PAGE)
-      .optional(),
-    sortBy: z
-      .enum([
-        'name',
-        'count',
-        'creatures_count',
-        'non_creatures_count',
-        'identity_count',
-      ])
-      .catch(DEFAULT_SORT_BY)
-      .optional(),
+    perPage: perPageSchema.optional(),
+    sortBy: sortBySchema.optional(),
     minCards: z.coerce.number().int().min(0).optional().catch(undefined),
     minCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
     minNonCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
@@ -54,143 +45,111 @@ export const Route = createFileRoute('/_app/factions')({
   }),
 });
 
-const SORT_BY_OPTIONS: DataTableSelectOption<
-  NonNullable<FactionFilterValues['sortBy']>
->[] = [
-  { value: 'name', label: 'Name' },
-  {
-    value: 'identity_count',
-    label: (
-      <span>
-        Name{' '}
-        <span className="text-xs font-normal italic">– Fewer Types First</span>
-      </span>
-    ),
-  },
-  { value: 'count', label: 'Cards' },
-  { value: 'creatures_count', label: 'Creatures' },
-  { value: 'non_creatures_count', label: 'Non Creatures' },
-];
-
-const PER_PAGE_OPTIONS: DataTableSelectOption<
-  FactionFilterValues['perPage']
->[] = [
-  { value: 10, label: '10' },
-  { value: 15, label: '15' },
-  { value: 20, label: '20' },
-];
-
 function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
-  const [openFilters, setOpenFilters] = useState(false);
-  const {
-    page = 1,
-    perPage = DEFAULT_PER_PAGE,
-    sortBy = DEFAULT_SORT_BY,
-    minCards = 0,
-    minCreatures = 0,
-    minNonCreatures = 0,
-    maxCards = undefined,
-    maxCreatures = undefined,
-    maxNonCreatures = undefined,
-  } = search;
-
-  const { data, isLoading, isPlaceholderData } = useFactions({
-    page: page - 1, // query starts from 0
-    pageSize: perPage,
-    sortBy,
-    minCards,
-    minCreatures,
-    minNonCreatures,
-    maxCards,
-    maxCreatures,
-    maxNonCreatures,
-    placeholderData: keepPreviousData,
-  });
+  const [openFilters, setOpenFilters] = useState(true);
 
   const { data: stats } = useFactionStats();
-  const cardsLimit = stats?.maxCards ?? 9999;
-  const creaturesLimit = stats?.maxCreatures ?? 9999;
-  const nonCreaturesLimit = stats?.maxNonCreatures ?? 9999;
+  const rangeLimits = useMemo(
+    () => ({
+      maxCards: stats?.maxCards ?? 9999,
+      maxCreatures: stats?.maxCreatures ?? 9999,
+      maxNonCreatures: stats?.maxNonCreatures ?? 9999,
+    }),
+    [stats],
+  );
+
+  const filters = useMemo(
+    () => ({
+      page: search.page ?? 1,
+      perPage: search.perPage ?? DEFAULT_PER_PAGE,
+      sortBy: search.sortBy ?? DEFAULT_SORT_BY,
+      minCards: search.minCards ?? 0,
+      minCreatures: search.minCreatures ?? 0,
+      minNonCreatures: search.minNonCreatures ?? 0,
+      maxCards: search.maxCards,
+      maxCreatures: search.maxCreatures,
+      maxNonCreatures: search.maxNonCreatures,
+    }),
+    [search],
+  );
+
+  const isFiltersDirty = useMemo(() => {
+    return (
+      filters.page !== 1 ||
+      filters.perPage !== DEFAULT_PER_PAGE ||
+      filters.sortBy !== DEFAULT_SORT_BY ||
+      !!filters.minCards ||
+      !!filters.minCreatures ||
+      !!filters.minNonCreatures ||
+      (filters.maxCards !== undefined &&
+        filters.maxCards !== rangeLimits.maxCards) ||
+      (filters.maxCreatures !== undefined &&
+        filters.maxCreatures !== rangeLimits.maxCreatures) ||
+      (filters.maxNonCreatures !== undefined &&
+        filters.maxNonCreatures !== rangeLimits.maxNonCreatures)
+    );
+  }, [filters, rangeLimits]);
+
+  const { data, isLoading, isPlaceholderData } = useFactions({
+    page: filters.page - 1, // query starts from 0
+    pageSize: filters.perPage,
+    sortBy: filters.sortBy,
+    minCards: filters.minCards,
+    minCreatures: filters.minCreatures,
+    minNonCreatures: filters.minNonCreatures,
+    maxCards: filters.maxCards,
+    maxCreatures: filters.maxCreatures,
+    maxNonCreatures: filters.maxNonCreatures,
+    placeholderData: keepPreviousData,
+  });
 
   const disablePagination = useDeferredLoading(isPlaceholderData);
 
   const factions = data?.data ?? [];
   const totalCount = data?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / perPage);
-  const currentPage = data?.currentPage ?? page - 1;
+  const totalPages = Math.ceil(totalCount / filters.perPage);
+  const currentPage = data?.currentPage ?? filters.page - 1;
   const outOfRange = data?.outOfRange;
 
-  const handleFilterChange = useCallback(
-    (values: FactionFilterValues) => {
-      const { sortBy: newSortBy, perPage: newPerPage } = values;
-      void navigate({
-        resetScroll: false,
-        search: prev => ({
-          ...prev,
-          page: undefined,
-          perPage: newPerPage !== DEFAULT_PER_PAGE ? newPerPage : undefined,
-          sortBy:
-            newSortBy !== DEFAULT_SORT_BY
-              ? (newSortBy ?? undefined)
-              : undefined,
-        }),
-      });
-    },
-    [navigate],
-  );
-
   const handleFilterSubmit = useCallback(
-    (values: FactionFilterValues) => {
-      const {
-        perPage: newPerPage,
-        sortBy: newSortBy,
-        cardsRange,
-        creaturesRange,
-        nonCreaturesRange,
-      } = values;
+    (newValues: FactionFilterValues) => {
+      const { cardsRange, creaturesRange, nonCreaturesRange } = newValues;
 
       void navigate({
         resetScroll: false,
         search: prev => ({
           ...prev,
           page: undefined,
-          perPage: newPerPage !== DEFAULT_PER_PAGE ? newPerPage : undefined,
-          sortBy:
-            newSortBy !== DEFAULT_SORT_BY
-              ? (newSortBy ?? undefined)
-              : undefined,
           minCards: getMin(cardsRange),
-          maxCards: getMax(cardsRange, cardsLimit),
           minCreatures: getMin(creaturesRange),
-          maxCreatures: getMax(creaturesRange, creaturesLimit),
           minNonCreatures: getMin(nonCreaturesRange),
-          maxNonCreatures: getMax(nonCreaturesRange, nonCreaturesLimit),
+          maxCards: getMax(cardsRange, rangeLimits?.maxCards),
+          maxCreatures: getMax(creaturesRange, rangeLimits?.maxCreatures),
+          maxNonCreatures: getMax(
+            nonCreaturesRange,
+            rangeLimits?.maxNonCreatures,
+          ),
         }),
       });
     },
-    [navigate, cardsLimit, creaturesLimit, nonCreaturesLimit],
+    [navigate, rangeLimits],
   );
 
-  const { form, isDirty } = useFactionForm({
-    onChange: handleFilterChange,
-    onSubmit: handleFilterSubmit,
-    limits: {
-      cardsLimit,
-      creaturesLimit,
-      nonCreaturesLimit,
-    },
-    initialValues: {
-      perPage,
-      sortBy,
-      cardsRange: [minCards, maxCards ?? cardsLimit],
-      creaturesRange: [minCreatures, maxCreatures ?? creaturesLimit],
+  const { form } = useFactionForm({
+    values: {
+      cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
+      creaturesRange: [
+        filters.minCreatures,
+        filters.maxCreatures ?? rangeLimits?.maxCreatures,
+      ],
       nonCreaturesRange: [
-        minNonCreatures,
-        maxNonCreatures ?? nonCreaturesLimit,
+        filters.minNonCreatures,
+        filters.maxNonCreatures ?? rangeLimits?.maxNonCreatures,
       ],
     },
+    onSubmit: handleFilterSubmit,
   });
 
   const handleSortingChange: OnChangeFn<SortingState> = updaterOrValue => {
@@ -204,9 +163,20 @@ function FactionsRoute() {
       | undefined;
 
     if (newSortBy) {
-      form.setFieldValue('sortBy', newSortBy);
+      void navigate({
+        resetScroll: false,
+        search: prev => ({
+          ...prev,
+          page: undefined,
+          sortBy: newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+        }),
+      });
     }
   };
+
+  useEffect(() => {
+    redirectIfOutOfRange(navigate, search, rangeLimits);
+  }, [navigate, rangeLimits, search]);
 
   useEffect(() => {
     if (outOfRange) {
@@ -222,15 +192,11 @@ function FactionsRoute() {
       <div className="mx-auto pb-10">
         {/* Main filters */}
         <div className="flex w-full items-center justify-end gap-3 pt-10 pb-6">
-          {isDirty && (
+          {isFiltersDirty && (
             <Button
               size="xs"
               nativeButton={false}
               render={<Link to="/factions" />}
-              onClick={e => {
-                e.stopPropagation();
-                void form.reset();
-              }}
             >
               Reset Filters
             </Button>
@@ -246,39 +212,45 @@ function FactionsRoute() {
 
           <Separator orientation="vertical" />
 
-          <form.Field
-            name="sortBy"
-            // eslint-disable-next-line react/no-children-prop
-            children={field => (
-              <Field orientation="horizontal" className="w-auto gap-2">
-                <FieldLabel className="text-xs" htmlFor={field.name}>
-                  Sort By:
-                </FieldLabel>
-                <DataTableSelect
-                  options={SORT_BY_OPTIONS}
-                  value={field.state.value}
-                  onChange={val => field.handleChange(val)}
-                />
-              </Field>
-            )}
-          />
+          <Field orientation="horizontal" className="w-auto gap-2">
+            <FieldLabel className="text-xs">Sort By:</FieldLabel>
+            <DataTableSelect
+              value={filters.sortBy}
+              options={SORT_BY_OPTIONS}
+              onChange={val => {
+                const newSortBy = val ?? DEFAULT_SORT_BY;
+                void navigate({
+                  resetScroll: false,
+                  search: prev => ({
+                    ...prev,
+                    page: undefined,
+                    sortBy:
+                      newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+                  }),
+                });
+              }}
+            />
+          </Field>
 
-          <form.Field
-            name="perPage"
-            // eslint-disable-next-line react/no-children-prop
-            children={field => (
-              <Field orientation="horizontal" className="w-auto gap-2">
-                <FieldLabel className="text-xs" htmlFor={field.name}>
-                  Per Page:
-                </FieldLabel>
-                <DataTableSelect
-                  value={field.state.value}
-                  options={PER_PAGE_OPTIONS}
-                  onChange={val => field.handleChange(val ?? DEFAULT_PER_PAGE)}
-                />
-              </Field>
-            )}
-          />
+          <Field orientation="horizontal" className="w-auto gap-2">
+            <FieldLabel className="text-xs">Per Page:</FieldLabel>
+            <DataTableSelect
+              value={filters.perPage}
+              options={PER_PAGE_OPTIONS}
+              onChange={val => {
+                const newPerPage = val ?? DEFAULT_PER_PAGE;
+                void navigate({
+                  resetScroll: false,
+                  search: prev => ({
+                    ...prev,
+                    page: undefined,
+                    perPage:
+                      newPerPage !== DEFAULT_PER_PAGE ? newPerPage : undefined,
+                  }),
+                });
+              }}
+            />
+          </Field>
 
           <Separator orientation="vertical" />
 
@@ -296,22 +268,30 @@ function FactionsRoute() {
 
         {/* Sub filters  */}
         <div
-          className={cn('flex items-center gap-2', !openFilters && 'hidden')}
+          className={cn(
+            'flex w-full items-center gap-2',
+            !openFilters && 'hidden',
+          )}
         >
-          <FactionFilterForm form={form} stats={stats} className="mb-8" />
+          <FactionFilterForm
+            form={form}
+            stats={stats}
+            className="mb-8 w-full"
+            isDirty={isFiltersDirty}
+          />
         </div>
 
         {/* Table */}
         <DataTable
           data={factions}
-          sortBy={sortBy}
           columns={columns}
           isLoading={isLoading}
+          sortBy={filters.sortBy}
           isPlaceholderData={isPlaceholderData}
           onSortingChange={handleSortingChange}
           pagination={{
             pageIndex: currentPage,
-            pageSize: perPage,
+            pageSize: filters.perPage,
             pageCount: totalPages,
           }}
         />
@@ -320,8 +300,8 @@ function FactionsRoute() {
           <SitePagination
             size="sm"
             showBoundaries
-            currentPage={page}
             totalPages={totalPages}
+            currentPage={filters.page}
             className="justify-end py-6"
             disabled={disablePagination}
             onPageChange={newPage =>
@@ -340,6 +320,79 @@ function FactionsRoute() {
   );
 }
 
+function redirectIfOutOfRange(
+  navigate: ReturnType<typeof Route.useNavigate>,
+  search: ReturnType<typeof Route.useSearch>,
+  rangeLimits: {
+    maxCards: number;
+    maxCreatures: number;
+    maxNonCreatures: number;
+  },
+) {
+  const {
+    minCards,
+    minCreatures,
+    minNonCreatures,
+    maxCards,
+    maxCreatures,
+    maxNonCreatures,
+  } = search;
+  if (minCards && minCards > rangeLimits.maxCards) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        minCards: undefined,
+      }),
+    });
+  }
+  if (maxCards && maxCards > rangeLimits.maxCards) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        maxCards: undefined,
+      }),
+    });
+  }
+  if (minCreatures && minCreatures > rangeLimits.maxCreatures) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        minCreatures: undefined,
+      }),
+    });
+  }
+  if (maxCreatures && maxCreatures > rangeLimits.maxCreatures) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        maxCreatures: undefined,
+      }),
+    });
+  }
+  if (minNonCreatures && minNonCreatures > rangeLimits.maxNonCreatures) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        minNonCreatures: undefined,
+      }),
+    });
+  }
+  if (maxNonCreatures && maxNonCreatures > rangeLimits.maxNonCreatures) {
+    void navigate({
+      replace: true,
+      search: prev => ({
+        ...prev,
+        maxNonCreatures: undefined,
+      }),
+    });
+  }
+}
+
 function getMin(range: [number, number] | undefined) {
   if (range && range[0] > 0) {
     return range[0];
@@ -347,8 +400,11 @@ function getMin(range: [number, number] | undefined) {
   return undefined;
 }
 
-function getMax(range: [number, number] | undefined, limit: number) {
-  if (range && range[1] < limit) {
+function getMax(
+  range: [number, number] | undefined,
+  limit: number | undefined,
+) {
+  if (range && range[1] < (limit ?? 9999)) {
     return range[1];
   }
   return undefined;

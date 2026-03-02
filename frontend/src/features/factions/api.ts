@@ -2,6 +2,8 @@ import type { QueryData } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
 
+import type { TPerPage, TSortBy } from './lib/faction-table.const';
+
 export async function fetchFactions({
   page,
   pageSize,
@@ -14,19 +16,14 @@ export async function fetchFactions({
   maxNonCreatures,
 }: {
   page: number;
-  pageSize: 10 | 15 | 20;
+  pageSize: TPerPage;
   minCards?: number;
   minCreatures?: number;
   minNonCreatures?: number;
   maxCards?: number;
   maxCreatures?: number;
   maxNonCreatures?: number;
-  sortBy?:
-    | 'name'
-    | 'count'
-    | 'creatures_count'
-    | 'non_creatures_count'
-    | 'identity_count';
+  sortBy?: TSortBy;
 }) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
