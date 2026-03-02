@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   };
   sortBy?: Parameters<typeof useFactions>[0]['sortBy'];
   onSortingChange?: OnChangeFn<SortingState>;
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -46,6 +47,7 @@ export function DataTable<TData, TValue>({
   onSortingChange,
   isLoading = false,
   isPlaceholderData = false,
+  className,
 }: DataTableProps<TData, TValue>) {
   const showLoadingTransition = useDeferredLoading(isPlaceholderData);
   const { pageSize, pageCount } = pagination;
@@ -66,7 +68,9 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="relative overflow-hidden rounded-md border">
+    <div
+      className={cn('relative overflow-hidden rounded-md border', className)}
+    >
       {showLoadingTransition && (
         <>
           <ProgressBar />

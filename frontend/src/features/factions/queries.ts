@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { QueryOptionsFromFn } from '@/lib/query/types';
 
-import { fetchFactionList, fetchFactions } from './api';
+import { fetchFactionList, fetchFactions, fetchFactionStats } from './api';
 
 export const factionKeys = {
   all: ['factions'] as const,
   list: () => [...factionKeys.all, 'list'] as const,
+  stats: () => [...factionKeys.all, 'stats'] as const,
   paged: (params: Parameters<typeof useFactions>[0]) =>
     [...factionKeys.all, 'paged', params] as const,
 };
@@ -22,6 +23,9 @@ export function useFactions({
   minCards,
   minCreatures,
   minNonCreatures,
+  maxCards,
+  maxCreatures,
+  maxNonCreatures,
   ...options
 }: Parameters<typeof fetchFactions>[0] &
   QueryOptionsFromFn<typeof fetchFactions>) {
@@ -32,6 +36,9 @@ export function useFactions({
     minCards,
     minCreatures,
     minNonCreatures,
+    maxCards,
+    maxCreatures,
+    maxNonCreatures,
   };
   return useQuery({
     queryKey: factionKeys.paged(params),
@@ -50,6 +57,21 @@ export function useFactionList(
   return useQuery({
     queryKey: factionKeys.list(),
     queryFn: fetchFactionList,
+    staleTime: Infinity,
+    ...options,
+  });
+}
+
+export type FactionStats = NonNullable<
+  ReturnType<typeof useFactionStats>['data']
+>;
+
+export function useFactionStats(
+  options: QueryOptionsFromFn<typeof fetchFactionStats> = {},
+) {
+  return useQuery({
+    queryKey: factionKeys.stats(),
+    queryFn: fetchFactionStats,
     staleTime: Infinity,
     ...options,
   });

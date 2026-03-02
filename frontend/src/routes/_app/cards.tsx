@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
 import { SubHeader } from '@/components/layout/site-header';
 import {
-  CardPaginationCount,
+  PaginationCount,
   SitePagination,
 } from '@/components/layout/site-pagination';
 import { Button } from '@/components/ui/button';
@@ -69,7 +69,7 @@ function CardsRoute() {
       search: buildCardsSearch({
         faction: newFaction,
         type: cardType,
-        page: 1,
+        page: undefined,
       }),
       state: {
         disablePlaceholderData: newFaction !== faction,
@@ -81,7 +81,7 @@ function CardsRoute() {
   useEffect(() => {
     if (outOfRange) {
       void navigate({
-        search: prev => ({ ...prev, page: 1 }),
+        search: prev => ({ ...prev, page: undefined }),
         replace: true,
       });
     }
@@ -120,8 +120,9 @@ function CardsRoute() {
                   })
                 }
               >
-                <CardPaginationCount
+                <PaginationCount
                   page={page}
+                  entityName="cards"
                   pageSize={PAGE_SIZE}
                   totalCount={totalCount}
                 />
@@ -150,7 +151,7 @@ function CardsRoute() {
                   search: buildCardsSearch({
                     faction: selectedFaction,
                     type: 'all',
-                    page: 1,
+                    page: undefined,
                   }),
                   state: {
                     disablePlaceholderData: selectedFaction !== faction,
@@ -180,7 +181,7 @@ function CardsRoute() {
                               Math.floor(Math.random() * factionList.length)
                             ].id,
                           type: 'all',
-                          page: 1,
+                          page: undefined,
                         })
                       }
                     />

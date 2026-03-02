@@ -9,12 +9,18 @@ export async function fetchFactions({
   minCards = 0,
   minCreatures = 0,
   minNonCreatures = 0,
+  maxCards,
+  maxCreatures,
+  maxNonCreatures,
 }: {
   page: number;
-  pageSize: number;
+  pageSize: 10 | 15 | 20;
   minCards?: number;
   minCreatures?: number;
   minNonCreatures?: number;
+  maxCards?: number;
+  maxCreatures?: number;
+  maxNonCreatures?: number;
   sortBy?:
     | 'name'
     | 'count'
@@ -43,6 +49,15 @@ export async function fetchFactions({
   if (minNonCreatures > 0) {
     query = query.gte('non_creatures_count', minNonCreatures);
   }
+  if (maxCards || maxCards === 0) {
+    query = query.lte('count', maxCards);
+  }
+  if (maxCreatures || maxCreatures === 0) {
+    query = query.lte('creatures_count', maxCreatures);
+  }
+  if (maxNonCreatures || maxNonCreatures === 0) {
+    query = query.lte('non_creatures_count', maxNonCreatures);
+  }
 
   switch (sortBy) {
     case 'identity_count':
@@ -65,13 +80,17 @@ export async function fetchFactions({
     }
   }
 
-  const { data, error, count } = await query.range(from, to);
+  const { data, error, count, status } = await query.range(from, to);
 
   if (error) {
+    if (status === 416 || error.code === 'PGRST103') {
+      return { data: [], count: 0, outOfRange: true };
+    }
+
     throw error;
   }
 
-  return { data, count, currentPage: page };
+  return { data, count, currentPage: page, outOfRange: false };
 }
 
 export async function fetchFactionList() {
@@ -81,7 +100,7 @@ export async function fetchFactionList() {
 
   const query = supabase
     .from('faction_identities')
-    .select('id, name, identity, count, identity_count');
+    .select('id, name, identity, identity_count');
 
   type Rows = QueryData<typeof query>;
   let allData: Rows = [];
@@ -100,4 +119,23 @@ export async function fetchFactionList() {
   } while (fetched === batchSize);
 
   return allData;
+}
+
+export async function fetchFactionStats() {
+  const query = supabase
+    .from('faction_stats')
+    .select('max_cards, max_creatures, max_non_creatures, max_identities');
+
+  const { data, error } = await query.single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    maxCards: data.max_cards ?? 9999,
+    maxCreatures: data.max_creatures ?? 9999,
+    maxNonCreatures: data.max_non_creatures ?? 9999,
+    maxIdentities: data.max_identities ?? 9999,
+  };
 }

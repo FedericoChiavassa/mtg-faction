@@ -153,6 +153,15 @@ export type Database = {
         }
         Relationships: []
       }
+      faction_stats: {
+        Row: {
+          max_cards: number | null
+          max_creatures: number | null
+          max_identities: number | null
+          max_non_creatures: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_cards_for_faction: {

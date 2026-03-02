@@ -4,48 +4,56 @@ import type { SliderRootChangeEventDetails } from '@base-ui/react/slider';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
-type ValueType = number;
-type OnChangeType = (
-  value: number,
-  eventDetails: SliderRootChangeEventDetails,
-) => void;
+type SliderValue = Parameters<typeof Slider>[0]['value'];
+type SliderOnChange = Parameters<typeof Slider>[0]['onValueChange'];
 
-export function FactionSlider({
+type Props<TValue extends SliderValue = SliderValue> = {
+  label: string;
+  id?: string;
+  value?: TValue;
+  defaultValue?: TValue;
+  max?: number;
+  onChange?: (
+    value: TValue,
+    eventDetails: SliderRootChangeEventDetails,
+  ) => void;
+};
+
+export function FactionSlider<TValue extends SliderValue = SliderValue>({
   id = 'faction-slider',
   label,
   value: controlledValue,
   onChange,
-}: {
-  label: string;
-  id?: string;
-  value?: ValueType;
-  onChange?: OnChangeType;
-}) {
-  const [internalValue, setInternalValue] = useState<ValueType>(0);
-  const value = controlledValue ?? internalValue;
+  defaultValue,
+  max = 9999,
+}: Props<TValue>) {
+  const [internalValue, setInternalValue] = useState<TValue>(
+    (defaultValue ?? [0]) as TValue,
+  );
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
 
-  const handleValueChange: OnChangeType = (newValue, eventDetails) => {
-    if (controlledValue === undefined) {
-      setInternalValue(newValue);
+  const handleValueChange: SliderOnChange = (newValue, eventDetails) => {
+    if (!isControlled) {
+      setInternalValue(newValue as TValue);
     }
-    onChange?.(newValue, eventDetails);
+    onChange?.(newValue as TValue, eventDetails);
   };
 
   return (
-    <div className="grid w-full max-w-xs gap-3">
+    <div className="grid w-full gap-3">
       <div className="flex items-center justify-between gap-2">
         <Label htmlFor={id}>{label}</Label>
-        <span className="text-sm text-muted-foreground">{value}+</span>
+        <span className="text-sm text-muted-foreground">
+          {typeof value === 'number' ? value : value?.join(' - ')}
+        </span>
       </div>
       <Slider
         min={0}
         id={id}
-        max={999}
+        max={max}
         value={value}
-        orientation="horizontal-reverse"
-        onValueChange={(v, eventDetails) =>
-          typeof v === 'number' ? handleValueChange(v, eventDetails) : null
-        }
+        onValueChange={handleValueChange}
       />
     </div>
   );

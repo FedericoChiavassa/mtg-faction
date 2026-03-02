@@ -208,14 +208,16 @@ export function SitePagination({
   );
 }
 
-export function CardPaginationCount({
+export function PaginationCount({
   pageSize,
   page,
   totalCount,
+  entityName = 'items',
 }: {
   pageSize: number;
   page: number;
   totalCount: number;
+  entityName?: string;
 }) {
   return (
     <span className="text-xs whitespace-nowrap">
@@ -227,7 +229,8 @@ export function CardPaginationCount({
         <span className="tabular-nums">
           {Math.min(pageSize * page, totalCount)}
         </span>{' '}
-        of <span className="font-bold tabular-nums">{totalCount}</span> cards
+        of <span className="font-bold tabular-nums">{totalCount}</span>{' '}
+        {entityName}
       </span>
     </span>
   );
