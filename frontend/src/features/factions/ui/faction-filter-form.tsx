@@ -1,8 +1,16 @@
+/* eslint-disable react/no-children-prop */
 import { useStore } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
+import { FingerprintPattern, Layers, PawPrint, Sparkles } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Field, FieldGroup } from '@/components/ui/field';
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from '@/components/ui/field';
 import type { FactionStats } from '@/features/factions/queries';
 
 import type { useFactionForm } from '../hooks/use-faction-form';
@@ -17,6 +25,8 @@ type Props = {
   actions?: React.ReactNode;
   onReset?: () => void;
 };
+
+const fieldLabelStyle = 'w-[20%] pr-3 grow-0! text-xs';
 
 export function FactionFilterForm({
   form,
@@ -37,17 +47,19 @@ export function FactionFilterForm({
           void form.handleSubmit();
         }}
       >
-        <div className="grid grid-cols-2 gap-6">
-          {/* <NameCombobox />*/}
-          {/* <IdentityCount />*/}
+        <div className="flex flex-col gap-6">
           <FieldGroup className="gap-2">
             <form.Field
               name="identities"
-              // eslint-disable-next-line react/no-children-prop
               children={field => (
-                <Field>
+                <Field orientation="horizontal">
+                  <FieldLabel className={fieldLabelStyle}>
+                    <FingerprintPattern size={16} />
+                    Creature Types
+                  </FieldLabel>
                   <IdentityCombobox
                     value={field.state.value}
+                    className="max-w-105 flex-1"
                     onValueChange={val => field.handleChange(val)}
                   />
                 </Field>
@@ -55,14 +67,20 @@ export function FactionFilterForm({
             />
           </FieldGroup>
 
-          <FieldGroup className="gap-2">
+          <FieldSeparator />
+
+          <FieldGroup className="gap-6">
             <form.Field
               name="cardsRange"
-              // eslint-disable-next-line react/no-children-prop
               children={field => (
-                <Field>
+                <Field orientation="horizontal">
+                  <FieldLabel
+                    className={cn(fieldLabelStyle, 'self-baseline-last')}
+                  >
+                    <Layers size={16} />
+                    Cards Range
+                  </FieldLabel>
                   <FactionSlider
-                    label="Cards"
                     value={field.state.value}
                     max={stats?.maxCards ?? 9999}
                     id="faction-slider-cards-range"
@@ -74,11 +92,15 @@ export function FactionFilterForm({
 
             <form.Field
               name="creaturesRange"
-              // eslint-disable-next-line react/no-children-prop
               children={field => (
-                <Field>
+                <Field orientation="horizontal">
+                  <FieldLabel
+                    className={cn(fieldLabelStyle, 'self-baseline-last')}
+                  >
+                    <PawPrint size={16} />
+                    Creatures Range
+                  </FieldLabel>
                   <FactionSlider
-                    label="Creatures"
                     value={field.state.value}
                     max={stats?.maxCreatures ?? 9999}
                     id="faction-slider-creatures-range"
@@ -90,11 +112,15 @@ export function FactionFilterForm({
 
             <form.Field
               name="nonCreaturesRange"
-              // eslint-disable-next-line react/no-children-prop
               children={field => (
-                <Field>
+                <Field orientation="horizontal">
+                  <FieldLabel
+                    className={cn(fieldLabelStyle, 'self-baseline-last')}
+                  >
+                    <Sparkles size={16} />
+                    Non Creatures Range
+                  </FieldLabel>
                   <FactionSlider
-                    label="Non Creatures"
                     value={field.state.value}
                     max={stats?.maxNonCreatures ?? 9999}
                     id="faction-slider-non-creatures-range"
@@ -104,6 +130,8 @@ export function FactionFilterForm({
               )}
             />
           </FieldGroup>
+
+          <FieldSeparator className="mt-2.5" />
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
@@ -119,6 +147,7 @@ export function FactionFilterForm({
               render={
                 <Link
                   to="/factions"
+                  resetScroll={false}
                   search={prev => ({
                     perPage: prev.perPage,
                     sortBy: prev.sortBy,

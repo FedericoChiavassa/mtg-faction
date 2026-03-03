@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { SliderRootChangeEventDetails } from '@base-ui/react/slider';
 
+import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
@@ -8,7 +9,7 @@ type SliderValue = Parameters<typeof Slider>[0]['value'];
 type SliderOnChange = Parameters<typeof Slider>[0]['onValueChange'];
 
 type Props<TValue extends SliderValue = SliderValue> = {
-  label: string;
+  label?: string;
   id?: string;
   value?: TValue;
   defaultValue?: TValue;
@@ -17,6 +18,7 @@ type Props<TValue extends SliderValue = SliderValue> = {
     value: TValue,
     eventDetails: SliderRootChangeEventDetails,
   ) => void;
+  className?: string;
 };
 
 export function FactionSlider<TValue extends SliderValue = SliderValue>({
@@ -26,6 +28,7 @@ export function FactionSlider<TValue extends SliderValue = SliderValue>({
   onChange,
   defaultValue,
   max = 9999,
+  className,
 }: Props<TValue>) {
   const [internalValue, setInternalValue] = useState<TValue>(
     (defaultValue ?? [0]) as TValue,
@@ -41,11 +44,18 @@ export function FactionSlider<TValue extends SliderValue = SliderValue>({
   };
 
   return (
-    <div className="grid w-full gap-3 rounded-sm border p-4 pt-3.5">
+    <div
+      className={cn(
+        'grid w-[min(100%,420px)] max-w-105 flex-1 gap-2.5',
+        className,
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
-        <Label htmlFor={id} className="text-xs">
-          {label}
-        </Label>
+        {label && (
+          <Label htmlFor={id} className="mr-auto text-xs">
+            {label}
+          </Label>
+        )}
         <span className="text-xs text-muted-foreground">
           {typeof value === 'number' ? value : value?.join(' - ')}
         </span>

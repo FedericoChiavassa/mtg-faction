@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
+import { SlidersHorizontal } from 'lucide-react';
 import z from 'zod';
 
 import { Container } from '@/components/layout/container';
@@ -113,7 +114,6 @@ function FactionsRoute() {
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
       const { cardsRange, creaturesRange, nonCreaturesRange } = newValues;
-      setOpenFilters(false);
 
       void navigate({
         resetScroll: false,
@@ -192,38 +192,38 @@ function FactionsRoute() {
       <div className="mx-auto pb-10">
         {/* Main filters */}
         <div className="flex w-full items-center justify-end gap-3 pt-10 pb-6">
-          {isFiltersDirty && (
+          <div className="mr-auto flex items-center gap-3">
             <Button
               size="xs"
-              nativeButton={false}
-              onClick={() => setOpenFilters(false)}
-              render={
-                <Link
-                  to="/factions"
-                  search={prev => ({
-                    perPage: prev.perPage,
-                    sortBy: prev.sortBy,
-                  })}
-                />
-              }
+              variant="link"
+              onClick={() => setOpenFilters(prev => !prev)}
+              className="-ml-2 w-28.5! cursor-pointer justify-start"
             >
-              Reset Filters
+              <SlidersHorizontal className="mr-1 size-4" />{' '}
+              {openFilters ? 'Hide Filters' : 'Show Filters'}
             </Button>
-          )}
-
-          <Button
-            size="xs"
-            variant="link"
-            className="min-w-22.25 cursor-pointer"
-            onClick={() => setOpenFilters(prev => !prev)}
-          >
-            {openFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
-
-          <Separator orientation="vertical" />
+            {isFiltersDirty && (
+              <Button
+                size="xs"
+                nativeButton={false}
+                onClick={() => setOpenFilters(false)}
+                render={
+                  <Link
+                    to="/factions"
+                    search={prev => ({
+                      perPage: prev.perPage,
+                      sortBy: prev.sortBy,
+                    })}
+                  />
+                }
+              >
+                Reset Filters
+              </Button>
+            )}
+          </div>
 
           <Field orientation="horizontal" className="w-auto gap-2">
-            <FieldLabel className="text-xs">Sort By:</FieldLabel>
+            <FieldLabel className="text-xs">Sort By</FieldLabel>
             <DataTableSelect
               value={filters.sortBy}
               options={SORT_BY_OPTIONS}
@@ -243,7 +243,7 @@ function FactionsRoute() {
           </Field>
 
           <Field orientation="horizontal" className="w-auto gap-2">
-            <FieldLabel className="text-xs">Per Page:</FieldLabel>
+            <FieldLabel className="text-xs">Per Page</FieldLabel>
             <DataTableSelect
               value={filters.perPage}
               options={PER_PAGE_OPTIONS}
@@ -278,26 +278,24 @@ function FactionsRoute() {
 
         {/* Sub filters  */}
         <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
-          <CollapsibleContent animate>
-            <div className="mb-8 flex items-center gap-2 rounded-md border p-4">
-              <FactionFilterForm
-                form={form}
-                stats={stats}
-                className="w-full"
-                isDirty={isFiltersDirty}
-                onReset={() => setOpenFilters(false)}
-                actions={
-                  <Button
-                    size="xs"
-                    variant="link"
-                    className="cursor-pointer"
-                    onClick={() => setOpenFilters(prev => !prev)}
-                  >
-                    Cancel
-                  </Button>
-                }
-              />
-            </div>
+          <CollapsibleContent animate className="-mx-1.5 px-1.5">
+            <Separator />
+            <FactionFilterForm
+              form={form}
+              stats={stats}
+              className="my-8 w-full"
+              isDirty={isFiltersDirty}
+              actions={
+                <Button
+                  size="xs"
+                  variant="link"
+                  className="cursor-pointer"
+                  onClick={() => setOpenFilters(prev => !prev)}
+                >
+                  Hide Filters
+                </Button>
+              }
+            />
           </CollapsibleContent>
         </Collapsible>
 

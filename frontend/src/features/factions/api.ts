@@ -14,6 +14,7 @@ export async function fetchFactions({
   maxCards,
   maxCreatures,
   maxNonCreatures,
+  identities,
 }: {
   page: number;
   pageSize: TPerPage;
@@ -24,6 +25,7 @@ export async function fetchFactions({
   maxCreatures?: number;
   maxNonCreatures?: number;
   sortBy?: TSortBy;
+  identities?: string[] | null;
 }) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
@@ -31,11 +33,15 @@ export async function fetchFactions({
   let query = supabase
     .from('faction_identities')
     .select(
-      'id, name, count, creatures_count, non_creatures_count, identity_count',
+      'id, name, count, creatures_count, non_creatures_count, identity_count, identity',
       {
         count: 'exact',
       },
     );
+
+  if (identities) {
+    query = query.contains('identity', identities);
+  }
 
   if (minCards > 0) {
     query = query.gte('count', minCards);
