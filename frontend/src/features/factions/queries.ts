@@ -26,6 +26,7 @@ export function useFactions({
   maxCards,
   maxCreatures,
   maxNonCreatures,
+  identities,
   ...options
 }: Parameters<typeof fetchFactions>[0] &
   QueryOptionsFromFn<typeof fetchFactions>) {
@@ -39,6 +40,7 @@ export function useFactions({
     maxCards,
     maxCreatures,
     maxNonCreatures,
+    identities,
   };
   return useQuery({
     queryKey: factionKeys.paged(params),

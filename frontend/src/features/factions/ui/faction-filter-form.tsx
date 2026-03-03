@@ -11,11 +11,11 @@ import {
   FieldLabel,
   FieldSeparator,
 } from '@/components/ui/field';
+import { IdentityCombobox } from '@/features/creature-types/ui/Identity-combobox';
 import type { FactionStats } from '@/features/factions/queries';
 
 import type { useFactionForm } from '../hooks/use-faction-form';
 import { FactionSlider } from './faction-slider';
-import { IdentityCombobox } from './Identity-combobox';
 
 type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
@@ -59,7 +59,7 @@ export function FactionFilterForm({
                   </FieldLabel>
                   <IdentityCombobox
                     value={field.state.value}
-                    className="max-w-105 flex-1"
+                    className="max-w-md flex-1"
                     onValueChange={val => field.handleChange(val)}
                   />
                 </Field>

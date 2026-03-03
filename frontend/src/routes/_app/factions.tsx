@@ -37,6 +37,7 @@ export const Route = createFileRoute('/_app/factions')({
     page: z.coerce.number().int().min(1).catch(1).optional(),
     perPage: perPageSchema.optional(),
     sortBy: sortBySchema.optional(),
+    identities: z.string().array().optional(),
     minCards: z.coerce.number().int().min(0).optional().catch(undefined),
     minCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
     minNonCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
@@ -66,6 +67,7 @@ function FactionsRoute() {
       page: search.page ?? 1,
       perPage: search.perPage ?? DEFAULT_PER_PAGE,
       sortBy: search.sortBy ?? DEFAULT_SORT_BY,
+      identities: search.identities ?? [],
       minCards: search.minCards ?? 0,
       minCreatures: search.minCreatures ?? 0,
       minNonCreatures: search.minNonCreatures ?? 0,
@@ -78,6 +80,7 @@ function FactionsRoute() {
 
   const isFiltersDirty = useMemo(() => {
     return (
+      filters.identities.length > 0 ||
       !!filters.minCards ||
       !!filters.minCreatures ||
       !!filters.minNonCreatures ||
@@ -94,6 +97,7 @@ function FactionsRoute() {
     page: filters.page - 1, // query starts from 0
     pageSize: filters.perPage,
     sortBy: filters.sortBy,
+    identities: filters.identities,
     minCards: filters.minCards,
     minCreatures: filters.minCreatures,
     minNonCreatures: filters.minNonCreatures,
@@ -113,13 +117,15 @@ function FactionsRoute() {
 
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
-      const { cardsRange, creaturesRange, nonCreaturesRange } = newValues;
+      const { cardsRange, creaturesRange, nonCreaturesRange, identities } =
+        newValues;
 
       void navigate({
         resetScroll: false,
         search: prev => ({
           ...prev,
           page: undefined,
+          identities,
           minCards: getMin(cardsRange),
           minCreatures: getMin(creaturesRange),
           minNonCreatures: getMin(nonCreaturesRange),
@@ -138,7 +144,7 @@ function FactionsRoute() {
   const { form } = useFactionForm({
     isOpen: openFilters,
     values: {
-      identities: null,
+      identities: filters.identities,
       cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
       creaturesRange: [
         filters.minCreatures,
@@ -189,7 +195,7 @@ function FactionsRoute() {
 
   return (
     <Container>
-      <div className="mx-auto pb-10">
+      <div className="mx-auto pb-15">
         {/* Main filters */}
         <div className="flex w-full items-center justify-end gap-3 pt-10 pb-6">
           <div className="mr-auto flex items-center gap-3">

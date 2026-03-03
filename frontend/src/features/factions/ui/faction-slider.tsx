@@ -46,7 +46,7 @@ export function FactionSlider<TValue extends SliderValue = SliderValue>({
   return (
     <div
       className={cn(
-        'grid w-[min(100%,420px)] max-w-105 flex-1 gap-2.5',
+        'grid w-[min(100%,420px)] max-w-md flex-1 gap-2.5',
         className,
       )}
     >

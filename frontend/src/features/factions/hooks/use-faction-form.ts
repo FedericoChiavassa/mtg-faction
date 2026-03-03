@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
 export type FactionFilterValues = {
-  identities: string[] | null;
+  identities: string[];
   cardsRange: [number, number];
   creaturesRange: [number, number];
   nonCreaturesRange: [number, number];
