@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
 export type FactionFilterValues = {
+  identities: string[] | null;
   cardsRange: [number, number];
   creaturesRange: [number, number];
   nonCreaturesRange: [number, number];
@@ -10,9 +11,14 @@ export type FactionFilterValues = {
 type UseFactionFormOptions = {
   values: FactionFilterValues;
   onSubmit?: (values: FactionFilterValues) => void;
+  isOpen?: boolean;
 };
 
-export function useFactionForm({ values, onSubmit }: UseFactionFormOptions) {
+export function useFactionForm({
+  values,
+  onSubmit,
+  isOpen,
+}: UseFactionFormOptions) {
   const form = useForm({
     defaultValues: values,
     onSubmit: async ({ value }) => {
@@ -21,8 +27,9 @@ export function useFactionForm({ values, onSubmit }: UseFactionFormOptions) {
   });
 
   useEffect(() => {
+    if (!isOpen) return; // don't reset while hidden
     form.reset(values);
-  }, [form, values]);
+  }, [form, isOpen, values]);
 
   return {
     form,

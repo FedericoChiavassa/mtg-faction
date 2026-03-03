@@ -4,10 +4,10 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
 import z from 'zod';
 
-import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
 import { SitePagination } from '@/components/layout/site-pagination';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,7 +48,7 @@ export const Route = createFileRoute('/_app/factions')({
 function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
-  const [openFilters, setOpenFilters] = useState(true);
+  const [openFilters, setOpenFilters] = useState(false);
 
   const { data: stats } = useFactionStats();
   const rangeLimits = useMemo(
@@ -77,9 +77,6 @@ function FactionsRoute() {
 
   const isFiltersDirty = useMemo(() => {
     return (
-      filters.page !== 1 ||
-      filters.perPage !== DEFAULT_PER_PAGE ||
-      filters.sortBy !== DEFAULT_SORT_BY ||
       !!filters.minCards ||
       !!filters.minCreatures ||
       !!filters.minNonCreatures ||
@@ -116,6 +113,7 @@ function FactionsRoute() {
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
       const { cardsRange, creaturesRange, nonCreaturesRange } = newValues;
+      setOpenFilters(false);
 
       void navigate({
         resetScroll: false,
@@ -138,7 +136,9 @@ function FactionsRoute() {
   );
 
   const { form } = useFactionForm({
+    isOpen: openFilters,
     values: {
+      identities: null,
       cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
       creaturesRange: [
         filters.minCreatures,
@@ -196,15 +196,25 @@ function FactionsRoute() {
             <Button
               size="xs"
               nativeButton={false}
-              render={<Link to="/factions" />}
+              onClick={() => setOpenFilters(false)}
+              render={
+                <Link
+                  to="/factions"
+                  search={prev => ({
+                    perPage: prev.perPage,
+                    sortBy: prev.sortBy,
+                  })}
+                />
+              }
             >
               Reset Filters
             </Button>
           )}
+
           <Button
             size="xs"
             variant="link"
-            className="cursor-pointer"
+            className="min-w-22.25 cursor-pointer"
             onClick={() => setOpenFilters(prev => !prev)}
           >
             {openFilters ? 'Hide Filters' : 'Show Filters'}
@@ -256,7 +266,7 @@ function FactionsRoute() {
 
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             Results:{' '}
-            {totalCount > 0 ? (
+            {!isLoading ? (
               <span className="mr-2 font-medium text-foreground tabular-nums">
                 {totalCount}
               </span>
@@ -267,19 +277,29 @@ function FactionsRoute() {
         </div>
 
         {/* Sub filters  */}
-        <div
-          className={cn(
-            'flex w-full items-center gap-2',
-            !openFilters && 'hidden',
-          )}
-        >
-          <FactionFilterForm
-            form={form}
-            stats={stats}
-            className="mb-8 w-full"
-            isDirty={isFiltersDirty}
-          />
-        </div>
+        <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+          <CollapsibleContent animate>
+            <div className="mb-8 flex items-center gap-2 rounded-md border p-4">
+              <FactionFilterForm
+                form={form}
+                stats={stats}
+                className="w-full"
+                isDirty={isFiltersDirty}
+                onReset={() => setOpenFilters(false)}
+                actions={
+                  <Button
+                    size="xs"
+                    variant="link"
+                    className="cursor-pointer"
+                    onClick={() => setOpenFilters(prev => !prev)}
+                  >
+                    Cancel
+                  </Button>
+                }
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Table */}
         <DataTable

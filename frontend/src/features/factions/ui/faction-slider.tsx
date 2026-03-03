@@ -41,10 +41,12 @@ export function FactionSlider<TValue extends SliderValue = SliderValue>({
   };
 
   return (
-    <div className="grid w-full gap-3">
+    <div className="grid w-full gap-3 rounded-sm border p-4 pt-3.5">
       <div className="flex items-center justify-between gap-2">
-        <Label htmlFor={id}>{label}</Label>
-        <span className="text-sm text-muted-foreground">
+        <Label htmlFor={id} className="text-xs">
+          {label}
+        </Label>
+        <span className="text-xs text-muted-foreground">
           {typeof value === 'number' ? value : value?.join(' - ')}
         </span>
       </div>
