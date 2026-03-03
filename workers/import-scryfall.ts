@@ -230,15 +230,16 @@ function computeFactionAffinities(
   return removeSubsets(allGroups);
 }
 
-// Fetch all creature types and generate plurals
-async function fetchAllCreatureTypes(): Promise<{
+//Generate creature type plurals
+function createCreatureTypeSet({
+  creatureTypes,
+}: {
+  creatureTypes: ScryfallCatalog['data'];
+}): {
   singularSet: Set<string>;
   pluralMap: Map<string, string>;
   maxTypeLength: number;
-}> {
-  const res = await fetch('https://api.scryfall.com/catalog/creature-types');
-  const json = (await res.json()) as ScryfallCatalog;
-
+} {
   const singularSet = new Set<string>();
   const pluralMap = new Map<string, string>();
 
@@ -249,7 +250,7 @@ async function fetchAllCreatureTypes(): Promise<{
     fungus: ['fungi'],
   };
 
-  for (const type of json.data) {
+  for (const type of creatureTypes) {
     const t = type.toLowerCase();
     singularSet.add(t);
     pluralMap.set(t, t); // singular → itself
@@ -317,7 +318,22 @@ async function importScryfall() {
   const allCards = (await cardsRes.json()) as ScryfallCard[];
 
   console.log('Fetching creature types...');
-  const creatureTypeSet = await fetchAllCreatureTypes();
+  const creatureTypesRes = await fetch(
+    'https://api.scryfall.com/catalog/creature-types',
+  );
+  const creatureTypesJson = (await creatureTypesRes.json()) as ScryfallCatalog;
+  const creatureTypeSet = createCreatureTypeSet({
+    creatureTypes: creatureTypesJson.data,
+  });
+
+  console.log(`Userting ${creatureTypesJson?.data?.length} creature types...`);
+  await bulkUpsert({
+    table: 'creature_types',
+    rows: creatureTypesJson?.data?.map(type => ({
+      name: type.toLowerCase(),
+    })),
+    onConflict: 'name',
+  });
 
   console.log(`\nProcessing ${allCards.length} cards...`);
 
