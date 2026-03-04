@@ -280,9 +280,10 @@ function createCreatureTypeSet({
 // Filter valid cards
 function isValidCard(card: ScryfallCard): boolean {
   return (
-    card.games.includes('paper') &&
+    (card.games.includes('paper') || card.games.includes('mtgo')) &&
     !card.type_line.includes('Token') &&
     !card.type_line.includes('Conspiracy') &&
+    card.set_type !== 'alchemy' &&
     card.set_type !== 'funny' &&
     card.set_type !== 'token' &&
     card.set_type !== 'memorabilia' &&
@@ -290,6 +291,7 @@ function isValidCard(card: ScryfallCard): boolean {
     card.layout !== 'planar' &&
     card.layout !== 'vanguard' &&
     card.layout !== 'scheme' &&
+    !card.promo_types?.includes('rebalanced') &&
     !card.promo_types?.includes('playtest')
   );
 }
