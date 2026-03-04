@@ -2,11 +2,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
-import { SlidersHorizontal } from 'lucide-react';
-import z from 'zod';
+import {
+  FingerprintPattern,
+  Layers,
+  PawPrint,
+  RulerDimensionLine,
+  SlidersHorizontal,
+  Sparkles,
+} from 'lucide-react';
 
+import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
 import { SitePagination } from '@/components/layout/site-pagination';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Field, FieldLabel } from '@/components/ui/field';
@@ -16,14 +24,6 @@ import {
   type FactionFilterValues,
   useFactionForm,
 } from '@/features/factions/hooks/use-faction-form';
-import {
-  DEFAULT_PER_PAGE,
-  DEFAULT_SORT_BY,
-  PER_PAGE_OPTIONS,
-  perPageSchema,
-  SORT_BY_OPTIONS,
-  sortBySchema,
-} from '@/features/factions/lib/faction-table.const';
 import { useFactions, useFactionStats } from '@/features/factions/queries';
 import { FilterForm } from '@/features/factions/ui/filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
@@ -31,21 +31,19 @@ import { DataTable } from '@/features/factions/ui/table/data-table';
 import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 
+import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
+import {
+  DEFAULT_PER_PAGE,
+  DEFAULT_SORT_BY,
+  PER_PAGE_OPTIONS,
+  SearchSchema,
+  SORT_BY_OPTIONS,
+} from './-factions/schema';
+import { usePageFilters } from './-factions/usePageFilters';
+
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
-  validateSearch: z.object({
-    page: z.coerce.number().int().min(1).catch(1).optional(),
-    perPage: perPageSchema.optional(),
-    sortBy: sortBySchema.optional(),
-    identities: z.string().array().optional(),
-    maxIdentities: z.coerce.number().int().min(1).optional().catch(undefined),
-    minCards: z.coerce.number().int().min(0).optional().catch(undefined),
-    minCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
-    minNonCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
-    maxCards: z.coerce.number().int().min(0).optional().catch(undefined),
-    maxCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
-    maxNonCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
-  }),
+  validateSearch: SearchSchema,
 });
 
 function FactionsRoute() {
@@ -63,38 +61,18 @@ function FactionsRoute() {
     [stats],
   );
 
-  const filters = useMemo(
-    () => ({
-      page: search.page ?? 1,
-      perPage: search.perPage ?? DEFAULT_PER_PAGE,
-      sortBy: search.sortBy ?? DEFAULT_SORT_BY,
-      identities: search.identities ?? [],
-      maxIdentities: search.maxIdentities,
-      minCards: search.minCards ?? 0,
-      minCreatures: search.minCreatures ?? 0,
-      minNonCreatures: search.minNonCreatures ?? 0,
-      maxCards: search.maxCards,
-      maxCreatures: search.maxCreatures,
-      maxNonCreatures: search.maxNonCreatures,
-    }),
-    [search],
-  );
-
-  const isFiltersDirty = useMemo(() => {
-    return (
-      filters.maxIdentities !== undefined ||
-      filters.identities.length > 0 ||
-      !!filters.minCards ||
-      !!filters.minCreatures ||
-      !!filters.minNonCreatures ||
-      (filters.maxCards !== undefined &&
-        filters.maxCards !== rangeLimits.maxCards) ||
-      (filters.maxCreatures !== undefined &&
-        filters.maxCreatures !== rangeLimits.maxCreatures) ||
-      (filters.maxNonCreatures !== undefined &&
-        filters.maxNonCreatures !== rangeLimits.maxNonCreatures)
-    );
-  }, [filters, rangeLimits]);
+  const {
+    filters,
+    isFiltersDirty,
+    isIdentitiesDirty,
+    isMaxIdentitiesDirty,
+    isCardsRangeDirty,
+    isCreaturesRangeDirty,
+    isNonCreaturesRangeDirty,
+  } = usePageFilters({
+    search,
+    rangeLimits,
+  });
 
   const { data, isLoading, isPlaceholderData } = useFactions({
     page: filters.page - 1, // query starts from 0
@@ -119,8 +97,15 @@ function FactionsRoute() {
   const currentPage = data?.currentPage ?? filters.page - 1;
   const outOfRange = data?.outOfRange;
 
+  const closeFilters = () => {
+    setOpenFilters(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
+      closeFilters();
+
       const {
         cardsRange,
         creaturesRange,
@@ -148,7 +133,12 @@ function FactionsRoute() {
         }),
       });
     },
-    [navigate, rangeLimits],
+    [
+      navigate,
+      rangeLimits?.maxCards,
+      rangeLimits?.maxCreatures,
+      rangeLimits?.maxNonCreatures,
+    ],
   );
 
   const { form } = useFactionForm({
@@ -204,9 +194,9 @@ function FactionsRoute() {
   return (
     <Container>
       <div className="mx-auto pb-15">
-        {/* Main filters */}
-        <div className="flex w-full items-center justify-end gap-3 pt-10 pb-6">
-          <div className="mr-auto flex items-center gap-3">
+        {/* Filters toggle */}
+        <div className="pointer-events-none relative z-20 flex w-full pt-10 pb-6">
+          <div className="pointer-events-auto mr-auto flex items-center gap-3">
             <Button
               size="xs"
               variant="link"
@@ -220,7 +210,7 @@ function FactionsRoute() {
               <Button
                 size="xs"
                 nativeButton={false}
-                onClick={() => setOpenFilters(false)}
+                onClick={closeFilters}
                 render={
                   <Link
                     to="/factions"
@@ -235,8 +225,70 @@ function FactionsRoute() {
               </Button>
             )}
           </div>
+        </div>
 
-          <Field orientation="horizontal" className="w-auto gap-2">
+        {/* Filters form  */}
+        <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+          <CollapsibleContent animate className="-mx-1.5 px-1.5">
+            <Separator />
+            <FilterForm
+              form={form}
+              stats={stats}
+              onClose={closeFilters}
+              isDirty={isFiltersDirty}
+              className="my-8 w-full pb-11.5"
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Table actions */}
+        <div
+          className={cn(
+            'relative z-15 -mt-19 flex w-full items-center justify-end gap-3 bg-background pt-6 pb-6',
+            isFiltersDirty && '-mt-6',
+          )}
+        >
+          {/* Filter badges */}
+          {isFiltersDirty && (
+            <div className="pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis">
+              {isIdentitiesDirty && (
+                <Badge variant="secondary" className="capitalize">
+                  <FingerprintPattern />
+                  {filters.identities.join(', ')}
+                </Badge>
+              )}
+              {isMaxIdentitiesDirty && (
+                <Badge variant="secondary">
+                  <RulerDimensionLine />
+                  {filters.maxIdentities}
+                </Badge>
+              )}
+              {isCardsRangeDirty && (
+                <Badge variant="secondary">
+                  <Layers />
+                  {filters.minCards ?? 0} -{' '}
+                  {filters.maxCards ?? rangeLimits.maxCards}
+                </Badge>
+              )}
+              {isCreaturesRangeDirty && (
+                <Badge variant="secondary">
+                  <PawPrint />
+                  {filters.minCreatures ?? 0} -{' '}
+                  {filters.maxCreatures ?? rangeLimits.maxCreatures}
+                </Badge>
+              )}
+              {isNonCreaturesRangeDirty && (
+                <Badge variant="secondary">
+                  <Sparkles />
+                  {filters.minNonCreatures ?? 0} -{' '}
+                  {filters.maxNonCreatures ?? rangeLimits.maxNonCreatures}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Sort By */}
+          <Field orientation="horizontal" className="ml-auto w-auto gap-2">
             <FieldLabel className="text-xs">Sort By</FieldLabel>
             <DataTableSelect
               value={filters.sortBy}
@@ -256,6 +308,7 @@ function FactionsRoute() {
             />
           </Field>
 
+          {/* Per Page */}
           <Field orientation="horizontal" className="w-auto gap-2">
             <FieldLabel className="text-xs">Per Page</FieldLabel>
             <DataTableSelect
@@ -278,6 +331,7 @@ function FactionsRoute() {
 
           <Separator orientation="vertical" />
 
+          {/* Results count */}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             Results:{' '}
             {!isLoading ? (
@@ -289,32 +343,6 @@ function FactionsRoute() {
             )}
           </div>
         </div>
-
-        {/* Sub filters  */}
-        <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
-          <CollapsibleContent animate className="-mx-1.5 px-1.5">
-            <Separator />
-            <FilterForm
-              form={form}
-              stats={stats}
-              className="my-8 w-full"
-              isDirty={isFiltersDirty}
-              actions={
-                <Button
-                  size="xs"
-                  variant="link"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setOpenFilters(prev => !prev);
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                  }}
-                >
-                  Hide Filters
-                </Button>
-              }
-            />
-          </CollapsibleContent>
-        </Collapsible>
 
         {/* Table */}
         <DataTable
@@ -349,8 +377,7 @@ function FactionsRoute() {
                 }),
               }).then(() => {
                 if (filters.perPage === 100) {
-                  setOpenFilters(false);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  closeFilters();
                 }
               })
             }
@@ -359,80 +386,6 @@ function FactionsRoute() {
       </div>
     </Container>
   );
-}
-
-function redirectIfOutOfRange(
-  navigate: ReturnType<typeof Route.useNavigate>,
-  outOfRange: boolean | undefined,
-  search: ReturnType<typeof Route.useSearch>,
-  rangeLimits: {
-    maxCards: number;
-    maxCreatures: number;
-    maxNonCreatures: number;
-  },
-  identitiesLimit: number | undefined = 4,
-) {
-  const {
-    minCards,
-    minCreatures,
-    minNonCreatures,
-    maxCards,
-    maxCreatures,
-    maxNonCreatures,
-    maxIdentities,
-  } = search;
-
-  const fixedMinCards =
-    minCards && minCards > rangeLimits.maxCards ? undefined : minCards;
-  const fixedMaxCards =
-    maxCards && maxCards > rangeLimits.maxCards ? undefined : maxCards;
-  const fixedMinCreatures =
-    minCreatures && minCreatures > rangeLimits.maxCreatures
-      ? undefined
-      : minCreatures;
-  const fixedMaxCreatures =
-    maxCreatures && maxCreatures > rangeLimits.maxCreatures
-      ? undefined
-      : maxCreatures;
-  const fixedMinNonCreatures =
-    minNonCreatures && minNonCreatures > rangeLimits.maxNonCreatures
-      ? undefined
-      : minNonCreatures;
-  const fixedMaxNonCreatures =
-    maxNonCreatures && maxNonCreatures > rangeLimits.maxNonCreatures
-      ? undefined
-      : maxNonCreatures;
-  const fixedMaxIdentities =
-    maxIdentities && maxIdentities > identitiesLimit
-      ? undefined
-      : maxIdentities;
-
-  const isOutOfRange =
-    outOfRange ||
-    fixedMinCards !== minCards ||
-    fixedMaxCards !== maxCards ||
-    fixedMinCreatures !== minCreatures ||
-    fixedMaxCreatures !== maxCreatures ||
-    fixedMinNonCreatures !== minNonCreatures ||
-    fixedMaxNonCreatures !== maxNonCreatures ||
-    fixedMaxIdentities !== search.maxIdentities;
-
-  if (isOutOfRange) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        page: undefined,
-        minCards: fixedMinCards,
-        maxCards: fixedMaxCards,
-        minCreatures: fixedMinCreatures,
-        maxCreatures: fixedMaxCreatures,
-        minNonCreatures: fixedMinNonCreatures,
-        maxNonCreatures: fixedMaxNonCreatures,
-        maxIdentities: fixedMaxIdentities,
-      }),
-    });
-  }
 }
 
 function getMin(range: [number, number] | undefined) {

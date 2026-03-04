@@ -2,6 +2,7 @@
 import { useStore } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
 import {
+  CircleChevronUp,
   FingerprintPattern,
   Layers,
   PawPrint,
@@ -29,8 +30,8 @@ type Props = {
   className?: string;
   stats?: FactionStats;
   isDirty?: boolean;
-  actions?: React.ReactNode;
   onReset?: () => void;
+  onClose?: () => void;
 };
 
 const fieldLabelStyle = 'w-[21%] pr-3 grow-0! text-xs';
@@ -40,8 +41,8 @@ export function FilterForm({
   className,
   stats,
   isDirty,
-  actions,
   onReset,
+  onClose,
 }: Props) {
   const isTouched = useStore(form.store, state => state.isTouched);
 
@@ -163,16 +164,23 @@ export function FilterForm({
           <FieldSeparator className="mt-2.5" />
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-2">
-          {actions}
-          {isDirty && (
+        <div className="mt-6 ml-[21%] flex flex-1 items-center pl-3">
+          <div className="flex max-w-md flex-1 items-center gap-2">
+            <Button
+              size="xs"
+              type="submit"
+              disabled={!isTouched}
+              className="flex-1 cursor-pointer"
+            >
+              Submit
+            </Button>
             <Button
               size="xs"
               type="reset"
               variant="outline"
               onClick={onReset}
               nativeButton={false}
-              className="no-underline!"
+              className={cn('flex-1 no-underline!', !isDirty && 'invisible')}
               render={
                 <Link
                   to="/factions"
@@ -186,17 +194,24 @@ export function FilterForm({
             >
               Reset
             </Button>
-          )}
+          </div>
+        </div>
+
+        <FieldSeparator className="mt-3" />
+      </form>
+
+      {onClose && (
+        <div className="mt-2 flex justify-center">
           <Button
-            size="xs"
-            type="submit"
-            disabled={!isTouched}
+            size="icon"
+            variant="ghost"
+            onClick={onClose}
             className="cursor-pointer"
           >
-            Submit
+            <CircleChevronUp />
           </Button>
         </div>
-      </form>
+      )}
     </div>
   );
 }

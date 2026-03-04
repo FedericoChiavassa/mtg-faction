@@ -1,8 +1,7 @@
 import type { QueryData } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
-
-import type { TPerPage, TSortBy } from './lib/faction-table.const';
+import type { TPerPage, TSortBy } from '@/routes/_app/-factions/schema';
 
 export async function fetchFactions({
   page,

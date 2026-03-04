@@ -44,12 +44,7 @@ export function CountSlider<TValue extends SliderValue = SliderValue>({
   };
 
   return (
-    <div
-      className={cn(
-        'grid w-[min(100%,420px)] max-w-md flex-1 gap-2.5',
-        className,
-      )}
-    >
+    <div className={cn('grid max-w-md flex-1 gap-2.5', className)}>
       <div className="flex items-center justify-between gap-2">
         {label && (
           <Label htmlFor={id} className="mr-auto text-xs">
