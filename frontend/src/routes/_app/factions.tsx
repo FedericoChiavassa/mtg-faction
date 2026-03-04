@@ -1,60 +1,91 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
-import z from 'zod';
+import {
+  FingerprintPattern,
+  Layers,
+  PawPrint,
+  RulerDimensionLine,
+  SlidersHorizontal,
+  Sparkles,
+} from 'lucide-react';
 
+import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
 import { SitePagination } from '@/components/layout/site-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFactions } from '@/features/factions/queries';
 import {
-  FactionFilterForm,
   type FactionFilterValues,
-} from '@/features/factions/ui/faction-filter-form';
+  useFactionForm,
+} from '@/features/factions/hooks/use-faction-form';
+import { useFactions, useFactionStats } from '@/features/factions/queries';
+import { FilterForm } from '@/features/factions/ui/filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
 import { DataTable } from '@/features/factions/ui/table/data-table';
+import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
+
+import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
+import {
+  DEFAULT_PER_PAGE,
+  DEFAULT_SORT_BY,
+  PER_PAGE_OPTIONS,
+  SearchSchema,
+  SORT_BY_OPTIONS,
+} from './-factions/schema';
+import { usePageFilters } from './-factions/usePageFilters';
 
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
-  validateSearch: z.object({
-    page: z.coerce.number().int().min(1).catch(1).optional(),
-    sortBy: z
-      .enum([
-        'name',
-        'count',
-        'creatures_count',
-        'non_creatures_count',
-        'identity_count',
-      ])
-      .catch('count')
-      .optional(),
-    minCards: z.coerce.number().int().min(0).catch(0).optional(),
-    minCreatures: z.coerce.number().int().min(0).catch(0).optional(),
-    minNonCreatures: z.coerce.number().int().min(0).catch(0).optional(),
-  }),
+  validateSearch: SearchSchema,
 });
-
-const PAGE_SIZE = 10;
-const TEMPORARY_DISABLE_FORM = true;
 
 function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
+  const [openFilters, setOpenFilters] = useState(false);
+
+  const { data: stats } = useFactionStats();
+  const rangeLimits = useMemo(
+    () => ({
+      maxCards: stats?.maxCards ?? 9999,
+      maxCreatures: stats?.maxCreatures ?? 9999,
+      maxNonCreatures: stats?.maxNonCreatures ?? 9999,
+    }),
+    [stats],
+  );
+
   const {
-    page = 1,
-    sortBy = 'count',
-    minCards = 0,
-    minCreatures = 0,
-    minNonCreatures = 0,
-  } = search;
+    filters,
+    isFiltersDirty,
+    isIdentitiesDirty,
+    isMaxIdentitiesDirty,
+    isCardsRangeDirty,
+    isCreaturesRangeDirty,
+    isNonCreaturesRangeDirty,
+  } = usePageFilters({
+    search,
+    rangeLimits,
+  });
+
   const { data, isLoading, isPlaceholderData } = useFactions({
-    page: page - 1, // query starts from 0
-    pageSize: PAGE_SIZE,
-    sortBy,
-    minCards,
-    minCreatures,
-    minNonCreatures,
+    page: filters.page - 1, // query starts from 0
+    pageSize: filters.perPage,
+    sortBy: filters.sortBy,
+    identities: filters.identities.length > 0 ? filters.identities : undefined,
+    maxIdentities: filters.maxIdentities,
+    minCards: filters.minCards,
+    minCreatures: filters.minCreatures,
+    minNonCreatures: filters.minNonCreatures,
+    maxCards: filters.maxCards,
+    maxCreatures: filters.maxCreatures,
+    maxNonCreatures: filters.maxNonCreatures,
     placeholderData: keepPreviousData,
   });
 
@@ -62,31 +93,71 @@ function FactionsRoute() {
 
   const factions = data?.data ?? [];
   const totalCount = data?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const currentPage = data?.currentPage ?? page - 1;
+  const totalPages = Math.ceil(totalCount / filters.perPage);
+  const currentPage = data?.currentPage ?? filters.page - 1;
+  const outOfRange = data?.outOfRange;
 
-  const handleFilterChange = (values: FactionFilterValues) => {
-    void navigate({
-      search: prev => ({
-        ...prev,
-        ...(values.sortBy !== 'count' && {
-          sortBy: values.sortBy ?? undefined,
+  const closeFilters = () => {
+    setOpenFilters(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFilterSubmit = useCallback(
+    (newValues: FactionFilterValues) => {
+      closeFilters();
+
+      const {
+        cardsRange,
+        creaturesRange,
+        nonCreaturesRange,
+        identities,
+        maxIdentities,
+      } = newValues;
+
+      void navigate({
+        resetScroll: false,
+        search: prev => ({
+          ...prev,
+          page: undefined,
+          identities: identities.length > 0 ? identities : undefined,
+          maxIdentities: maxIdentities,
+          minCards: getMin(cardsRange),
+          minCreatures: getMin(creaturesRange),
+          minNonCreatures: getMin(nonCreaturesRange),
+          maxCards: getMax(cardsRange, rangeLimits?.maxCards),
+          maxCreatures: getMax(creaturesRange, rangeLimits?.maxCreatures),
+          maxNonCreatures: getMax(
+            nonCreaturesRange,
+            rangeLimits?.maxNonCreatures,
+          ),
         }),
-      }),
-    });
-  };
+      });
+    },
+    [
+      navigate,
+      rangeLimits?.maxCards,
+      rangeLimits?.maxCreatures,
+      rangeLimits?.maxNonCreatures,
+    ],
+  );
 
-  const handleFilterSubmit = (values: FactionFilterValues) => {
-    void navigate({
-      search: prev => ({
-        ...prev,
-        minCards: values.minCards > 0 ? values.minCards : undefined,
-        minCreatures: values.minCreatures > 0 ? values.minCreatures : undefined,
-        minNonCreatures:
-          values.minNonCreatures > 0 ? values.minNonCreatures : undefined,
-      }),
-    });
-  };
+  const { form } = useFactionForm({
+    isOpen: openFilters,
+    values: {
+      maxIdentities: filters.maxIdentities,
+      identities: filters.identities,
+      cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
+      creaturesRange: [
+        filters.minCreatures,
+        filters.maxCreatures ?? rangeLimits?.maxCreatures,
+      ],
+      nonCreaturesRange: [
+        filters.minNonCreatures,
+        filters.maxNonCreatures ?? rangeLimits?.maxNonCreatures,
+      ],
+    },
+    onSubmit: handleFilterSubmit,
+  });
 
   const handleSortingChange: OnChangeFn<SortingState> = updaterOrValue => {
     const newSorting =
@@ -100,58 +171,214 @@ function FactionsRoute() {
 
     if (newSortBy) {
       void navigate({
-        search: prev => ({ ...prev, sortBy: newSortBy, page: 1 }),
+        resetScroll: false,
+        search: prev => ({
+          ...prev,
+          page: undefined,
+          sortBy: newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+        }),
       });
     }
   };
 
+  useEffect(() => {
+    redirectIfOutOfRange(
+      navigate,
+      outOfRange,
+      search,
+      rangeLimits,
+      stats?.maxIdentities,
+    );
+  }, [navigate, outOfRange, rangeLimits, search, stats?.maxIdentities]);
+
   return (
     <Container>
-      <div className="mx-auto py-10">
-        {!TEMPORARY_DISABLE_FORM && (
-          <FactionFilterForm
-            onChange={handleFilterChange}
-            onSubmit={handleFilterSubmit}
-            initialValues={{ sortBy, minCards, minCreatures, minNonCreatures }}
-          />
-        )}
-
-        <div className="mb-4 ml-auto flex w-max items-center gap-1 text-xs text-muted-foreground">
-          Results:{' '}
-          {totalCount > 0 ? (
-            <span className="mr-2 font-medium text-foreground">
-              {totalCount}
-            </span>
-          ) : (
-            <Skeleton className="mr-2 inline-block h-4 w-7.5" />
-          )}
+      <div className="mx-auto pb-15">
+        {/* Filters toggle */}
+        <div className="pointer-events-none relative z-20 flex w-full pt-10 pb-6">
+          <div className="pointer-events-auto mr-auto flex items-center gap-3">
+            <Button
+              size="xs"
+              variant="link"
+              onClick={() => setOpenFilters(prev => !prev)}
+              className="-ml-2 w-28.5! cursor-pointer justify-start"
+            >
+              <SlidersHorizontal className="mr-1 size-4" />{' '}
+              {openFilters ? 'Hide Filters' : 'Show Filters'}
+            </Button>
+            {isFiltersDirty && (
+              <Button
+                size="xs"
+                nativeButton={false}
+                onClick={closeFilters}
+                render={
+                  <Link
+                    to="/factions"
+                    search={prev => ({
+                      perPage: prev.perPage,
+                      sortBy: prev.sortBy,
+                    })}
+                  />
+                }
+              >
+                Reset Filters
+              </Button>
+            )}
+          </div>
         </div>
 
+        {/* Filters form  */}
+        <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+          <CollapsibleContent animate className="-mx-1.5 px-1.5">
+            <Separator />
+            <FilterForm
+              form={form}
+              stats={stats}
+              onClose={closeFilters}
+              isDirty={isFiltersDirty}
+              className="my-8 w-full pb-11.5"
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Table actions */}
+        <div
+          className={cn(
+            'relative z-15 -mt-19 flex w-full items-center justify-end gap-3 bg-background pt-6 pb-6',
+            isFiltersDirty && '-mt-6',
+          )}
+        >
+          {/* Filter badges */}
+          {isFiltersDirty && (
+            <div className="pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis">
+              {isIdentitiesDirty && (
+                <Badge variant="secondary" className="capitalize">
+                  <FingerprintPattern />
+                  {filters.identities.join(', ')}
+                </Badge>
+              )}
+              {isMaxIdentitiesDirty && (
+                <Badge variant="secondary">
+                  <RulerDimensionLine />
+                  {filters.maxIdentities}
+                </Badge>
+              )}
+              {isCardsRangeDirty && (
+                <Badge variant="secondary">
+                  <Layers />
+                  {filters.minCards ?? 0} -{' '}
+                  {filters.maxCards ?? rangeLimits.maxCards}
+                </Badge>
+              )}
+              {isCreaturesRangeDirty && (
+                <Badge variant="secondary">
+                  <PawPrint />
+                  {filters.minCreatures ?? 0} -{' '}
+                  {filters.maxCreatures ?? rangeLimits.maxCreatures}
+                </Badge>
+              )}
+              {isNonCreaturesRangeDirty && (
+                <Badge variant="secondary">
+                  <Sparkles />
+                  {filters.minNonCreatures ?? 0} -{' '}
+                  {filters.maxNonCreatures ?? rangeLimits.maxNonCreatures}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Sort By */}
+          <Field orientation="horizontal" className="ml-auto w-auto gap-2">
+            <FieldLabel className="text-xs">Sort By</FieldLabel>
+            <DataTableSelect
+              value={filters.sortBy}
+              options={SORT_BY_OPTIONS}
+              onChange={val => {
+                const newSortBy = val ?? DEFAULT_SORT_BY;
+                void navigate({
+                  resetScroll: false,
+                  search: prev => ({
+                    ...prev,
+                    page: undefined,
+                    sortBy:
+                      newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+                  }),
+                });
+              }}
+            />
+          </Field>
+
+          {/* Per Page */}
+          <Field orientation="horizontal" className="w-auto gap-2">
+            <FieldLabel className="text-xs">Per Page</FieldLabel>
+            <DataTableSelect
+              value={filters.perPage}
+              options={PER_PAGE_OPTIONS}
+              onChange={val => {
+                const newPerPage = val ?? DEFAULT_PER_PAGE;
+                void navigate({
+                  resetScroll: false,
+                  search: prev => ({
+                    ...prev,
+                    page: undefined,
+                    perPage:
+                      newPerPage !== DEFAULT_PER_PAGE ? newPerPage : undefined,
+                  }),
+                });
+              }}
+            />
+          </Field>
+
+          <Separator orientation="vertical" />
+
+          {/* Results count */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            Results:{' '}
+            {!isLoading ? (
+              <span className="mr-2 font-medium text-foreground tabular-nums">
+                {totalCount}
+              </span>
+            ) : (
+              <Skeleton className="mr-2 inline-block h-4 w-7.5" />
+            )}
+          </div>
+        </div>
+
+        {/* Table */}
         <DataTable
           data={factions}
-          sortBy={sortBy}
           columns={columns}
           isLoading={isLoading}
+          sortBy={filters.sortBy}
           isPlaceholderData={isPlaceholderData}
           onSortingChange={handleSortingChange}
           pagination={{
             pageIndex: currentPage,
-            pageSize: PAGE_SIZE,
+            pageSize: filters.perPage,
             pageCount: totalPages,
           }}
         />
 
+        {/* Pagination */}
         {totalPages > 1 && factions.length && (
           <SitePagination
             size="sm"
             showBoundaries
-            currentPage={page}
             totalPages={totalPages}
+            currentPage={filters.page}
             className="justify-end py-6"
             disabled={disablePagination}
             onPageChange={newPage =>
               void navigate({
-                search: prev => ({ ...prev, page: newPage }),
+                resetScroll: false,
+                search: prev => ({
+                  ...prev,
+                  page: newPage,
+                }),
+              }).then(() => {
+                if (filters.perPage === 100) {
+                  closeFilters();
+                }
               })
             }
           />
@@ -159,4 +386,21 @@ function FactionsRoute() {
       </div>
     </Container>
   );
+}
+
+function getMin(range: [number, number] | undefined) {
+  if (range && range[0] > 0) {
+    return range[0];
+  }
+  return undefined;
+}
+
+function getMax(
+  range: [number, number] | undefined,
+  limit: number | undefined,
+) {
+  if (range && range[1] < (limit ?? 9999)) {
+    return range[1];
+  }
+  return undefined;
 }

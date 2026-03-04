@@ -26,16 +26,16 @@ export function SiteFooter() {
               Home
             </Link>
             <Link
-              to="/cards"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Cards
-            </Link>
-            <Link
               to="/factions"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Factions
+            </Link>
+            <Link
+              to="/cards"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Cards
             </Link>
             <Link
               to="/rules"

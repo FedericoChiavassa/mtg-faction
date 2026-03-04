@@ -62,6 +62,24 @@ export type Database = {
           },
         ]
       }
+      creature_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       faction_identities: {
         Row: {
           count: number
@@ -150,6 +168,15 @@ export type Database = {
           normal_img_url_2?: string | null
           oracle_id?: string | null
           scryfall_uri?: string | null
+        }
+        Relationships: []
+      }
+      faction_stats: {
+        Row: {
+          max_cards: number | null
+          max_creatures: number | null
+          max_identities: number | null
+          max_non_creatures: number | null
         }
         Relationships: []
       }

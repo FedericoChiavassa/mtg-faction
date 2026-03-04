@@ -22,7 +22,7 @@ export function CardTypeToggle({
         size="sm"
         value={[value]}
         variant="outline"
-        onValueChange={handleChange}
+        onValueChange={v => handleChange(v as CardTypeValue[])}
       >
         <ToggleGroupItem
           value="all"

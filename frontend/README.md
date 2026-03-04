@@ -5,7 +5,8 @@
 - @vitejs/plugin-react-swc
 - TanStack Router
 - TanStack Query
-- Zustand
+- TanStack Table
+- TanStack Form
 - Tailwind CSS
 - shadcn/ui
 
