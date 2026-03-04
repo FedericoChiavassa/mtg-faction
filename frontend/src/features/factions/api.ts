@@ -15,6 +15,7 @@ export async function fetchFactions({
   maxCreatures,
   maxNonCreatures,
   identities,
+  maxIdentities,
 }: {
   page: number;
   pageSize: TPerPage;
@@ -26,6 +27,7 @@ export async function fetchFactions({
   maxNonCreatures?: number;
   sortBy?: TSortBy;
   identities?: string[] | null;
+  maxIdentities?: number;
 }) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
@@ -41,6 +43,10 @@ export async function fetchFactions({
 
   if (identities) {
     query = query.contains('identity', identities);
+  }
+
+  if (maxIdentities) {
+    query = query.eq('identity_count', maxIdentities);
   }
 
   if (minCards > 0) {

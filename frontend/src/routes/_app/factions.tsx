@@ -25,7 +25,7 @@ import {
   sortBySchema,
 } from '@/features/factions/lib/faction-table.const';
 import { useFactions, useFactionStats } from '@/features/factions/queries';
-import { FactionFilterForm } from '@/features/factions/ui/faction-filter-form';
+import { FilterForm } from '@/features/factions/ui/filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
 import { DataTable } from '@/features/factions/ui/table/data-table';
 import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
@@ -38,6 +38,7 @@ export const Route = createFileRoute('/_app/factions')({
     perPage: perPageSchema.optional(),
     sortBy: sortBySchema.optional(),
     identities: z.string().array().optional(),
+    maxIdentities: z.coerce.number().int().min(1).optional().catch(undefined),
     minCards: z.coerce.number().int().min(0).optional().catch(undefined),
     minCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
     minNonCreatures: z.coerce.number().int().min(0).optional().catch(undefined),
@@ -68,6 +69,7 @@ function FactionsRoute() {
       perPage: search.perPage ?? DEFAULT_PER_PAGE,
       sortBy: search.sortBy ?? DEFAULT_SORT_BY,
       identities: search.identities ?? [],
+      maxIdentities: search.maxIdentities,
       minCards: search.minCards ?? 0,
       minCreatures: search.minCreatures ?? 0,
       minNonCreatures: search.minNonCreatures ?? 0,
@@ -80,6 +82,7 @@ function FactionsRoute() {
 
   const isFiltersDirty = useMemo(() => {
     return (
+      filters.maxIdentities !== undefined ||
       filters.identities.length > 0 ||
       !!filters.minCards ||
       !!filters.minCreatures ||
@@ -97,7 +100,8 @@ function FactionsRoute() {
     page: filters.page - 1, // query starts from 0
     pageSize: filters.perPage,
     sortBy: filters.sortBy,
-    identities: filters.identities,
+    identities: filters.identities.length > 0 ? filters.identities : undefined,
+    maxIdentities: filters.maxIdentities,
     minCards: filters.minCards,
     minCreatures: filters.minCreatures,
     minNonCreatures: filters.minNonCreatures,
@@ -117,15 +121,21 @@ function FactionsRoute() {
 
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
-      const { cardsRange, creaturesRange, nonCreaturesRange, identities } =
-        newValues;
+      const {
+        cardsRange,
+        creaturesRange,
+        nonCreaturesRange,
+        identities,
+        maxIdentities,
+      } = newValues;
 
       void navigate({
         resetScroll: false,
         search: prev => ({
           ...prev,
           page: undefined,
-          identities,
+          identities: identities.length > 0 ? identities : undefined,
+          maxIdentities: maxIdentities,
           minCards: getMin(cardsRange),
           minCreatures: getMin(creaturesRange),
           minNonCreatures: getMin(nonCreaturesRange),
@@ -144,6 +154,7 @@ function FactionsRoute() {
   const { form } = useFactionForm({
     isOpen: openFilters,
     values: {
+      maxIdentities: filters.maxIdentities,
       identities: filters.identities,
       cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
       creaturesRange: [
@@ -181,17 +192,14 @@ function FactionsRoute() {
   };
 
   useEffect(() => {
-    redirectIfOutOfRange(navigate, search, rangeLimits);
-  }, [navigate, rangeLimits, search]);
-
-  useEffect(() => {
-    if (outOfRange) {
-      void navigate({
-        search: prev => ({ ...prev, page: undefined }),
-        replace: true,
-      });
-    }
-  }, [outOfRange, navigate]);
+    redirectIfOutOfRange(
+      navigate,
+      outOfRange,
+      search,
+      rangeLimits,
+      stats?.maxIdentities,
+    );
+  }, [navigate, outOfRange, rangeLimits, search, stats?.maxIdentities]);
 
   return (
     <Container>
@@ -286,7 +294,7 @@ function FactionsRoute() {
         <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
           <CollapsibleContent animate className="-mx-1.5 px-1.5">
             <Separator />
-            <FactionFilterForm
+            <FilterForm
               form={form}
               stats={stats}
               className="my-8 w-full"
@@ -296,7 +304,10 @@ function FactionsRoute() {
                   size="xs"
                   variant="link"
                   className="cursor-pointer"
-                  onClick={() => setOpenFilters(prev => !prev)}
+                  onClick={() => {
+                    setOpenFilters(prev => !prev);
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
                 >
                   Hide Filters
                 </Button>
@@ -320,6 +331,7 @@ function FactionsRoute() {
           }}
         />
 
+        {/* Pagination */}
         {totalPages > 1 && factions.length && (
           <SitePagination
             size="sm"
@@ -335,6 +347,11 @@ function FactionsRoute() {
                   ...prev,
                   page: newPage,
                 }),
+              }).then(() => {
+                if (filters.perPage === 100) {
+                  setOpenFilters(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               })
             }
           />
@@ -346,12 +363,14 @@ function FactionsRoute() {
 
 function redirectIfOutOfRange(
   navigate: ReturnType<typeof Route.useNavigate>,
+  outOfRange: boolean | undefined,
   search: ReturnType<typeof Route.useSearch>,
   rangeLimits: {
     maxCards: number;
     maxCreatures: number;
     maxNonCreatures: number;
   },
+  identitiesLimit: number | undefined = 4,
 ) {
   const {
     minCards,
@@ -360,58 +379,57 @@ function redirectIfOutOfRange(
     maxCards,
     maxCreatures,
     maxNonCreatures,
+    maxIdentities,
   } = search;
-  if (minCards && minCards > rangeLimits.maxCards) {
+
+  const fixedMinCards =
+    minCards && minCards > rangeLimits.maxCards ? undefined : minCards;
+  const fixedMaxCards =
+    maxCards && maxCards > rangeLimits.maxCards ? undefined : maxCards;
+  const fixedMinCreatures =
+    minCreatures && minCreatures > rangeLimits.maxCreatures
+      ? undefined
+      : minCreatures;
+  const fixedMaxCreatures =
+    maxCreatures && maxCreatures > rangeLimits.maxCreatures
+      ? undefined
+      : maxCreatures;
+  const fixedMinNonCreatures =
+    minNonCreatures && minNonCreatures > rangeLimits.maxNonCreatures
+      ? undefined
+      : minNonCreatures;
+  const fixedMaxNonCreatures =
+    maxNonCreatures && maxNonCreatures > rangeLimits.maxNonCreatures
+      ? undefined
+      : maxNonCreatures;
+  const fixedMaxIdentities =
+    maxIdentities && maxIdentities > identitiesLimit
+      ? undefined
+      : maxIdentities;
+
+  const isOutOfRange =
+    outOfRange ||
+    fixedMinCards !== minCards ||
+    fixedMaxCards !== maxCards ||
+    fixedMinCreatures !== minCreatures ||
+    fixedMaxCreatures !== maxCreatures ||
+    fixedMinNonCreatures !== minNonCreatures ||
+    fixedMaxNonCreatures !== maxNonCreatures ||
+    fixedMaxIdentities !== search.maxIdentities;
+
+  if (isOutOfRange) {
     void navigate({
       replace: true,
       search: prev => ({
         ...prev,
-        minCards: undefined,
-      }),
-    });
-  }
-  if (maxCards && maxCards > rangeLimits.maxCards) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        maxCards: undefined,
-      }),
-    });
-  }
-  if (minCreatures && minCreatures > rangeLimits.maxCreatures) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        minCreatures: undefined,
-      }),
-    });
-  }
-  if (maxCreatures && maxCreatures > rangeLimits.maxCreatures) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        maxCreatures: undefined,
-      }),
-    });
-  }
-  if (minNonCreatures && minNonCreatures > rangeLimits.maxNonCreatures) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        minNonCreatures: undefined,
-      }),
-    });
-  }
-  if (maxNonCreatures && maxNonCreatures > rangeLimits.maxNonCreatures) {
-    void navigate({
-      replace: true,
-      search: prev => ({
-        ...prev,
-        maxNonCreatures: undefined,
+        page: undefined,
+        minCards: fixedMinCards,
+        maxCards: fixedMaxCards,
+        minCreatures: fixedMinCreatures,
+        maxCreatures: fixedMaxCreatures,
+        minNonCreatures: fixedMinNonCreatures,
+        maxNonCreatures: fixedMaxNonCreatures,
+        maxIdentities: fixedMaxIdentities,
       }),
     });
   }

@@ -5,7 +5,7 @@ export const DEFAULT_SORT_BY = 'count';
 
 export const perPageSchema = z.coerce
   .number()
-  .pipe(z.union([z.literal(10), z.literal(15), z.literal(20)]))
+  .pipe(z.union([z.literal(10), z.literal(15), z.literal(20), z.literal(100)]))
   .catch(DEFAULT_PER_PAGE);
 
 export const sortBySchema = z
@@ -25,6 +25,7 @@ export const PER_PAGE_OPTIONS: { value: TPerPage; label: string }[] = [
   { value: 10, label: '10' },
   { value: 15, label: '15' },
   { value: 20, label: '20' },
+  { value: 100, label: '100' },
 ];
 
 export const SORT_BY_OPTIONS: { value: TSortBy; label: React.ReactNode }[] = [

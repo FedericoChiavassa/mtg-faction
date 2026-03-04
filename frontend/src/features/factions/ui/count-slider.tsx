@@ -21,8 +21,8 @@ type Props<TValue extends SliderValue = SliderValue> = {
   className?: string;
 };
 
-export function FactionSlider<TValue extends SliderValue = SliderValue>({
-  id = 'faction-slider',
+export function CountSlider<TValue extends SliderValue = SliderValue>({
+  id = 'count-slider',
   label,
   value: controlledValue,
   onChange,

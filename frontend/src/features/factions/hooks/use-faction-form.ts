@@ -3,6 +3,7 @@ import { useForm } from '@tanstack/react-form';
 
 export type FactionFilterValues = {
   identities: string[];
+  maxIdentities: number | null | undefined;
   cardsRange: [number, number];
   creaturesRange: [number, number];
   nonCreaturesRange: [number, number];

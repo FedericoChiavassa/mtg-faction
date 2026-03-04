@@ -1,7 +1,13 @@
 /* eslint-disable react/no-children-prop */
 import { useStore } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
-import { FingerprintPattern, Layers, PawPrint, Sparkles } from 'lucide-react';
+import {
+  FingerprintPattern,
+  Layers,
+  PawPrint,
+  RulerDimensionLine,
+  Sparkles,
+} from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -12,10 +18,11 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { IdentityCombobox } from '@/features/creature-types/ui/Identity-combobox';
+import { IdentityCountToggle } from '@/features/creature-types/ui/identity-count-toggle';
 import type { FactionStats } from '@/features/factions/queries';
 
 import type { useFactionForm } from '../hooks/use-faction-form';
-import { FactionSlider } from './faction-slider';
+import { CountSlider } from './count-slider';
 
 type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
@@ -26,9 +33,9 @@ type Props = {
   onReset?: () => void;
 };
 
-const fieldLabelStyle = 'w-[20%] pr-3 grow-0! text-xs';
+const fieldLabelStyle = 'w-[21%] pr-3 grow-0! text-xs';
 
-export function FactionFilterForm({
+export function FilterForm({
   form,
   className,
   stats,
@@ -69,6 +76,28 @@ export function FactionFilterForm({
 
           <FieldSeparator />
 
+          <FieldGroup className="gap-2">
+            <form.Field
+              name="maxIdentities"
+              children={field => (
+                <Field orientation="horizontal">
+                  <FieldLabel className={fieldLabelStyle}>
+                    <RulerDimensionLine size={16} />
+                    Number of Creature Types
+                  </FieldLabel>
+                  <IdentityCountToggle
+                    value={field.state.value?.toString()}
+                    onValueChange={val =>
+                      field.handleChange(val ? Number(val) : null)
+                    }
+                  />
+                </Field>
+              )}
+            />
+          </FieldGroup>
+
+          <FieldSeparator />
+
           <FieldGroup className="gap-6">
             <form.Field
               name="cardsRange"
@@ -80,10 +109,10 @@ export function FactionFilterForm({
                     <Layers size={16} />
                     Cards Range
                   </FieldLabel>
-                  <FactionSlider
+                  <CountSlider
+                    id="slider-cards-range"
                     value={field.state.value}
                     max={stats?.maxCards ?? 9999}
-                    id="faction-slider-cards-range"
                     onChange={val => field.handleChange(val)}
                   />
                 </Field>
@@ -100,10 +129,10 @@ export function FactionFilterForm({
                     <PawPrint size={16} />
                     Creatures Range
                   </FieldLabel>
-                  <FactionSlider
+                  <CountSlider
                     value={field.state.value}
+                    id="slider-creatures-range"
                     max={stats?.maxCreatures ?? 9999}
-                    id="faction-slider-creatures-range"
                     onChange={val => field.handleChange(val)}
                   />
                 </Field>
@@ -120,10 +149,10 @@ export function FactionFilterForm({
                     <Sparkles size={16} />
                     Non Creatures Range
                   </FieldLabel>
-                  <FactionSlider
+                  <CountSlider
                     value={field.state.value}
+                    id="slider-non-creatures-range"
                     max={stats?.maxNonCreatures ?? 9999}
-                    id="faction-slider-non-creatures-range"
                     onChange={val => field.handleChange(val)}
                   />
                 </Field>
