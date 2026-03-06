@@ -109,6 +109,7 @@ export function SitePagination({
           <PaginationItem>
             <PaginationLink
               size={boundariesSize}
+              aria-disabled={isFirst}
               aria-label="Go to first page"
               onClick={() => !isFirst && onPageChange(1)}
               className={cn(
@@ -139,7 +140,9 @@ export function SitePagination({
         </PaginationItem>
 
         {children ? (
-          <PaginationItem>{children}</PaginationItem>
+          <PaginationItem className="flex items-center">
+            {children}
+          </PaginationItem>
         ) : variant === 'compact' ? (
           /* COMPACT VARIANT: <current>/<total> */
           <PaginationItem className="px-2 text-xs font-normal">
@@ -192,6 +195,7 @@ export function SitePagination({
           <PaginationItem>
             <PaginationLink
               size={boundariesSize}
+              aria-disabled={isLast}
               aria-label="Go to last page"
               onClick={() => !isLast && onPageChange(totalPages)}
               className={cn(
@@ -220,7 +224,7 @@ export function PaginationCount({
   entityName?: string;
 }) {
   return (
-    <span className="text-xs whitespace-nowrap">
+    <span className="text-xs whitespace-nowrap text-muted-foreground">
       <span>
         <span className="tabular-nums">
           {Math.min(pageSize * (page - 1) + 1, totalCount)}
@@ -229,7 +233,10 @@ export function PaginationCount({
         <span className="tabular-nums">
           {Math.min(pageSize * page, totalCount)}
         </span>{' '}
-        of <span className="font-bold tabular-nums">{totalCount}</span>{' '}
+        of{' '}
+        <span className="font-bold text-foreground tabular-nums">
+          {totalCount}
+        </span>{' '}
         {entityName}
       </span>
     </span>

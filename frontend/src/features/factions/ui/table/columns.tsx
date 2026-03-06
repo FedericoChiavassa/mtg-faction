@@ -33,7 +33,11 @@ export const columns: ColumnDef<Faction, any>[] = [
     cell: ({ table, row }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
 
-      return pageIndex * pageSize + row.index + 1;
+      return (
+        <span className="text-muted-foreground">
+          {pageIndex * pageSize + row.index + 1}
+        </span>
+      );
     },
   }),
   columnHelper.accessor('name', {
@@ -160,13 +164,15 @@ export const columns: ColumnDef<Faction, any>[] = [
           ></DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-min">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>{faction.name}</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-semibold text-foreground">
+                {faction.name}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
             </DropdownMenuGroup>
 
             <DropdownMenuGroup>
               <DropdownMenuItem
-                className="font-normal text-nowrap"
+                className="text-xs font-normal text-nowrap text-muted-foreground"
                 render={
                   <Link
                     to={`/cards`}
@@ -175,10 +181,11 @@ export const columns: ColumnDef<Faction, any>[] = [
                   />
                 }
               >
-                View <span className="font-semibold">All</span> Cards
+                View <span className="font-semibold text-foreground">All</span>{' '}
+                Cards
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="font-normal text-nowrap"
+                className="text-xs font-normal text-nowrap text-muted-foreground"
                 render={
                   <Link
                     to={`/cards`}
@@ -187,10 +194,12 @@ export const columns: ColumnDef<Faction, any>[] = [
                   />
                 }
               >
-                View <span className="font-semibold">Creature</span> Cards
+                View{' '}
+                <span className="font-semibold text-foreground">Creature</span>{' '}
+                Cards
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="font-normal text-nowrap"
+                className="text-xs font-normal text-nowrap text-muted-foreground"
                 render={
                   <Link
                     to={`/cards`}
@@ -199,7 +208,11 @@ export const columns: ColumnDef<Faction, any>[] = [
                   />
                 }
               >
-                View <span className="font-semibold">Non Creature</span> Cards
+                View{' '}
+                <span className="font-semibold text-foreground">
+                  Non Creature
+                </span>{' '}
+                Cards
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

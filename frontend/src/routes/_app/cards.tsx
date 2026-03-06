@@ -6,6 +6,11 @@ import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
+import {
+  PageHeader,
+  PageHeaderCaption,
+  PageHeaderTitle,
+} from '@/components/layout/page-header';
 import { SubHeader } from '@/components/layout/site-header';
 import {
   PaginationCount,
@@ -89,6 +94,13 @@ function CardsRoute() {
 
   return (
     <>
+      {!faction && (
+        <PageHeader>
+          <PageHeaderCaption>Browse by Faction</PageHeaderCaption>
+          <PageHeaderTitle>Cards</PageHeaderTitle>
+        </PageHeader>
+      )}
+
       {faction && (
         <SubHeader
           className={cn(
@@ -141,7 +153,7 @@ function CardsRoute() {
             isPlaceholderData={isPlaceholderData}
           />
         ) : (
-          <div className="flex flex-1 flex-col justify-start">
+          <div className="flex flex-1 flex-col justify-start pt-2">
             <FactionCombobox
               hasPopover={false}
               placeholder="Select a faction..."
@@ -160,9 +172,6 @@ function CardsRoute() {
               }}
             />
             <Empty className="justify-start gap-6 pt-6">
-              <EmptyDescription className="text-xs italic">
-                Select a faction to browse its cards
-              </EmptyDescription>
               <EmptyDescription>
                 <Button
                   size="sm"

@@ -51,7 +51,7 @@ export function DataTableColumnHeader<TData, TValue>({
         size="sm"
         variant="ghost"
         className={cn(
-          'h-8 data-[state=open]:bg-accent',
+          'h-8 cursor-pointer',
           align === 'left' && '-ml-3',
           align === 'right' && '-mr-3',
           !!column.getIsSorted() &&

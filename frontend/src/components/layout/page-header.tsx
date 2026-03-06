@@ -1,0 +1,54 @@
+import { cn } from '@/lib/utils';
+
+import { Container } from './container';
+
+export function PageHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      data-slot="page-header"
+      className={'bg-muted/30 outline outline-border dark:bg-card'}
+    >
+      <Container className="py-4">{children}</Container>
+    </div>
+  );
+}
+
+export function PageHeaderCaption({
+  children,
+  className,
+}: {
+  children: string;
+  className?: string;
+}) {
+  return (
+    <p
+      data-slot="page-header-caption"
+      className={cn(
+        'mb-0.5 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground uppercase',
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+export function PageHeaderTitle({
+  children,
+  className,
+}: {
+  children: string;
+  className?: string;
+}) {
+  return (
+    <h1
+      data-slot="page-header-title"
+      className={cn(
+        'text-lg font-semibold tracking-tight text-foreground',
+        className,
+      )}
+    >
+      {children}
+    </h1>
+  );
+}
