@@ -19,7 +19,7 @@ const linkStyle = cva(
 );
 
 const HeaderStyle = cva(
-  'sticky flex h-12 w-full max-w-none flex-row items-center border-b border-border/40 bg-background',
+  'sticky flex h-12 w-full max-w-none flex-row items-center border-b bg-background',
 );
 
 export function SiteHeader() {
@@ -27,8 +27,8 @@ export function SiteHeader() {
     <header className={cn(HeaderStyle(), 'top-0 z-50')}>
       <Container className="flex w-full items-center">
         <Link to="/" className="flex items-center gap-2">
-          <Swords />
-          <span className="text-xl font-semibold tracking-tight">Faction</span>
+          <Swords className="size-5" />
+          <span className="text-lg font-semibold tracking-tight">Faction</span>
         </Link>
 
         <NavigationMenu className="ml-auto">

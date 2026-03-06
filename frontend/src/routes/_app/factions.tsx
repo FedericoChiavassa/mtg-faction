@@ -13,6 +13,11 @@ import {
 
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
+import {
+  PageHeader,
+  PageHeaderCaption,
+  PageHeaderTitle,
+} from '@/components/layout/page-header';
 import { SitePagination } from '@/components/layout/site-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -192,199 +197,207 @@ function FactionsRoute() {
   }, [navigate, outOfRange, rangeLimits, search, stats?.maxIdentities]);
 
   return (
-    <Container>
-      <div className="mx-auto pb-15">
-        {/* Filters toggle */}
-        <div className="pointer-events-none relative z-20 flex w-full pt-10 pb-6">
-          <div className="pointer-events-auto mr-auto flex items-center gap-3">
-            <Button
-              size="xs"
-              variant="link"
-              onClick={() => setOpenFilters(prev => !prev)}
-              className="-ml-2 w-28.5! cursor-pointer justify-start"
-            >
-              <SlidersHorizontal className="mr-1 size-4" />{' '}
-              {openFilters ? 'Hide Filters' : 'Show Filters'}
-            </Button>
-            {isFiltersDirty && (
+    <>
+      <PageHeader>
+        <PageHeaderCaption>Explore</PageHeaderCaption>
+        <PageHeaderTitle>Factions</PageHeaderTitle>
+      </PageHeader>
+      <Container className="mt-px">
+        <div className="mx-auto pb-15">
+          {/* Filters toggle */}
+          <div className="pointer-events-none relative z-20 flex w-full py-4">
+            <div className="pointer-events-auto mr-auto flex items-center gap-3">
               <Button
                 size="xs"
-                nativeButton={false}
-                onClick={closeFilters}
-                render={
-                  <Link
-                    to="/factions"
-                    search={prev => ({
-                      perPage: prev.perPage,
-                      sortBy: prev.sortBy,
-                    })}
-                  />
-                }
+                variant="link"
+                onClick={() => setOpenFilters(prev => !prev)}
+                className="-ml-2 w-28.5! cursor-pointer justify-start"
               >
-                Reset Filters
+                <SlidersHorizontal className="mr-1 size-4" />{' '}
+                {openFilters ? 'Hide Filters' : 'Show Filters'}
               </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Filters form  */}
-        <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
-          <CollapsibleContent animate className="-mx-1.5 px-1.5">
-            <Separator />
-            <FilterForm
-              form={form}
-              stats={stats}
-              onClose={closeFilters}
-              isDirty={isFiltersDirty}
-              className="my-8 w-full pb-11.5"
-            />
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* Table actions */}
-        <div
-          className={cn(
-            'relative z-15 -mt-19 flex w-full items-center justify-end gap-3 bg-background pt-6 pb-6',
-            isFiltersDirty && '-mt-6',
-          )}
-        >
-          {/* Filter badges */}
-          {isFiltersDirty && (
-            <div className="pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis">
-              {isIdentitiesDirty && (
-                <Badge variant="secondary" className="capitalize">
-                  <FingerprintPattern />
-                  {filters.identities.join(', ')}
-                </Badge>
-              )}
-              {isMaxIdentitiesDirty && (
-                <Badge variant="secondary">
-                  <RulerDimensionLine />
-                  {filters.maxIdentities}
-                </Badge>
-              )}
-              {isCardsRangeDirty && (
-                <Badge variant="secondary">
-                  <Layers />
-                  {filters.minCards ?? 0} -{' '}
-                  {filters.maxCards ?? rangeLimits.maxCards}
-                </Badge>
-              )}
-              {isCreaturesRangeDirty && (
-                <Badge variant="secondary">
-                  <PawPrint />
-                  {filters.minCreatures ?? 0} -{' '}
-                  {filters.maxCreatures ?? rangeLimits.maxCreatures}
-                </Badge>
-              )}
-              {isNonCreaturesRangeDirty && (
-                <Badge variant="secondary">
-                  <Sparkles />
-                  {filters.minNonCreatures ?? 0} -{' '}
-                  {filters.maxNonCreatures ?? rangeLimits.maxNonCreatures}
-                </Badge>
+              {isFiltersDirty && (
+                <Button
+                  size="xs"
+                  nativeButton={false}
+                  onClick={closeFilters}
+                  render={
+                    <Link
+                      to="/factions"
+                      search={prev => ({
+                        perPage: prev.perPage,
+                        sortBy: prev.sortBy,
+                      })}
+                    />
+                  }
+                >
+                  Reset Filters
+                </Button>
               )}
             </div>
-          )}
-
-          {/* Sort By */}
-          <Field orientation="horizontal" className="ml-auto w-auto gap-2">
-            <FieldLabel className="text-xs">Sort By</FieldLabel>
-            <DataTableSelect
-              value={filters.sortBy}
-              options={SORT_BY_OPTIONS}
-              onChange={val => {
-                const newSortBy = val ?? DEFAULT_SORT_BY;
-                void navigate({
-                  resetScroll: false,
-                  search: prev => ({
-                    ...prev,
-                    page: undefined,
-                    sortBy:
-                      newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
-                  }),
-                });
-              }}
-            />
-          </Field>
-
-          {/* Per Page */}
-          <Field orientation="horizontal" className="w-auto gap-2">
-            <FieldLabel className="text-xs">Per Page</FieldLabel>
-            <DataTableSelect
-              value={filters.perPage}
-              options={PER_PAGE_OPTIONS}
-              onChange={val => {
-                const newPerPage = val ?? DEFAULT_PER_PAGE;
-                void navigate({
-                  resetScroll: false,
-                  search: prev => ({
-                    ...prev,
-                    page: undefined,
-                    perPage:
-                      newPerPage !== DEFAULT_PER_PAGE ? newPerPage : undefined,
-                  }),
-                });
-              }}
-            />
-          </Field>
-
-          <Separator orientation="vertical" />
-
-          {/* Results count */}
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            Results:{' '}
-            {!isLoading ? (
-              <span className="mr-2 font-medium text-foreground tabular-nums">
-                {totalCount}
-              </span>
-            ) : (
-              <Skeleton className="mr-2 inline-block h-4 w-7.5" />
-            )}
           </div>
-        </div>
 
-        {/* Table */}
-        <DataTable
-          data={factions}
-          columns={columns}
-          isLoading={isLoading}
-          sortBy={filters.sortBy}
-          isPlaceholderData={isPlaceholderData}
-          onSortingChange={handleSortingChange}
-          pagination={{
-            pageIndex: currentPage,
-            pageSize: filters.perPage,
-            pageCount: totalPages,
-          }}
-        />
+          {/* Filters form  */}
+          <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+            <CollapsibleContent animate className="-mx-1.5 px-1.5">
+              <Separator />
+              <FilterForm
+                form={form}
+                stats={stats}
+                onClose={closeFilters}
+                isDirty={isFiltersDirty}
+                className="my-8 w-full pb-11.5"
+              />
+            </CollapsibleContent>
+          </Collapsible>
 
-        {/* Pagination */}
-        {totalPages > 1 && factions.length && (
-          <SitePagination
-            size="sm"
-            showBoundaries
-            totalPages={totalPages}
-            currentPage={filters.page}
-            className="justify-end py-6"
-            disabled={disablePagination}
-            onPageChange={newPage =>
-              void navigate({
-                resetScroll: false,
-                search: prev => ({
-                  ...prev,
-                  page: newPage,
-                }),
-              }).then(() => {
-                if (filters.perPage === 100) {
-                  closeFilters();
-                }
-              })
-            }
+          {/* Table actions */}
+          <div
+            className={cn(
+              'relative z-15 -mt-15 flex w-full items-center justify-end gap-3 bg-background py-4',
+              isFiltersDirty && '-mt-5',
+            )}
+          >
+            {/* Filter badges */}
+            {isFiltersDirty && (
+              <div className="pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis">
+                {isIdentitiesDirty && (
+                  <Badge variant="secondary" className="capitalize">
+                    <FingerprintPattern />
+                    {filters.identities.join(', ')}
+                  </Badge>
+                )}
+                {isMaxIdentitiesDirty && (
+                  <Badge variant="secondary">
+                    <RulerDimensionLine />
+                    {filters.maxIdentities}
+                  </Badge>
+                )}
+                {isCardsRangeDirty && (
+                  <Badge variant="secondary">
+                    <Layers />
+                    {filters.minCards ?? 0} -{' '}
+                    {filters.maxCards ?? rangeLimits.maxCards}
+                  </Badge>
+                )}
+                {isCreaturesRangeDirty && (
+                  <Badge variant="secondary">
+                    <PawPrint />
+                    {filters.minCreatures ?? 0} -{' '}
+                    {filters.maxCreatures ?? rangeLimits.maxCreatures}
+                  </Badge>
+                )}
+                {isNonCreaturesRangeDirty && (
+                  <Badge variant="secondary">
+                    <Sparkles />
+                    {filters.minNonCreatures ?? 0} -{' '}
+                    {filters.maxNonCreatures ?? rangeLimits.maxNonCreatures}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Sort By */}
+            <Field orientation="horizontal" className="ml-auto w-auto gap-2">
+              <FieldLabel className="text-xs">Sort By</FieldLabel>
+              <DataTableSelect
+                value={filters.sortBy}
+                options={SORT_BY_OPTIONS}
+                onChange={val => {
+                  const newSortBy = val ?? DEFAULT_SORT_BY;
+                  void navigate({
+                    resetScroll: false,
+                    search: prev => ({
+                      ...prev,
+                      page: undefined,
+                      sortBy:
+                        newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+                    }),
+                  });
+                }}
+              />
+            </Field>
+
+            {/* Per Page */}
+            <Field orientation="horizontal" className="w-auto gap-2">
+              <FieldLabel className="text-xs">Per Page</FieldLabel>
+              <DataTableSelect
+                value={filters.perPage}
+                options={PER_PAGE_OPTIONS}
+                onChange={val => {
+                  const newPerPage = val ?? DEFAULT_PER_PAGE;
+                  void navigate({
+                    resetScroll: false,
+                    search: prev => ({
+                      ...prev,
+                      page: undefined,
+                      perPage:
+                        newPerPage !== DEFAULT_PER_PAGE
+                          ? newPerPage
+                          : undefined,
+                    }),
+                  });
+                }}
+              />
+            </Field>
+
+            <Separator orientation="vertical" />
+
+            {/* Results count */}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              Results:{' '}
+              {!isLoading ? (
+                <span className="mr-2 font-medium text-foreground tabular-nums">
+                  {totalCount}
+                </span>
+              ) : (
+                <Skeleton className="mr-2 inline-block h-4 w-7.5" />
+              )}
+            </div>
+          </div>
+
+          {/* Table */}
+          <DataTable
+            data={factions}
+            columns={columns}
+            isLoading={isLoading}
+            sortBy={filters.sortBy}
+            isPlaceholderData={isPlaceholderData}
+            onSortingChange={handleSortingChange}
+            pagination={{
+              pageIndex: currentPage,
+              pageSize: filters.perPage,
+              pageCount: totalPages,
+            }}
           />
-        )}
-      </div>
-    </Container>
+
+          {/* Pagination */}
+          {totalPages > 1 && factions.length && (
+            <SitePagination
+              size="sm"
+              showBoundaries
+              totalPages={totalPages}
+              currentPage={filters.page}
+              className="justify-end py-6"
+              disabled={disablePagination}
+              onPageChange={newPage =>
+                void navigate({
+                  resetScroll: false,
+                  search: prev => ({
+                    ...prev,
+                    page: newPage,
+                  }),
+                }).then(() => {
+                  if (filters.perPage === 100) {
+                    closeFilters();
+                  }
+                })
+              }
+            />
+          )}
+        </div>
+      </Container>
+    </>
   );
 }
 

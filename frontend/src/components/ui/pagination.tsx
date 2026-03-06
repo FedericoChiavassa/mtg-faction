@@ -53,8 +53,11 @@ function PaginationLink({
     <Button
       size={size}
       nativeButton={false}
-      className={cn('shadow-none', className)}
       variant={isActive ? 'outline' : variant}
+      className={cn(
+        'shadow-none aria-disabled:text-muted-foreground/50',
+        className,
+      )}
       render={
         <a
           data-active={isActive}

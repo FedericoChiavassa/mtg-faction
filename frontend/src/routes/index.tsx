@@ -26,7 +26,7 @@ function HomeRoute() {
 
       <main className="relative flex min-h-dvh w-full flex-col overflow-hidden pt-60 pb-28 text-center">
         <div className="relative z-10 mx-auto max-w-3xl px-6">
-          <h1 className="text-5xl font-bold tracking-tight md:text-6xl">
+          <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
             Faction
           </h1>
 
