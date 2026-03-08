@@ -144,7 +144,7 @@ function CardsRoute() {
         </SubHeader>
       )}
 
-      <Container className="flex flex-1 flex-col pt-2 pb-12">
+      <Container className="flex flex-1 flex-col pt-2 pb-15">
         {faction ? (
           <CardGrid
             cards={cards}
@@ -153,7 +153,7 @@ function CardsRoute() {
             isPlaceholderData={isPlaceholderData}
           />
         ) : (
-          <div className="flex flex-1 flex-col justify-start pt-2">
+          <div className="flex flex-1 flex-col justify-start pt-6">
             <FactionCombobox
               hasPopover={false}
               placeholder="Select a faction..."

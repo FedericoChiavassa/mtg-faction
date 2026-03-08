@@ -4,11 +4,8 @@ import { Container } from './container';
 
 export function PageHeader({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      data-slot="page-header"
-      className={'bg-muted/30 outline outline-border dark:bg-card'}
-    >
-      <Container className="py-4">{children}</Container>
+    <div data-slot="page-header" className={'bg-card outline outline-border'}>
+      <Container className="py-5">{children}</Container>
     </div>
   );
 }
@@ -24,7 +21,7 @@ export function PageHeaderCaption({
     <p
       data-slot="page-header-caption"
       className={cn(
-        'mb-0.5 text-[10px] font-semibold tracking-[0.15em] text-muted-foreground uppercase',
+        'mb-0.5 text-[11px] font-semibold tracking-[0.15em] text-muted-foreground uppercase',
         className,
       )}
     >
@@ -44,7 +41,7 @@ export function PageHeaderTitle({
     <h1
       data-slot="page-header-title"
       className={cn(
-        'text-lg font-semibold tracking-tight text-foreground',
+        'text-2xl font-semibold tracking-tight text-foreground',
         className,
       )}
     >
