@@ -60,7 +60,7 @@ function RulesRoute() {
       </PageHeader>
 
       {/* Body */}
-      <Container className="py-10">
+      <Container className="pt-10 pb-20">
         <div className="flex gap-12">
           <TableOfContents />
 
@@ -68,8 +68,7 @@ function RulesRoute() {
             {/* 1. Overview */}
             <RuleSection number={1} id="overview" title="Overview">
               <p>
-                In Faction{' '}
-                <Highlight>each deck is built around a Faction</Highlight>,
+                In Faction <Strong>each deck is built around a Faction</Strong>,
                 which is a combination of creature types.
               </p>
               <p>You may include:</p>
@@ -105,15 +104,8 @@ function RulesRoute() {
                   ].map(({ size, side }) => (
                     <li key={size}>
                       <span>
-                        Minimum{' '}
-                        <strong className="font-semibold text-foreground">
-                          {size}
-                        </strong>{' '}
-                        deck with up to{' '}
-                        <strong className="font-semibold text-foreground">
-                          {side} cards
-                        </strong>{' '}
-                        in the sideboard
+                        Minimum <Strong>{size}</Strong> deck with up to{' '}
+                        <Strong>{side} cards</Strong> in the sideboard
                       </span>
                     </li>
                   ))}
@@ -135,8 +127,8 @@ function RulesRoute() {
             >
               <p>
                 A Faction is the full{' '}
-                <Highlight>combination of creature types</Highlight> that appear
-                on a creature card&apos;s type line.
+                <Strong>combination of creature types</Strong> that appear on a
+                creature card&apos;s type line.
               </p>
               <p>Examples:</p>
               <Card className="p-4 shadow-none">
@@ -174,10 +166,7 @@ function RulesRoute() {
             >
               <p>
                 You may include any creature card whose creature types{' '}
-                <strong className="font-semibold text-foreground">
-                  exactly match
-                </strong>{' '}
-                your chosen Faction.
+                <Strong>exactly match</Strong> your chosen Faction.
               </p>
               <p>
                 Examples for the Faction <TypeBadge>Human Wizard</TypeBadge>:
@@ -228,10 +217,10 @@ function RulesRoute() {
             >
               <p>
                 You may include any non-creature card (including lands) that
-                <Highlight>
+                <Strong>
                   {' '}
                   mentions your Faction or part of your Faction
-                </Highlight>{' '}
+                </Strong>{' '}
                 in its:
               </p>
               <RuleList items={['Name', 'Type line', 'Oracle text']} />
@@ -284,7 +273,7 @@ function RulesRoute() {
                 <p className="text-sm leading-relaxed">
                   If a non-creature card references both a creature type and a
                   more specific combination containing that type,{' '}
-                  <Highlight>only the more specific</Highlight> combination is
+                  <Strong>only the more specific</Strong> combination is
                   considered.
                 </p>
                 <Card className="p-4 shadow-none">
@@ -566,7 +555,7 @@ function RuleSection({
   );
 }
 
-function Highlight({
+function Strong({
   children,
   className,
 }: {
@@ -574,9 +563,9 @@ function Highlight({
   className?: string;
 }) {
   return (
-    <span className={cn('font-semibold text-foreground', className)}>
+    <strong className={cn('font-semibold text-foreground', className)}>
       {children}
-    </span>
+    </strong>
   );
 }
 

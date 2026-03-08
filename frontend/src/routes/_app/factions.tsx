@@ -378,8 +378,8 @@ function FactionsRoute() {
               showBoundaries
               totalPages={totalPages}
               currentPage={filters.page}
-              className="justify-end py-6"
               disabled={disablePagination}
+              className="justify-end pt-5 pb-6"
               onPageChange={newPage =>
                 void navigate({
                   resetScroll: false,

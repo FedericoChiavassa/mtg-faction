@@ -30,11 +30,15 @@ function HomeRoute() {
             Faction
           </h1>
 
-          <p className="mt-6 text-lg text-muted-foreground">
+          <p className="mt-6 text-xl text-muted-foreground">
             A community format for Magic: The Gathering.
           </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Build decks around creature-type factions and explore a flavorful
+            way to play Magic.
+          </p>
 
-          <div className="mx-auto mt-10 flex items-center justify-center gap-2">
+          <div className="mx-auto mt-9 flex items-center justify-center gap-2">
             <FactionCombobox
               className="max-w-none text-start"
               placeholder="Select a faction to browse its cards..."
