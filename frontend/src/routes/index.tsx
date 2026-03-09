@@ -31,11 +31,11 @@ function HomeRoute() {
           </h1>
 
           <p className="mt-6 text-xl text-muted-foreground">
-            A community format for Magic: The Gathering.
+            A community format for Magic: The Gathering
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Build decks around creature-type factions and explore a flavorful
-            way to play Magic.
+            way to play Magic
           </p>
 
           <div className="mx-auto mt-9 flex items-center justify-center gap-2">

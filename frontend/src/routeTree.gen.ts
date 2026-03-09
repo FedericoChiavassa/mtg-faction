@@ -13,6 +13,7 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRulesRouteImport } from './routes/_app/rules'
 import { Route as AppFactionsRouteImport } from './routes/_app/factions'
+import { Route as AppContactRouteImport } from './routes/_app/contact'
 import { Route as AppCardsRouteImport } from './routes/_app/cards'
 import { Route as AppAboutRouteImport } from './routes/_app/about'
 
@@ -35,6 +36,11 @@ const AppFactionsRoute = AppFactionsRouteImport.update({
   path: '/factions',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppContactRoute = AppContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppCardsRoute = AppCardsRouteImport.update({
   id: '/cards',
   path: '/cards',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AppAboutRoute
   '/cards': typeof AppCardsRoute
+  '/contact': typeof AppContactRoute
   '/factions': typeof AppFactionsRoute
   '/rules': typeof AppRulesRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AppAboutRoute
   '/cards': typeof AppCardsRoute
+  '/contact': typeof AppContactRoute
   '/factions': typeof AppFactionsRoute
   '/rules': typeof AppRulesRoute
 }
@@ -66,20 +74,22 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/_app/about': typeof AppAboutRoute
   '/_app/cards': typeof AppCardsRoute
+  '/_app/contact': typeof AppContactRoute
   '/_app/factions': typeof AppFactionsRoute
   '/_app/rules': typeof AppRulesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/cards' | '/factions' | '/rules'
+  fullPaths: '/' | '/about' | '/cards' | '/contact' | '/factions' | '/rules'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/cards' | '/factions' | '/rules'
+  to: '/' | '/about' | '/cards' | '/contact' | '/factions' | '/rules'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/about'
     | '/_app/cards'
+    | '/_app/contact'
     | '/_app/factions'
     | '/_app/rules'
   fileRoutesById: FileRoutesById
@@ -119,6 +129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFactionsRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/contact': {
+      id: '/_app/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof AppContactRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/cards': {
       id: '/_app/cards'
       path: '/cards'
@@ -139,6 +156,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppAboutRoute: typeof AppAboutRoute
   AppCardsRoute: typeof AppCardsRoute
+  AppContactRoute: typeof AppContactRoute
   AppFactionsRoute: typeof AppFactionsRoute
   AppRulesRoute: typeof AppRulesRoute
 }
@@ -146,6 +164,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAboutRoute: AppAboutRoute,
   AppCardsRoute: AppCardsRoute,
+  AppContactRoute: AppContactRoute,
   AppFactionsRoute: AppFactionsRoute,
   AppRulesRoute: AppRulesRoute,
 }
