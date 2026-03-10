@@ -3,6 +3,7 @@ import { type StandardSchemaV1Issue, useForm } from '@tanstack/react-form';
 import { AlertCircleIcon, MailCheck } from 'lucide-react';
 import { z } from 'zod';
 
+import { supabase } from '@/lib/supabase';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 const contactSchema = z.object({
   name: z.string().min(2, 'Name too short').max(80, 'Name too long').trim(),
   email: z.email('Invalid email').max(120).trim(),
-  title: z
+  subject: z
     .string()
     .min(3, 'Subject too short')
     .max(120, 'Subject too long')
@@ -33,24 +34,36 @@ const contactSchema = z.object({
     .max(5000, 'Message too long')
     .trim(),
   website: z.string().max(0), // spam honeypot – must stay empty
+  formLoadedAt: z.number(),
 });
 
 type ContactPayload = z.infer<typeof contactSchema>;
 
 // ── API call ──────────────────────────────────────────────────────────────────
 
-const EDGE_FN_URL =
-  'https://<YOUR_PROJECT_REF>.supabase.co/functions/v1/contact-form';
-
 async function submitContactForm(data: ContactPayload) {
-  const res = await fetch(EDGE_FN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? 'Submission failed');
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const { data: result, error } = await supabase.functions.invoke(
+      'contact-form',
+      {
+        body: data,
+        signal: controller.signal,
+      },
+    );
+
+    if (error) {
+      throw new Error(
+        error.context?.error || error.message || 'Submission failed',
+      );
+    }
+
+    return result;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -71,14 +84,16 @@ function FieldError({
 export default function ContactForm() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [serverError, setServerError] = useState<string | null>(null);
+  const [formLoadedAt] = useState(() => Date.now());
 
   const form = useForm({
     defaultValues: {
       name: '',
       email: '',
-      title: '',
+      subject: '',
       message: '',
-      website: '', // honeypot
+      website: '', // spam honeypot
+      formLoadedAt,
     },
     validators: {
       onSubmit: contactSchema,
@@ -179,11 +194,11 @@ export default function ContactForm() {
         )}
       </form.Field>
 
-      {/* Title / Subject */}
+      {/* Subject */}
       <form.Field
-        name="title"
+        name="subject"
         validators={{
-          onChange: contactSchema.shape.title,
+          onChange: contactSchema.shape.subject,
         }}
       >
         {field => (

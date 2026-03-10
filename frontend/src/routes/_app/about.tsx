@@ -145,10 +145,30 @@ function AboutRoute() {
               continue to evolve.
             </p>
             <p>
-              A feedback form may be added in the future for players who want to
-              share ideas, report issues, or suggest improvements to the format
-              or the website.
+              If you wnat to get in contact or send a feedback a form is
+              availabel to share ideas, report issues, or suggest improvements
+              to the format or the website.
             </p>
+          </Section>
+          {/* Closing */}
+          <Section id="closing" title="Closing">
+            <p>
+              Faction is still in its early stages, and the format may continue
+              to evolve based on community play and feedback.
+            </p>
+            <p>
+              Whether you want to share new ideas, report technical issues, or
+              suggest improvements to the ruleset or the website, send us a
+              message.
+            </p>
+
+            <Link
+              to="/contact"
+              className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Get in touch
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </Section>
         </article>
       </Container>
