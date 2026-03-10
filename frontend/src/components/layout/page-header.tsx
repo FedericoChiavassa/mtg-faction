@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 import { Container } from './container';
@@ -33,19 +35,22 @@ export function PageHeaderCaption({
 export function PageHeaderTitle({
   children,
   className,
+  icon: Icon,
 }: {
   children: string;
   className?: string;
+  icon?: LucideIcon;
 }) {
   return (
     <h1
       data-slot="page-header-title"
       className={cn(
-        'text-2xl font-semibold tracking-tight text-foreground',
+        'flex items-center gap-2 text-2xl font-semibold tracking-tight text-foreground',
         className,
       )}
     >
-      {children}
+      {Icon && <Icon className="size-5 shrink-0 text-muted-foreground" />}
+      <span>{children}</span>
     </h1>
   );
 }

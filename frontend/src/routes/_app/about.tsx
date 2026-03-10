@@ -1,5 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowRight, CircleDot, FlaskConical, Shuffle } from 'lucide-react';
+import {
+  ArrowRight,
+  CircleDot,
+  FlaskConical,
+  Info,
+  Shuffle,
+} from 'lucide-react';
 
 import { Container } from '@/components/layout/container';
 import {
@@ -22,7 +28,7 @@ function AboutRoute() {
       {/* Page header */}
       <PageHeader>
         <PageHeaderCaption>Format</PageHeaderCaption>
-        <PageHeaderTitle>About</PageHeaderTitle>
+        <PageHeaderTitle icon={Info}>About</PageHeaderTitle>
       </PageHeader>
 
       {/* Body */}
@@ -138,18 +144,6 @@ function AboutRoute() {
 
           <Separator />
 
-          {/* Closing */}
-          <Section id="closing" title="Closing">
-            <p>
-              Faction is still at a very early stage, and the format may
-              continue to evolve.
-            </p>
-            <p>
-              If you wnat to get in contact or send a feedback a form is
-              availabel to share ideas, report issues, or suggest improvements
-              to the format or the website.
-            </p>
-          </Section>
           {/* Closing */}
           <Section id="closing" title="Closing">
             <p>

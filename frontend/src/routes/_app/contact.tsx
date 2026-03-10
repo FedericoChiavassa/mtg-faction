@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { Mail } from 'lucide-react';
 
 import { Container } from '@/components/layout/container';
 import {
@@ -17,7 +18,7 @@ function RouteComponent() {
     <>
       <PageHeader>
         <PageHeaderCaption>Get in touch</PageHeaderCaption>
-        <PageHeaderTitle>Contact</PageHeaderTitle>
+        <PageHeaderTitle icon={Mail}>Contact</PageHeaderTitle>
       </PageHeader>
       <Container className="py-10">
         <ContactForm />

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link, useRouterState } from '@tanstack/react-router';
-import { Shuffle } from 'lucide-react';
+import { Layers, Shuffle } from 'lucide-react';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ import {
 import { CardGrid } from '@/features/cards/ui/card-grid';
 import { useFactionList } from '@/features/factions/queries';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useIsScrolled } from '@/hooks/use-is-scrolled';
 
 export const Route = createFileRoute('/_app/cards')({
@@ -45,6 +46,7 @@ function CardsRoute() {
   const page = search.page ?? 1;
   const type = search.type ?? 'all';
   const isScrolled = useIsScrolled();
+  const isMobile = useIsMobile();
   const navigate = Route.useNavigate();
   const { data: factionList, isLoading: isFactionListLoading } =
     useFactionList();
@@ -97,7 +99,7 @@ function CardsRoute() {
       {!faction && (
         <PageHeader>
           <PageHeaderCaption>Browse by Faction</PageHeaderCaption>
-          <PageHeaderTitle>Cards</PageHeaderTitle>
+          <PageHeaderTitle icon={Layers}>Cards</PageHeaderTitle>
         </PageHeader>
       )}
 
@@ -114,32 +116,30 @@ function CardsRoute() {
           />
 
           <div className="ml-auto flex items-center">
-            {faction && (
-              <SitePagination
-                showBoundaries
-                variant="compact"
-                currentPage={page}
-                totalPages={totalPages}
-                className="justify-end py-6"
-                disabled={isPlaceholderData}
-                onPageChange={newPage =>
-                  void navigate({
-                    search: prev =>
-                      buildCardsSearch({
-                        ...prev,
-                        page: newPage,
-                      }),
-                  })
-                }
-              >
-                <PaginationCount
-                  page={page}
-                  entityName="cards"
-                  pageSize={PAGE_SIZE}
-                  totalCount={totalCount}
-                />
-              </SitePagination>
-            )}
+            <SitePagination
+              showBoundaries
+              variant="compact"
+              currentPage={page}
+              totalPages={totalPages}
+              className="justify-end py-6"
+              disabled={isPlaceholderData}
+              onPageChange={newPage =>
+                void navigate({
+                  search: prev =>
+                    buildCardsSearch({
+                      ...prev,
+                      page: newPage,
+                    }),
+                })
+              }
+            >
+              <PaginationCount
+                page={page}
+                entityName="cards"
+                pageSize={PAGE_SIZE}
+                totalCount={totalCount}
+              />
+            </SitePagination>
           </div>
         </SubHeader>
       )}
@@ -211,6 +211,7 @@ function CardsRoute() {
             totalPages={totalPages}
             className="justify-end py-6"
             disabled={isPlaceholderData}
+            variant={isMobile ? 'compact' : 'default'}
             onPageChange={newPage =>
               void navigate({
                 search: prev =>

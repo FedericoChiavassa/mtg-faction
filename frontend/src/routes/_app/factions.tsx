@@ -4,6 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
 import {
   FingerprintPattern,
+  Flag,
   Layers,
   PawPrint,
   RulerDimensionLine,
@@ -200,7 +201,7 @@ function FactionsRoute() {
     <>
       <PageHeader>
         <PageHeaderCaption>Explore</PageHeaderCaption>
-        <PageHeaderTitle>Factions</PageHeaderTitle>
+        <PageHeaderTitle icon={Flag}>Factions</PageHeaderTitle>
       </PageHeader>
       <Container className="mt-px">
         <div className="mx-auto pb-15">

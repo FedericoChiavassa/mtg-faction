@@ -10,6 +10,7 @@ import {
   OctagonAlert,
   OctagonX,
   PawPrint,
+  ScrollText,
   SendToBack,
   Sparkles,
   X,
@@ -48,7 +49,7 @@ function RulesRoute() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <PageHeaderCaption>Format</PageHeaderCaption>
-            <PageHeaderTitle>Rules</PageHeaderTitle>
+            <PageHeaderTitle icon={ScrollText}>Rules</PageHeaderTitle>
           </div>
           {/* <Badge
             variant="outline"
@@ -537,18 +538,18 @@ function RuleSection({
     <section id={id} className="group scroll-mt-21.5">
       <a
         href={`#${id}`}
-        className="group/a mb-4 flex items-baseline gap-3 no-underline"
+        className="group/a mb-4 flex items-center gap-3 no-underline max-md:gap-1"
       >
-        <span className="w-5 shrink-0 text-[11px] font-semibold tracking-widest text-muted-foreground/50 uppercase tabular-nums">
+        <span className="w-5 shrink-0 font-mono text-xs font-semibold tracking-widest text-muted-foreground/50 uppercase">
           {String(number).padStart(2, '0')}
         </span>
-        <h2 className="flex items-center text-base font-semibold text-foreground transition-colors duration-150 group-hover/a:text-foreground/80">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-foreground transition-colors duration-150 group-hover/a:text-foreground/80">
           {title}
-          {Icon && <Icon className="ml-1.5 size-3.5" />}
+          {Icon && <Icon className="size-4 text-muted-foreground" />}
         </h2>
         <Hash className="ml-auto h-3 w-3 shrink-0 self-center text-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100" />
       </a>
-      <div className="space-y-3 pl-8 text-sm leading-relaxed text-muted-foreground">
+      <div className="space-y-3 pl-8 text-sm leading-relaxed text-muted-foreground max-md:pl-0">
         {children}
       </div>
     </section>
