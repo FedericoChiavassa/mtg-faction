@@ -62,6 +62,36 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          ip: string
+          message: string
+          name: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          ip: string
+          message: string
+          name: string
+          subject: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          ip?: string
+          message?: string
+          name?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       creature_types: {
         Row: {
           created_at: string
@@ -115,32 +145,6 @@ export type Database = {
           non_creatures_count?: number
         }
         Relationships: []
-      }
-      format_legalities: {
-        Row: {
-          card_id: string
-          format: string
-          status: Database["public"]["Enums"]["legality_status"]
-        }
-        Insert: {
-          card_id: string
-          format: string
-          status: Database["public"]["Enums"]["legality_status"]
-        }
-        Update: {
-          card_id?: string
-          format?: string
-          status?: Database["public"]["Enums"]["legality_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "format_legalities_card_id_fkey"
-            columns: ["card_id"]
-            isOneToOne: false
-            referencedRelation: "cards"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
@@ -199,9 +203,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      insert_contact_message: {
+        Args: {
+          p_email: string
+          p_ip: string
+          p_message: string
+          p_name: string
+          p_subject: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      legality_status: "legal" | "not_legal" | "banned" | "restricted"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -328,9 +342,7 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      legality_status: ["legal", "not_legal", "banned", "restricted"],
-    },
+    Enums: {},
   },
 } as const
 

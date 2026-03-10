@@ -49,6 +49,12 @@ export function SiteFooter() {
             >
               About
             </Link>
+            <Link
+              to="/contact"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Contact
+            </Link>
           </nav>
 
           {/* Legal */}
