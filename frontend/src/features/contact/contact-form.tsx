@@ -43,7 +43,6 @@ type ContactPayload = z.infer<typeof contactSchema>;
 
 async function submitContactForm(data: ContactPayload) {
   const controller = new AbortController();
-
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
@@ -56,12 +55,18 @@ async function submitContactForm(data: ContactPayload) {
     );
 
     if (error) {
-      throw new Error(
-        error.context?.error || error.message || 'Submission failed',
-      );
+      const errorData = error.context
+        ? await error.context.json().catch(() => ({}))
+        : {};
+      throw new Error(errorData.error || error.message || 'Submission failed');
     }
 
     return result;
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw err;
   } finally {
     clearTimeout(timeout);
   }
