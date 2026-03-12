@@ -29,9 +29,12 @@ export function DataTableSelect<T extends string | number>({
     <Select onValueChange={onChange} value={value ?? undefined}>
       <SelectTrigger
         size="sm"
-        className="h-7! cursor-pointer p-1.5 text-xs font-medium"
+        className="h-7! cursor-pointer p-1.5 text-xs font-medium max-md:overflow-hidden"
       >
-        <SelectValue placeholder={placeholder ?? 'Select...'}>
+        <SelectValue
+          className="max-md:truncate"
+          placeholder={placeholder ?? 'Select...'}
+        >
           {selectedLabel}
         </SelectValue>
       </SelectTrigger>

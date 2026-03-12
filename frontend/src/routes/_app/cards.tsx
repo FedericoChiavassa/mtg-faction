@@ -177,7 +177,7 @@ function CardsRoute() {
             isPlaceholderData={isPlaceholderData}
           />
         ) : (
-          <div className="flex flex-1 flex-col justify-start pt-6">
+          <div className="flex flex-1 flex-col justify-start pt-6 max-md:pt-1">
             <FactionCombobox
               hasPopover={false}
               placeholder="Select a faction..."

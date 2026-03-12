@@ -2,15 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
-import {
-  FingerprintPattern,
-  Flag,
-  Layers,
-  PawPrint,
-  RulerDimensionLine,
-  SlidersHorizontal,
-  Sparkles,
-} from 'lucide-react';
+import { Flag, SlidersHorizontal } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
@@ -20,7 +12,6 @@ import {
   PageHeaderTitle,
 } from '@/components/layout/page-header';
 import { SitePagination } from '@/components/layout/site-pagination';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Field, FieldLabel } from '@/components/ui/field';
@@ -31,12 +22,15 @@ import {
   useFactionForm,
 } from '@/features/factions/hooks/use-faction-form';
 import { useFactions, useFactionStats } from '@/features/factions/queries';
+import { FactionCardList } from '@/features/factions/ui/faction-card-list';
 import { FilterForm } from '@/features/factions/ui/filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
 import { DataTable } from '@/features/factions/ui/table/data-table';
 import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
+import { FilterBadges } from './-factions/filter-badges';
 import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
 import {
   DEFAULT_PER_PAGE,
@@ -55,6 +49,7 @@ export const Route = createFileRoute('/_app/factions')({
 function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
+  const isMobile = useIsMobile();
   const [openFilters, setOpenFilters] = useState(false);
 
   const { data: stats } = useFactionStats();
@@ -210,9 +205,9 @@ function FactionsRoute() {
             <div className="pointer-events-auto mr-auto flex items-center gap-3">
               <Button
                 size="xs"
-                variant="link"
+                variant={isMobile ? 'outline' : 'link'}
                 onClick={() => setOpenFilters(prev => !prev)}
-                className="-ml-2 w-28.5! cursor-pointer justify-start"
+                className="w-28.5! cursor-pointer justify-start md:-ml-2"
               >
                 <SlidersHorizontal className="mr-1 size-4" />{' '}
                 {openFilters ? 'Hide Filters' : 'Show Filters'}
@@ -240,67 +235,53 @@ function FactionsRoute() {
 
           {/* Filters form  */}
           <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
-            <CollapsibleContent animate className="-mx-1.5 px-1.5">
+            <CollapsibleContent
+              animate
+              className="-mx-1.5 px-1.5 max-md:-mx-4 max-md:px-4"
+            >
               <Separator />
               <FilterForm
                 form={form}
                 stats={stats}
                 onClose={closeFilters}
                 isDirty={isFiltersDirty}
-                className="my-8 w-full pb-11.5"
+                className="my-8 w-full pb-11.5 max-md:pb-0"
               />
             </CollapsibleContent>
           </Collapsible>
+
+          <Separator className="-mx-4 mb-2 block min-w-dvw md:hidden" />
 
           {/* Table actions */}
           <div
             className={cn(
               'relative z-15 -mt-15 flex w-full items-center justify-end gap-3 bg-background py-4',
+              'max-md:mt-0 max-md:justify-between max-md:pt-0',
               isFiltersDirty && '-mt-5',
             )}
           >
-            {/* Filter badges */}
-            {isFiltersDirty && (
-              <div className="pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis">
-                {isIdentitiesDirty && (
-                  <Badge variant="secondary" className="capitalize">
-                    <FingerprintPattern />
-                    {filters.identities.join(', ')}
-                  </Badge>
-                )}
-                {isMaxIdentitiesDirty && (
-                  <Badge variant="secondary">
-                    <RulerDimensionLine />
-                    {filters.maxIdentities}
-                  </Badge>
-                )}
-                {isCardsRangeDirty && (
-                  <Badge variant="secondary">
-                    <Layers />
-                    {filters.minCards ?? 0} -{' '}
-                    {filters.maxCards ?? rangeLimits.maxCards}
-                  </Badge>
-                )}
-                {isCreaturesRangeDirty && (
-                  <Badge variant="secondary">
-                    <PawPrint />
-                    {filters.minCreatures ?? 0} -{' '}
-                    {filters.maxCreatures ?? rangeLimits.maxCreatures}
-                  </Badge>
-                )}
-                {isNonCreaturesRangeDirty && (
-                  <Badge variant="secondary">
-                    <Sparkles />
-                    {filters.minNonCreatures ?? 0} -{' '}
-                    {filters.maxNonCreatures ?? rangeLimits.maxNonCreatures}
-                  </Badge>
-                )}
-              </div>
+            {/* Filter badges - desktop */}
+            {!isMobile && (
+              <FilterBadges
+                rangeLimits={rangeLimits}
+                data={{
+                  filters,
+                  isFiltersDirty,
+                  isIdentitiesDirty,
+                  isMaxIdentitiesDirty,
+                  isCardsRangeDirty,
+                  isCreaturesRangeDirty,
+                  isNonCreaturesRangeDirty,
+                }}
+              />
             )}
 
             {/* Sort By */}
-            <Field orientation="horizontal" className="ml-auto w-auto gap-2">
-              <FieldLabel className="text-xs">Sort By</FieldLabel>
+            <Field
+              orientation={isMobile ? 'vertical' : 'horizontal'}
+              className="ml-auto w-auto gap-2 max-md:ml-0 max-md:flex-1 max-md:gap-1 max-md:overflow-hidden"
+            >
+              <FieldLabel className="text-xs text-nowrap">Sort By</FieldLabel>
               <DataTableSelect
                 value={filters.sortBy}
                 options={SORT_BY_OPTIONS}
@@ -320,8 +301,11 @@ function FactionsRoute() {
             </Field>
 
             {/* Per Page */}
-            <Field orientation="horizontal" className="w-auto gap-2">
-              <FieldLabel className="text-xs">Per Page</FieldLabel>
+            <Field
+              orientation={isMobile ? 'vertical' : 'horizontal'}
+              className="w-auto shrink-0 gap-2 max-md:gap-1 max-md:overflow-hidden"
+            >
+              <FieldLabel className="text-xs text-nowrap">Per Page</FieldLabel>
               <DataTableSelect
                 value={filters.perPage}
                 options={PER_PAGE_OPTIONS}
@@ -342,45 +326,80 @@ function FactionsRoute() {
               />
             </Field>
 
-            <Separator orientation="vertical" />
+            <Separator orientation="vertical" className="max-md:ml-2" />
 
             {/* Results count */}
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              Results:{' '}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground max-md:flex-col">
+              <span className="max-md:font-medium max-md:text-foreground">
+                Results<span className="hidden md:inline">:</span>{' '}
+              </span>
               {!isLoading ? (
-                <span className="mr-2 font-medium text-foreground tabular-nums">
+                <span className="mr-2 flex items-center justify-center font-medium text-foreground tabular-nums max-md:mx-2 max-md:min-h-7">
                   {totalCount}
                 </span>
               ) : (
-                <Skeleton className="mr-2 inline-block h-4 w-7.5" />
+                <Skeleton className="mr-2 inline-block h-4 w-7.5 max-md:mx-2 max-md:my-3" />
               )}
             </div>
           </div>
 
+          <Separator className="-mx-4 mb-4 block min-w-dvw md:hidden" />
+
+          {/* Filter badges - mobile */}
+          {isMobile && (
+            <FilterBadges
+              startingIcon
+              className="mb-4"
+              rangeLimits={rangeLimits}
+              data={{
+                filters,
+                isFiltersDirty,
+                isIdentitiesDirty,
+                isMaxIdentitiesDirty,
+                isCardsRangeDirty,
+                isCreaturesRangeDirty,
+                isNonCreaturesRangeDirty,
+              }}
+            />
+          )}
+
           {/* Table */}
-          <DataTable
-            data={factions}
-            columns={columns}
-            isLoading={isLoading}
-            sortBy={filters.sortBy}
-            isPlaceholderData={isPlaceholderData}
-            onSortingChange={handleSortingChange}
-            pagination={{
-              pageIndex: currentPage,
-              pageSize: filters.perPage,
-              pageCount: totalPages,
-            }}
-          />
+          {isMobile ? (
+            <FactionCardList
+              data={factions}
+              isLoading={isLoading}
+              pagination={{
+                pageIndex: currentPage,
+                pageSize: filters.perPage,
+              }}
+            />
+          ) : (
+            <DataTable
+              data={factions}
+              columns={columns}
+              isLoading={isLoading}
+              sortBy={filters.sortBy}
+              isPlaceholderData={isPlaceholderData}
+              onSortingChange={handleSortingChange}
+              pagination={{
+                pageIndex: currentPage,
+                pageSize: filters.perPage,
+                pageCount: totalPages,
+              }}
+            />
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && factions.length && (
             <SitePagination
               size="sm"
               showBoundaries
+              fullWidth={isMobile}
               totalPages={totalPages}
               currentPage={filters.page}
               disabled={disablePagination}
               className="justify-end pt-5 pb-6"
+              variant={isMobile ? 'compact' : 'default'}
               onPageChange={newPage =>
                 void navigate({
                   resetScroll: false,
@@ -389,7 +408,7 @@ function FactionsRoute() {
                     page: newPage,
                   }),
                 }).then(() => {
-                  if (filters.perPage === 100) {
+                  if (filters.perPage === 100 || isMobile) {
                     closeFilters();
                   }
                 })
