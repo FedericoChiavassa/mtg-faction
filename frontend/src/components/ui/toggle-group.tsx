@@ -61,8 +61,10 @@ function ToggleGroupItem({
   children,
   variant = 'default',
   size = 'default',
+  originalColors = false,
   ...props
-}: TogglePrimitive.Props & VariantProps<typeof toggleVariants>) {
+}: TogglePrimitive.Props &
+  VariantProps<typeof toggleVariants> & { originalColors?: boolean }) {
   const context = React.useContext(ToggleGroupContext);
 
   return (
@@ -73,7 +75,8 @@ function ToggleGroupItem({
       data-variant={context.variant || variant}
       className={cn(
         'shrink-0 group-data-[spacing=0]/toggle-group:rounded-none group-data-[spacing=0]/toggle-group:px-2 group-data-[spacing=0]/toggle-group:shadow-none focus:z-10 focus-visible:z-10 group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-l-md group-data-vertical/toggle-group:data-[spacing=0]:first:rounded-t-md group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-r-md group-data-vertical/toggle-group:data-[spacing=0]:last:rounded-b-md data-[state=on]:bg-muted group-data-horizontal/toggle-group:data-[spacing=0]:data-[variant=outline]:border-l-0 group-data-vertical/toggle-group:data-[spacing=0]:data-[variant=outline]:border-t-0 group-data-horizontal/toggle-group:data-[spacing=0]:data-[variant=outline]:first:border-l group-data-vertical/toggle-group:data-[spacing=0]:data-[variant=outline]:first:border-t',
-        'aria-pressed:bg-stone-200/65! dark:aria-pressed:bg-stone-700/65!',
+        !originalColors &&
+          'not-aria-pressed:hover:bg-primary/2! aria-pressed:bg-primary/10! dark:not-aria-pressed:hover:bg-primary/5! dark:aria-pressed:bg-primary/23!',
         toggleVariants({
           variant: context.variant || variant,
           size: context.size || size,

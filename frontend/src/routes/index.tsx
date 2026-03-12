@@ -24,23 +24,22 @@ function HomeRoute() {
         <ThemeToggle className="-mr-2 ml-auto" />
       </Container>
 
-      <main className="relative flex min-h-dvh w-full flex-col overflow-hidden pt-60 pb-28 text-center">
-        <div className="relative z-10 mx-auto max-w-3xl px-6">
+      <main className="just relative flex min-h-dvh w-full flex-col items-center overflow-hidden pb-15 text-center">
+        <div className="relative z-10 mx-auto mt-auto flex max-w-dvw flex-col px-4">
           <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
             Faction
           </h1>
 
-          <p className="mt-6 text-xl text-muted-foreground">
-            A community format for Magic: The Gathering
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Build decks around creature-type factions and explore a flavorful
-            way to play Magic
+          <p className="mt-6 text-2xl text-muted-foreground">
+            A community format for{' '}
+            <span className="text-pretty whitespace-nowrap">
+              Magic: The Gathering
+            </span>
           </p>
 
-          <div className="mx-auto mt-9 flex items-center justify-center gap-2">
+          <div className="mx-auto mt-9 flex max-w-full items-center justify-center gap-2 overflow-hidden max-md:mx-0">
             <FactionCombobox
-              className="max-w-none text-start"
+              className="max-w-none text-start max-md:w-full"
               placeholder="Select a faction to browse its cards..."
               onValueChange={selectedFaction => {
                 void navigate({
@@ -110,6 +109,10 @@ function HomeRoute() {
             </Button>
           </div>
         </div>
+        <p className="mt-auto px-4 text-sm text-pretty text-muted-foreground/50">
+          Build decks around creature-type factions and explore a flavorful way
+          to play Magic
+        </p>
       </main>
 
       <SiteFooter />

@@ -204,7 +204,7 @@ function FactionsRoute() {
         <PageHeaderTitle icon={Flag}>Factions</PageHeaderTitle>
       </PageHeader>
       <Container className="mt-px">
-        <div className="mx-auto pb-15">
+        <div className="mx-auto pb-15 max-md:pb-10">
           {/* Filters toggle */}
           <div className="pointer-events-none relative z-20 flex w-full py-4">
             <div className="pointer-events-auto mr-auto flex items-center gap-3">

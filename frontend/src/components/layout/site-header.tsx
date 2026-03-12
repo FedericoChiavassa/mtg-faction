@@ -61,6 +61,7 @@ export function SiteHeader() {
   return (
     <header className={cn(HeaderStyle(), 'top-0 z-50')}>
       <Container className="flex w-full items-center">
+        {/* Desktop logo */}
         <div className="hidden items-center gap-2 md:flex">
           <Logo />
           <p className="mt-0.75 text-xs text-muted-foreground/50">
@@ -110,9 +111,11 @@ export function SiteHeader() {
             </DrawerTrigger>
             <DrawerContent className="w-64">
               <DrawerHeader className="pb-0">
-                <DrawerTitle className="flex items-center gap-2">
-                  <Swords className="size-4" />
-                  Faction
+                <DrawerTitle>
+                  <Link to="/" className="flex items-center gap-2">
+                    <Swords className="size-4" />
+                    Faction
+                  </Link>
                 </DrawerTitle>
                 <p className="pt-2 text-xs font-medium text-muted-foreground">
                   Magic: The Gathering format
@@ -166,16 +169,22 @@ export function SiteHeader() {
 export function SubHeader({
   children,
   className,
+  containerProps,
 }: {
   children: React.ReactNode;
   className?: string;
+  containerProps?: {
+    className?: string;
+  };
 }) {
   return (
     <div
       data-slot="sub-header"
       className={cn(HeaderStyle(), 'top-12 z-40', className)}
     >
-      <Container className="flex w-full">{children}</Container>
+      <Container className={cn('flex w-full', containerProps?.className)}>
+        {children}
+      </Container>
     </div>
   );
 }

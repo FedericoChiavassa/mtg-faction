@@ -9,11 +9,16 @@ export function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-3">
           {/* Brand */}
           <div>
-            <h3 className="text-lg font-semibold tracking-tight">Faction</h3>
-            <p className="mt-3 text-sm text-muted-foreground">
-              A community format for Magic: The Gathering centered on creature
-              types, featuring unique faction-based deck-building.
-            </p>
+            <h3 className="text-lg font-semibold tracking-tight text-foreground">
+              Faction
+            </h3>
+            <div className="mt-3 space-y-2 text-xs text-muted-foreground">
+              <p>A community format for Magic: The Gathering.</p>
+              <p>
+                Build decks around creature-type factions and explore a
+                flavorful way to play Magic.
+              </p>
+            </div>
           </div>
 
           {/* Navigation */}

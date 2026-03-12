@@ -32,7 +32,7 @@ function AboutRoute() {
       </PageHeader>
 
       {/* Body */}
-      <Container className="pt-10 pb-20">
+      <Container className="pt-10 pb-20 max-md:pb-15">
         <article className="max-w-[68ch] space-y-10">
           {/* About the Format */}
           <Section id="about" title="About the Format">

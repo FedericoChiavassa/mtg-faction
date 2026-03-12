@@ -61,7 +61,7 @@ function RulesRoute() {
       </PageHeader>
 
       {/* Body */}
-      <Container className="pt-10 pb-20">
+      <Container className="pt-10 pb-20 max-md:pb-15">
         <div className="flex gap-12">
           <TableOfContents />
 
@@ -166,8 +166,8 @@ function RulesRoute() {
               title="Creature Cards"
             >
               <p>
-                You may include any creature card whose creature types{' '}
-                <Strong>exactly match</Strong> your chosen Faction.
+                You may include any creature card whose creature types in its
+                type line <Strong>exactly match</Strong> your chosen Faction.
               </p>
               <p>
                 Examples for the Faction <TypeBadge>Human Wizard</TypeBadge>:

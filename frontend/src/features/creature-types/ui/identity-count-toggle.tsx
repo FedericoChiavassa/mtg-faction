@@ -39,7 +39,7 @@ export function IdentityCountToggle({
           key={option}
           value={option}
           aria-label={`Show ${option} identities`}
-          className="font-normal tabular-nums shadow-none!"
+          className="cursor-pointer font-normal tabular-nums shadow-none!"
         >
           {option}
         </ToggleGroupItem>

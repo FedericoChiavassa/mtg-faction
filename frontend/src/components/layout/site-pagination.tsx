@@ -21,6 +21,7 @@ interface SitePaginationProps {
   children?: React.ReactNode;
   showBoundaries?: boolean;
   size?: 'default' | 'xs' | 'sm' | 'lg';
+  fullWidth?: boolean;
 }
 
 export function SitePagination({
@@ -33,6 +34,7 @@ export function SitePagination({
   children,
   showBoundaries = false,
   size,
+  fullWidth,
 }: SitePaginationProps) {
   const isFirst = currentPage <= 1;
   const isLast = currentPage >= totalPages;
@@ -102,6 +104,7 @@ export function SitePagination({
       <PaginationContent
         className={cn(
           disabled && 'pointer-events-none opacity-50 transition-opacity',
+          fullWidth && 'mx-6 w-full justify-between max-md:mx-4',
         )}
       >
         {/* JUMP TO FIRST */}
@@ -235,9 +238,9 @@ export function PaginationCount({
         </span>{' '}
         of{' '}
         <span className="font-bold text-foreground tabular-nums">
-          {totalCount}
-        </span>{' '}
-        {entityName}
+          {totalCount}{' '}
+          <span className="text-[11px] uppercase">{entityName}</span>
+        </span>
       </span>
     </span>
   );
