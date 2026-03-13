@@ -48,8 +48,8 @@ export function IdentityCombobox({
                 </ComboboxChip>
               ))}
               <ComboboxChipsInput
-                className="text-xs capitalize"
                 placeholder="Select one or more creature types..."
+                className="text-xs not-placeholder-shown:capitalize"
               />
             </>
           )}

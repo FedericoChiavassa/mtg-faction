@@ -6,6 +6,7 @@ import {
   type VirtualizedComboboxProps,
   VirtualizedCommand,
 } from '@/components/virtualized-combobox';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 import { searchMatchesFaction } from '../lib/faction-matcher';
 import { useFactionList } from '../queries';
@@ -27,6 +28,7 @@ export function FactionCombobox({
   hasPopover = true,
   className,
 }: FactionComboboxProps) {
+  const isMobile = useIsMobile();
   const [internalValue, setInternalValue] =
     useState<FactionComboboxProps['value']>(null);
 
@@ -47,6 +49,7 @@ export function FactionCombobox({
       value={value}
       loading={isLoading}
       className={className}
+      capitalizeCommandValue
       options={factionList ?? []}
       filter={searchMatchesFaction}
       triggerPlaceholder={placeholder}
@@ -55,8 +58,9 @@ export function FactionCombobox({
     />
   ) : (
     <VirtualizedCommand
-      autofocus
+      capitalizeValue
       loading={isLoading}
+      autofocus={!isMobile}
       placeholder={placeholder}
       options={factionList ?? []}
       selectedOption={value ?? ''}

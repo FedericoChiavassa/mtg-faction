@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 type Option = {
   id: string;
@@ -42,6 +43,7 @@ type VirtualizedCommandProps<T extends Option = Option> = {
   onSelectOption?: (option: string) => void;
   className?: string;
   autofocus?: boolean;
+  capitalizeValue?: boolean;
 };
 
 export const VirtualizedCommand = <T extends Option = Option>({
@@ -54,7 +56,9 @@ export const VirtualizedCommand = <T extends Option = Option>({
   onSelectOption,
   className,
   autofocus = false,
+  capitalizeValue = false,
 }: VirtualizedCommandProps<T>) => {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [filteredOptions, setFilteredOptions] = useState<T[]>(options);
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -98,7 +102,7 @@ export const VirtualizedCommand = <T extends Option = Option>({
 
   const handleSearch = useCallback(
     (newSearch: string) => {
-      setIsKeyboardNavActive(true);
+      if (!isMobile) setIsKeyboardNavActive(true); // don't disable items on mobile
       updateFilteredOptions(newSearch);
       setSearch(prev => {
         if (newSearch.trim() !== prev.trim()) {
@@ -108,7 +112,7 @@ export const VirtualizedCommand = <T extends Option = Option>({
         return newSearch;
       });
     },
-    [scrollToIndex, updateFilteredOptions],
+    [isMobile, scrollToIndex, updateFilteredOptions],
   );
 
   const handleKeyDown = useCallback(
@@ -177,10 +181,13 @@ export const VirtualizedCommand = <T extends Option = Option>({
     >
       <CommandInput
         readOnly={loading}
-        className="pl-3.5!"
         autoFocus={autofocus}
         placeholder={placeholder}
         onValueChange={handleSearch}
+        className={cn(
+          'pl-1.5!',
+          capitalizeValue && 'not-placeholder-shown:capitalize',
+        )}
       />
       <CommandList
         ref={parentRef}
@@ -212,6 +219,7 @@ export const VirtualizedCommand = <T extends Option = Option>({
                   value={option.id}
                   onSelect={onSelectOption}
                   disabled={isKeyboardNavActive}
+                  data-checked={isMobile && selectedOption === option.id}
                   onMouseLeave={() =>
                     !isKeyboardNavActive && setFocusedIndex(-1)
                   }
@@ -223,7 +231,7 @@ export const VirtualizedCommand = <T extends Option = Option>({
                     transform: `translateY(${virtualOption.start}px)`,
                   }}
                   className={cn(
-                    'opacity-100!',
+                    'gap-2 opacity-100!',
                     'absolute top-0 left-0 w-full bg-transparent',
                     focusedIndex === virtualOption.index &&
                       'bg-accent! text-accent-foreground',
@@ -231,15 +239,17 @@ export const VirtualizedCommand = <T extends Option = Option>({
                       'bg-transparent! aria-selected:text-primary',
                   )}
                 >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      selectedOption === option.id
-                        ? 'opacity-100'
-                        : 'opacity-0',
-                    )}
-                  />
-                  <span className="w-75 truncate">
+                  {!isMobile && (
+                    <Check
+                      className={cn(
+                        'h-4 w-4',
+                        selectedOption === option.id
+                          ? 'opacity-100'
+                          : 'opacity-0',
+                      )}
+                    />
+                  )}
+                  <span className="w-75 truncate max-md:w-auto max-md:flex-1">
                     {highlightText(option.name, search)}
                   </span>
                 </CommandItem>
@@ -259,11 +269,11 @@ export type VirtualizedComboboxProps<T extends Option = Option> = {
   filter?: (option: T, search: string) => boolean;
   triggerPlaceholder?: string;
   searchPlaceholder?: string;
-  width?: string;
   height?: string;
   loading?: boolean;
   size?: VariantProps<typeof buttonVariants>['size'];
   className?: string;
+  capitalizeCommandValue?: boolean;
 };
 
 export function VirtualizedCombobox<T extends Option = Option>({
@@ -273,12 +283,14 @@ export function VirtualizedCombobox<T extends Option = Option>({
   filter,
   triggerPlaceholder = 'Select an item',
   searchPlaceholder = 'Search items...',
-  width = '370px',
   height = '400px',
   loading,
   size,
   className,
+  capitalizeCommandValue = false,
 }: VirtualizedComboboxProps<T>) {
+  const isMobile = useIsMobile();
+
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] =
     useState<NonNullable<VirtualizedComboboxProps['value']>>('');
@@ -302,10 +314,10 @@ export function VirtualizedCombobox<T extends Option = Option>({
             role="combobox"
             variant="outline"
             aria-expanded={open}
-            className={cn('justify-between', className)}
-            style={{
-              width: width,
-            }}
+            className={cn(
+              'w-auto flex-1 cursor-pointer justify-between overflow-hidden md:w-92.5 lg:w-92.5',
+              className,
+            )}
           />
         }
       >
@@ -321,15 +333,21 @@ export function VirtualizedCombobox<T extends Option = Option>({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         )}
       </PopoverTrigger>
-      <PopoverContent className="p-0" style={{ width: width }}>
+      <PopoverContent
+        align="start"
+        className="p-0"
+        style={{ width: isMobile ? 'calc(100dvw - 32px)' : '370px' }}
+      >
         <VirtualizedCommand
           height={height}
           filter={filter}
           options={options}
           loading={loading}
+          autofocus={isMobile}
           selectedOption={value}
           placeholder={searchPlaceholder}
           onSelectOption={handleValueChange}
+          capitalizeValue={capitalizeCommandValue}
         />
       </PopoverContent>
     </Popover>
