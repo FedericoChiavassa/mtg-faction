@@ -11,12 +11,14 @@ export function CardTypeToggle({
   orientation = 'horizontal',
   className,
   originalColors = false,
+  spacing = undefined,
 }: {
   value: CardTypeValue;
   onValueChange: (value: CardTypeValue) => void;
   orientation?: 'horizontal' | 'vertical';
   className?: string;
   originalColors?: boolean;
+  spacing?: number;
 }) {
   const handleChange = ([val]: CardTypeValue[]) => {
     if (!val) return;
@@ -26,8 +28,8 @@ export function CardTypeToggle({
 
   return (
     <ToggleGroup
-      // spacing={3}
       value={[value]}
+      spacing={spacing}
       variant="outline"
       orientation={orientation}
       className={cn('bg-background', className)}

@@ -4,10 +4,25 @@ import { cn } from '@/lib/utils';
 
 import { Container } from './container';
 
-export function PageHeader({ children }: { children: React.ReactNode }) {
+export function PageHeader({
+  children,
+  className,
+  containerProps,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  containerProps?: {
+    className?: string;
+  };
+}) {
   return (
-    <div data-slot="page-header" className={'bg-card outline outline-border'}>
-      <Container className="py-5">{children}</Container>
+    <div
+      data-slot="page-header"
+      className={cn('bg-card outline outline-border', className)}
+    >
+      <Container className={cn('py-5', containerProps?.className)}>
+        {children}
+      </Container>
     </div>
   );
 }

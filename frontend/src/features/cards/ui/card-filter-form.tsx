@@ -28,7 +28,7 @@ export function CardFilterForm({
   onChange,
   isMobile,
 }: Props) {
-  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(isMobile ? false : true);
   const isResetting = useRef(false);
 
   const form = useForm({
@@ -120,6 +120,7 @@ export function CardFilterForm({
                 <CardTypeToggle
                   value={field.state.value}
                   originalColors={isMobile}
+                  spacing={isMobile ? 3 : undefined}
                   className="max-md:w-full max-md:shadow-none!"
                   orientation={isMobile ? 'vertical' : 'horizontal'}
                   onValueChange={cardType => {
