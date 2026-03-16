@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
-import { Flag, SlidersHorizontal } from 'lucide-react';
+import { Flag } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Container } from '@/components/layout/container';
@@ -14,6 +14,14 @@ import {
 import { SitePagination } from '@/components/layout/site-pagination';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,6 +39,7 @@ import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
 import { FilterBadges } from './-factions/filter-badges';
+import { FiltersToggle } from './-factions/filters-toggle';
 import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
 import {
   DEFAULT_PER_PAGE,
@@ -194,69 +203,66 @@ function FactionsRoute() {
 
   return (
     <>
-      <PageHeader>
-        <PageHeaderCaption>Explore</PageHeaderCaption>
-        <PageHeaderTitle icon={Flag}>Factions</PageHeaderTitle>
+      <PageHeader
+        className="flex items-center max-md:h-[90.5px]"
+        containerProps={{
+          className: 'flex items-baseline-last justify-between',
+        }}
+      >
+        <div className="flex flex-col justify-center">
+          <PageHeaderCaption>Explore</PageHeaderCaption>
+          <PageHeaderTitle icon={Flag}>Factions</PageHeaderTitle>
+        </div>
+
+        {/* Filters toggle - mobile */}
+        {isMobile && (
+          <FiltersToggle
+            open={openFilters}
+            className="ml-auto"
+            isMobile={isMobile}
+            onClose={closeFilters}
+            isFiltersDirty={isFiltersDirty}
+            onClick={() => setOpenFilters(prev => !prev)}
+          />
+        )}
       </PageHeader>
       <Container className="mt-px">
         <div className="mx-auto pb-15 max-md:pb-10">
-          {/* Filters toggle */}
-          <div className="pointer-events-none relative z-20 flex w-full py-4">
-            <div className="pointer-events-auto mr-auto flex items-center gap-3">
-              <Button
-                size="xs"
-                variant={isMobile ? 'outline' : 'link'}
-                onClick={() => setOpenFilters(prev => !prev)}
-                className="w-28.5! cursor-pointer justify-start md:-ml-2"
+          {/* Filters toggle - desktop */}
+          {!isMobile && (
+            <FiltersToggle
+              open={openFilters}
+              isMobile={isMobile}
+              onClose={closeFilters}
+              isFiltersDirty={isFiltersDirty}
+              onClick={() => setOpenFilters(prev => !prev)}
+            />
+          )}
+
+          {/* Filters form - desktop */}
+          {!isMobile && (
+            <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+              <CollapsibleContent
+                animate
+                className="-mx-1.5 px-1.5 max-md:-mx-4 max-md:px-4"
               >
-                <SlidersHorizontal className="mr-1 size-4" />{' '}
-                {openFilters ? 'Hide Filters' : 'Show Filters'}
-              </Button>
-              {isFiltersDirty && (
-                <Button
-                  size="xs"
-                  nativeButton={false}
-                  onClick={closeFilters}
-                  render={
-                    <Link
-                      to="/factions"
-                      search={prev => ({
-                        perPage: prev.perPage,
-                        sortBy: prev.sortBy,
-                      })}
-                    />
-                  }
-                >
-                  Reset Filters
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Filters form  */}
-          <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
-            <CollapsibleContent
-              animate
-              className="-mx-1.5 px-1.5 max-md:-mx-4 max-md:px-4"
-            >
-              <Separator />
-              <FilterForm
-                form={form}
-                stats={stats}
-                onClose={closeFilters}
-                isDirty={isFiltersDirty}
-                className="my-8 w-full pb-11.5 max-md:pb-0"
-              />
-            </CollapsibleContent>
-          </Collapsible>
-
-          <Separator className="-mx-4 mb-2 block min-w-dvw md:hidden" />
+                <Separator />
+                <FilterForm
+                  form={form}
+                  stats={stats}
+                  onClose={closeFilters}
+                  isDirty={isFiltersDirty}
+                  className="my-8 w-full pb-11.5"
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
           {/* Table actions */}
           <div
             className={cn(
               'relative z-15 -mt-15 flex w-full items-center justify-end gap-3 bg-background py-4',
-              'max-md:mt-0 max-md:justify-between max-md:pt-0',
+              'max-md:mt-0 max-md:justify-between',
               isFiltersDirty && '-mt-5',
             )}
           >
@@ -417,6 +423,71 @@ function FactionsRoute() {
           )}
         </div>
       </Container>
+
+      {/* Filters drawer - mobile */}
+      {isMobile && (
+        <Drawer open={openFilters} onOpenChange={() => setOpenFilters(false)}>
+          <DrawerContent>
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>Filters options</DrawerTitle>
+            </DrawerHeader>
+
+            <div className="no-scrollbar overflow-y-auto bg-background px-4 pt-6">
+              <FilterForm
+                isMobile
+                form={form}
+                stats={stats}
+                className="pb-11.5"
+                onClose={closeFilters}
+                isDirty={isFiltersDirty}
+              />
+            </div>
+
+            <DrawerFooter className="flex flex-row gap-2 border-t bg-card">
+              <Button
+                size="xs"
+                type="submit"
+                className="flex-1"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  void form.handleSubmit();
+                }}
+              >
+                Apply
+              </Button>
+              {isFiltersDirty && (
+                <Button
+                  size="xs"
+                  type="reset"
+                  variant="outline"
+                  nativeButton={false}
+                  onClick={() => setOpenFilters(false)}
+                  className={cn('flex-1 bg-background no-underline!')}
+                  render={
+                    <Link
+                      to="/factions"
+                      resetScroll={false}
+                      search={prev => ({
+                        perPage: prev.perPage,
+                        sortBy: prev.sortBy,
+                      })}
+                    />
+                  }
+                >
+                  Reset
+                </Button>
+              )}
+
+              <DrawerClose className="flex flex-1">
+                <Button size="xs" variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      )}
     </>
   );
 }

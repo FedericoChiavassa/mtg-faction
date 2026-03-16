@@ -66,6 +66,7 @@ export default defineConfig([
       // Hooks
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/static-components': 'off', // disabled because too slow
 
       // React Query
       ...pluginQuery.configs['flat/recommended'].rules,

@@ -32,9 +32,11 @@ type Props = {
   isDirty?: boolean;
   onReset?: () => void;
   onClose?: () => void;
+  isMobile?: boolean;
 };
 
 const fieldLabelStyle = 'w-[21%] pr-3 grow-0! text-xs';
+const fieldLabelStyle_mobile = 'text-xs';
 
 export function FilterForm({
   form,
@@ -43,6 +45,7 @@ export function FilterForm({
   isDirty,
   onReset,
   onClose,
+  isMobile,
 }: Props) {
   const isTouched = useStore(form.store, state => state.isTouched);
 
@@ -60,8 +63,13 @@ export function FilterForm({
             <form.Field
               name="identities"
               children={field => (
-                <Field orientation="horizontal">
-                  <FieldLabel className={fieldLabelStyle}>
+                <Field orientation={isMobile ? 'vertical' : 'horizontal'}>
+                  <FieldLabel
+                    className={cn(
+                      !isMobile && fieldLabelStyle,
+                      isMobile && fieldLabelStyle_mobile,
+                    )}
+                  >
                     <FingerprintPattern size={16} />
                     Creature Types
                   </FieldLabel>
@@ -81,8 +89,13 @@ export function FilterForm({
             <form.Field
               name="maxIdentities"
               children={field => (
-                <Field orientation="horizontal">
-                  <FieldLabel className={fieldLabelStyle}>
+                <Field orientation={isMobile ? 'vertical' : 'horizontal'}>
+                  <FieldLabel
+                    className={cn(
+                      !isMobile && fieldLabelStyle,
+                      isMobile && fieldLabelStyle_mobile,
+                    )}
+                  >
                     <RulerDimensionLine size={16} />
                     Number of Creature Types
                   </FieldLabel>
@@ -103,7 +116,7 @@ export function FilterForm({
             <form.Field
               name="cardsRange"
               children={field => (
-                <Field orientation="horizontal">
+                <Field orientation={isMobile ? 'vertical' : 'horizontal'}>
                   <FieldLabel
                     className={cn(fieldLabelStyle, 'self-baseline-last')}
                   >
@@ -123,7 +136,7 @@ export function FilterForm({
             <form.Field
               name="creaturesRange"
               children={field => (
-                <Field orientation="horizontal">
+                <Field orientation={isMobile ? 'vertical' : 'horizontal'}>
                   <FieldLabel
                     className={cn(fieldLabelStyle, 'self-baseline-last')}
                   >
@@ -143,7 +156,7 @@ export function FilterForm({
             <form.Field
               name="nonCreaturesRange"
               children={field => (
-                <Field orientation="horizontal">
+                <Field orientation={isMobile ? 'vertical' : 'horizontal'}>
                   <FieldLabel
                     className={cn(fieldLabelStyle, 'self-baseline-last')}
                   >
@@ -160,11 +173,9 @@ export function FilterForm({
               )}
             />
           </FieldGroup>
-
-          <FieldSeparator className="mt-2.5" />
         </div>
 
-        <div className="mt-6 ml-[21%] flex flex-1 items-center pl-3">
+        <div className="mt-6 ml-[21%] flex flex-1 items-center pl-3 max-md:hidden">
           <div className="flex max-w-md flex-1 items-center gap-2">
             <Button
               size="xs"
@@ -197,11 +208,11 @@ export function FilterForm({
           </div>
         </div>
 
-        <FieldSeparator className="mt-3" />
+        <FieldSeparator className="mt-3 max-md:hidden" />
       </form>
 
       {onClose && (
-        <div className="mt-2 flex justify-center">
+        <div className="mt-2 flex justify-center max-md:hidden">
           <Button
             size="icon"
             variant="ghost"
