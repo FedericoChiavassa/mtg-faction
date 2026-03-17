@@ -131,7 +131,7 @@ export async function fetchFactionList() {
 
 export async function fetchFactionStats() {
   const query = supabase
-    .from('faction_stats')
+    .from('faction_stats_view')
     .select('max_cards, max_creatures, max_non_creatures, max_identities');
 
   const { data, error } = await query.single();
