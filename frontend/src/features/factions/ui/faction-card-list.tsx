@@ -88,12 +88,15 @@ const StatCell = ({
   return (
     <span
       title={title}
-      className="flex flex-col items-center gap-0.5"
+      className="flex flex-col items-center gap-0"
       style={{
         ...(!!maxDigits && { minWidth: `${maxDigits}ch` }),
       }}
     >
-      <Icon size={14} className="text-muted-foreground" />
+      <div className="flex flex-col items-center gap-0">
+        <Icon size={13} className="text-muted-foreground" />
+        <span className="text-[9px] text-muted-foreground">{title}</span>
+      </div>
       <span className="font-medium">{value}</span>
     </span>
   );
@@ -116,9 +119,9 @@ export function FactionCard({
 }) {
   return (
     <Link to="/cards" search={{ faction: faction.id }}>
-      <div className="flex items-center gap-3 rounded-lg border bg-card py-3 pr-4 pl-3 transition-colors hover:bg-muted">
-        {/* Rank */}
+      <div className="flex items-start gap-3 rounded-lg border bg-card py-2.5 pr-4 pl-3 transition-colors hover:bg-muted">
         <div className="flex flex-1 flex-wrap gap-x-3 gap-y-1">
+          {/* Rank */}
           <span
             className="shrink-0 text-right text-sm font-medium text-muted-foreground/50 tabular-nums"
             style={{
@@ -143,14 +146,14 @@ export function FactionCard({
             maxDigits={statsDigits?.count}
           />
           <StatCell
+            title="Creat."
             icon={PawPrint}
-            title="Creatures"
             value={faction.creatures_count}
             maxDigits={statsDigits?.creatures_count}
           />
           <StatCell
+            title="Spells"
             icon={Sparkles}
-            title="Non Creatures"
             value={faction.non_creatures_count}
             maxDigits={statsDigits?.non_creatures_count}
           />

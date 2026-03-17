@@ -80,7 +80,8 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 border-t pt-6 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Faction. Community-created format.
+          © {new Date().getFullYear()} Faction. Community-created{' '}
+          <span className="text-[11px]">MTG</span> format.
         </div>
       </Container>
     </footer>

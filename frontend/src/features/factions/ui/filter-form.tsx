@@ -183,7 +183,7 @@ export function FilterForm({
               disabled={!isTouched}
               className="flex-1 cursor-pointer"
             >
-              Submit
+              Aplly Filters
             </Button>
             <Button
               size="xs"

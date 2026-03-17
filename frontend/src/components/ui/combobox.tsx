@@ -104,6 +104,7 @@ function ComboboxContent({
         sideOffset={sideOffset}
         className="isolate z-50"
         alignOffset={alignOffset}
+        style={{ pointerEvents: 'auto' }}
       >
         <ComboboxPrimitive.Popup
           data-chips={!!anchor}

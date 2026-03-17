@@ -426,8 +426,12 @@ function FactionsRoute() {
 
       {/* Filters drawer - mobile */}
       {isMobile && (
-        <Drawer open={openFilters} onOpenChange={() => setOpenFilters(false)}>
-          <DrawerContent>
+        <Drawer
+          fixed
+          open={openFilters}
+          onOpenChange={() => setOpenFilters(false)}
+        >
+          <DrawerContent className="min-h-[80dvh]">
             <DrawerHeader className="sr-only">
               <DrawerTitle>Filters options</DrawerTitle>
             </DrawerHeader>
@@ -479,7 +483,7 @@ function FactionsRoute() {
                 </Button>
               )}
 
-              <DrawerClose className="flex flex-1">
+              <DrawerClose asChild className="flex flex-1">
                 <Button size="xs" variant="outline" className="flex-1">
                   Cancel
                 </Button>

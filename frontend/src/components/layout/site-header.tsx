@@ -65,7 +65,7 @@ export function SiteHeader() {
         <div className="hidden items-center gap-2 md:flex">
           <Logo />
           <p className="mt-0.75 text-xs text-muted-foreground/50">
-            ·&nbsp;&nbsp;MTG format
+            ·&nbsp;&nbsp;<span className="text-[11px]">MTG</span> format
           </p>
         </div>
 
