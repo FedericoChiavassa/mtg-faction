@@ -175,7 +175,7 @@ export type Database = {
         }
         Relationships: []
       }
-      faction_stats: {
+      faction_stats_view: {
         Row: {
           max_cards: number | null
           max_creatures: number | null
