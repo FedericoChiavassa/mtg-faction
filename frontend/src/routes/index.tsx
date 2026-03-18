@@ -3,6 +3,7 @@ import { ArrowRight, Shuffle } from 'lucide-react';
 
 import { Container } from '@/components/layout/container';
 import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteLogo } from '@/components/site-logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -26,7 +27,13 @@ function HomeRoute() {
 
       <main className="just relative flex min-h-dvh w-full flex-col items-center overflow-hidden pb-15 text-center">
         <div className="relative z-10 mx-auto mt-auto flex max-w-dvw flex-col px-4">
-          <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
+          <h1 className="relative left-4.5 mx-auto flex w-fit items-center justify-center gap-2 text-5xl font-semibold tracking-tight md:text-6xl">
+            <Link
+              to="/cards"
+              className="absolute right-full mr-2 cursor-pointer"
+            >
+              <SiteLogo className="group/card-swap size-14" />
+            </Link>
             Faction
           </h1>
 
