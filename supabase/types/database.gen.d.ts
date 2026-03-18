@@ -146,6 +146,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_logs: {
+        Row: {
+          completed_at: string | null
+          creature_cards: number
+          creature_types: number
+          faction_identities: number
+          id: string
+          non_creature_cards: number
+        }
+        Insert: {
+          completed_at?: string | null
+          creature_cards: number
+          creature_types: number
+          faction_identities: number
+          id?: string
+          non_creature_cards: number
+        }
+        Update: {
+          completed_at?: string | null
+          creature_cards?: number
+          creature_types?: number
+          faction_identities?: number
+          id?: string
+          non_creature_cards?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       card_summary_view: {

@@ -1,3 +1,5 @@
+import type { Database } from '@db/types';
+import { supabase } from 'lib/createClient';
 import fetch from 'node-fetch';
 
 import { bulkUpsert } from './helpers/bulkUpsert';
@@ -44,6 +46,7 @@ type ScryfallBulkData = {
     object: string;
     id: string;
     type: string;
+    updated_at: string;
     name: string;
     uri: string;
     download_uri: string;
@@ -309,14 +312,31 @@ async function importScryfall() {
   const bulkRes = await fetch('https://api.scryfall.com/bulk-data');
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
-  const oracleCardsDataUrl = bulkData.data.find(
-    d => d.type === 'oracle_cards',
-  )?.download_uri;
-  if (!oracleCardsDataUrl)
+  const oracleCardsData = bulkData.data.find(d => d.type === 'oracle_cards');
+
+  if (!oracleCardsData) {
     throw new Error('Could not find oracle_cards bulk data');
+  }
+
+  const { data: lastSync } = await supabase
+    .from('sync_logs')
+    .select('completed_at')
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (lastSync) {
+    const lastUpdate = new Date(lastSync.completed_at ?? '');
+    const scryfallDate = new Date(oracleCardsData.updated_at);
+
+    if (scryfallDate <= lastUpdate) {
+      console.log('✅ Database is already up to date. Skipping download.');
+      process.exit(0);
+    }
+  }
 
   console.log('Downloading full card data...');
-  const cardsRes = await fetch(oracleCardsDataUrl);
+  const cardsRes = await fetch(oracleCardsData?.download_uri);
   const allCards = (await cardsRes.json()) as ScryfallCard[];
 
   console.log('Fetching creature types...');
@@ -328,7 +348,7 @@ async function importScryfall() {
     creatureTypes: creatureTypesJson.data,
   });
 
-  console.log(`Userting ${creatureTypesJson?.data?.length} creature types...`);
+  console.log(`Upserting ${creatureTypesJson?.data?.length} creature types...`);
   await bulkUpsert({
     table: 'creature_types',
     rows: creatureTypesJson?.data?.map(type => ({
@@ -435,6 +455,7 @@ async function importScryfall() {
   // Cleanup
   identityMap.clear();
   creatureInserts.length = 0;
+  const creatureCardsCount = finalCreatureInserts.length;
   finalCreatureInserts.length = 0;
 
   // 5. Process Non-Creatures
@@ -467,9 +488,30 @@ async function importScryfall() {
   });
 
   // Cleanup
+  const nonCreatureCardsCount = nonCreatureInserts.length;
   nonCreatureInserts.length = 0;
 
-  console.log('\nImport complete!');
+  // 6. Update sync log
+  const syncData: Database['public']['Tables']['sync_logs']['Insert'] = {
+    completed_at: oracleCardsData.updated_at,
+    creature_types: creatureTypesJson?.data?.length || 0,
+    faction_identities: allIdentities?.length || 0,
+    creature_cards: creatureCardsCount,
+    non_creature_cards: nonCreatureCardsCount,
+  };
+
+  console.log('\nPreparing to log sync results:');
+  console.table([syncData]);
+
+  const { error } = await supabase.from('sync_logs').insert(syncData);
+
+  if (error) {
+    console.error('\n❌ Failed to update sync_logs:', error.message);
+  } else {
+    console.log('\nsync_logs updated successfully');
+  }
+
+  console.log('Import complete!');
 }
 
 // --------------------
