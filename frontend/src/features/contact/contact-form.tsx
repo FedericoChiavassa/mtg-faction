@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { type StandardSchemaV1Issue, useForm } from '@tanstack/react-form';
+import { useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon, MailCheck } from 'lucide-react';
 import { z } from 'zod';
 
@@ -87,6 +88,7 @@ function FieldError({
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ContactForm() {
+  const navigate = useNavigate();
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [serverError, setServerError] = useState<string | null>(null);
   const [formLoadedAt] = useState(() => Date.now());
@@ -131,9 +133,11 @@ export default function ContactForm() {
             <Button
               variant="secondary"
               className="mt-6 cursor-pointer"
-              onClick={() => setStatus('idle')}
+              onClick={() => {
+                void navigate({ to: '/' });
+              }}
             >
-              Send another
+              Back to Home
             </Button>
           </EmptyContent>
         </EmptyHeader>
