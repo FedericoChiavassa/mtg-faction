@@ -1,5 +1,5 @@
+import { supabase } from '@lib/createClient';
 import type { QueryData } from '@supabase/supabase-js';
-import { supabase } from 'lib/createClient';
 
 // fetch all faction identities with pagination (avoiding 1000 cap)
 export async function fetchAllFactionIdentities<S extends string = '*'>(

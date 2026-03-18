@@ -22,9 +22,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+        working-directory: workers
 
       - name: Run Scryfall Script
-        run: node workers/import-scryfall.ts
+        run: npm run import-scryfall
+        working-directory: workers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
