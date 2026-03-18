@@ -1,6 +1,5 @@
 import type { Database } from '@db/types';
-import { supabase } from 'lib/createClient';
-import fetch from 'node-fetch';
+import { supabase } from '@lib/createClient';
 
 import { bulkUpsert } from './helpers/bulkUpsert';
 import { extractCreatureGroupsFromText } from './helpers/extractCreatureGroupsFromText';

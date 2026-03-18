@@ -1,7 +1,7 @@
 // --------------------
 // Helper: Generate all subsets of an array
 
-import { supabase } from 'lib/createClient';
+import { supabase } from '@lib/createClient';
 
 import { bulkUpsert } from './bulkUpsert';
 import { fetchAllFactionIdentities } from './fetchAllFactionIdentities';

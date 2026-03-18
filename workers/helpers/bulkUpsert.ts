@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Database } from '@db/types';
-import { supabase } from 'lib/createClient';
+import { supabase } from '@lib/createClient';
 
 type BulkUpsertOptions = {
   table: keyof Database['public']['Tables'];

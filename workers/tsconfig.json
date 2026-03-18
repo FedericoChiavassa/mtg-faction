@@ -13,7 +13,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "@db/types": ["../supabase/types/database.d.ts"]
+      "@db/types": ["../supabase/types/database.d.ts"],
+      "@lib/*": ["lib/*"],
+      "@workers/*": ["*"]
     }
   },
   "include": ["**/*.ts"],
