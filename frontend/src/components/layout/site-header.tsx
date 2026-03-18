@@ -9,7 +9,6 @@ import {
   Mail,
   Menu,
   ScrollText,
-  Swords,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -30,6 +29,7 @@ import {
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
 
+import { SiteLogo } from '../site-logo';
 import { Separator } from '../ui/separator';
 
 const linkStyle = cva(
@@ -49,8 +49,8 @@ const navLinks = [
 ];
 
 const Logo = () => (
-  <Link to="/" className="relative flex items-center gap-2 max-md:ml-2">
-    <Swords className="size-5 max-md:absolute max-md:right-[calc(100%+8px)]" />
+  <Link to="/" className="relative flex items-center gap-1 max-md:ml-2">
+    <SiteLogo className="size-5.5 max-md:absolute max-md:right-[calc(100%+4px)]" />
     <span className="text-lg font-semibold tracking-tight">Faction</span>
   </Link>
 );
@@ -112,8 +112,8 @@ export function SiteHeader() {
             <DrawerContent className="w-64">
               <DrawerHeader className="pb-0">
                 <DrawerTitle>
-                  <Link to="/" className="flex items-center gap-2">
-                    <Swords className="size-4" />
+                  <Link to="/" className="flex items-center gap-1">
+                    <SiteLogo className="size-5" />
                     Faction
                   </Link>
                 </DrawerTitle>
@@ -146,11 +146,13 @@ export function SiteHeader() {
               </nav>
 
               <div className="mt-auto border-t p-4">
-                <p className="text-xs text-muted-foreground/50">
-                  Factions is a community format for Magic: The Gathering
-                  centered on creature types, featuring unique faction-based
-                  deck-building.
-                </p>
+                <div className="space-y-2 text-xs text-muted-foreground/50">
+                  <p>A community format for Magic: The Gathering.</p>
+                  <p>
+                    Build decks around creature-type factions and explore a
+                    flavorful way to play Magic.
+                  </p>
+                </div>
               </div>
             </DrawerContent>
           </Drawer>
