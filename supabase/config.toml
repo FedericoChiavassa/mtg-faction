@@ -393,3 +393,14 @@ entrypoint = "./functions/contact-form/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/contact-form/*.html" ]
+
+[functions.new-contact-message]
+enabled = true
+verify_jwt = false
+import_map = "./functions/new-contact-message/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/new-contact-message/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/new-contact-message/*.html" ]
