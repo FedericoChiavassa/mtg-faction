@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import type { OnChangeFn, SortingState } from '@tanstack/react-table';
 import { Flag } from 'lucide-react';
 
@@ -12,16 +12,7 @@ import {
   PageHeaderTitle,
 } from '@/components/layout/page-header';
 import { SitePagination } from '@/components/layout/site-pagination';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,17 +29,18 @@ import { DataTableSelect } from '@/features/factions/ui/table/data-table-select'
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
-import { FilterBadges } from './-factions/filter-badges';
-import { FiltersToggle } from './-factions/filters-toggle';
-import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
+import { usePageFilters } from './-hooks/use-page-filters';
 import {
   DEFAULT_PER_PAGE,
   DEFAULT_SORT_BY,
   PER_PAGE_OPTIONS,
   SearchSchema,
   SORT_BY_OPTIONS,
-} from './-factions/schema';
-import { usePageFilters } from './-factions/usePageFilters';
+} from './-schema';
+import { FilterBadges } from './-ui/filter-badges';
+import { FiltersDrawer } from './-ui/filters-drawer';
+import { FiltersToggle } from './-ui/filters-toggle';
+import { redirectIfOutOfRange } from './-utils/redirect-if-out-of-range';
 
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
@@ -344,7 +336,7 @@ function FactionsRoute() {
                   {totalCount}
                 </span>
               ) : (
-                <Skeleton className="mr-2 inline-block h-4 w-7.5 max-md:mx-2 max-md:my-3" />
+                <Skeleton className="mr-2 inline-block h-4 w-7.5 max-md:mx-2 max-md:my-1.5" />
               )}
             </div>
           </div>
@@ -426,71 +418,14 @@ function FactionsRoute() {
 
       {/* Filters drawer - mobile */}
       {isMobile && (
-        <Drawer
-          fixed
-          open={openFilters}
-          onOpenChange={() => setOpenFilters(false)}
-        >
-          <DrawerContent className="min-h-[80dvh]">
-            <DrawerHeader className="sr-only">
-              <DrawerTitle>Filters options</DrawerTitle>
-            </DrawerHeader>
-
-            <div className="no-scrollbar overflow-y-auto bg-background px-4 pt-6">
-              <FilterForm
-                isMobile
-                form={form}
-                stats={stats}
-                className="pb-11.5"
-                onClose={closeFilters}
-                isDirty={isFiltersDirty}
-              />
-            </div>
-
-            <DrawerFooter className="flex flex-row gap-2 border-t bg-card">
-              <Button
-                size="xs"
-                type="submit"
-                className="flex-1"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  void form.handleSubmit();
-                }}
-              >
-                Apply
-              </Button>
-              {isFiltersDirty && (
-                <Button
-                  size="xs"
-                  type="reset"
-                  variant="outline"
-                  nativeButton={false}
-                  onClick={() => setOpenFilters(false)}
-                  className={cn('flex-1 bg-background no-underline!')}
-                  render={
-                    <Link
-                      to="/factions"
-                      resetScroll={false}
-                      search={prev => ({
-                        perPage: prev.perPage,
-                        sortBy: prev.sortBy,
-                      })}
-                    />
-                  }
-                >
-                  Reset
-                </Button>
-              )}
-
-              <DrawerClose asChild className="flex flex-1">
-                <Button size="xs" variant="outline" className="flex-1">
-                  Cancel
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
+        <FiltersDrawer
+          form={form}
+          stats={stats}
+          openFilters={openFilters}
+          closeFilters={closeFilters}
+          setOpenFilters={setOpenFilters}
+          isFiltersDirty={isFiltersDirty}
+        />
       )}
     </>
   );

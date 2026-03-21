@@ -1,4 +1,4 @@
-import { supabase } from '@lib/createClient';
+import { supabase } from '@lib/create-client';
 import type { QueryData } from '@supabase/supabase-js';
 
 // fetch all faction identities with pagination (avoiding 1000 cap)
