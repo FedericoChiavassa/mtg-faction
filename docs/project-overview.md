@@ -1,4 +1,4 @@
-# Faction – Architecture
+# Faction
 
 ## Project Overview
 

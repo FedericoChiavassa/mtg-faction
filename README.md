@@ -1,6 +1,23 @@
 # Faction
 
-See [project description here](docs/Project%20description.md)
+This is the source code for [Faction](https://mtgfaction.vercel.app), a Magic: The Gathering card game format created by the community.
+
+Frontend can be found [here](frontend).  
+The code that fetches data from Scryfall can be found in [workers](workers).  
+Database migrations and functions can be found in [supabase](supabase).
+
+## Tech stack
+
+- React + TypeScript
+- Vite
+- TanStack Router
+- TanStack Query
+- TanStack Table
+- TanStack Form
+- Tailwind CSS
+- shadcn/ui
+- zod
+- supabase
 
 ## Local Development
 
