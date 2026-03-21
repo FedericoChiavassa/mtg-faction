@@ -13,12 +13,3 @@ From the project root:
 ```bash
 npm run types:gen
 ```
-
-or
-
-```bash
-supabase gen types typescript \
-  --local \
-  --schema public \
-  > supabase/types/database.gen.d.ts
-```
