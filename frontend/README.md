@@ -1,15 +1,8 @@
-## Tech stack
+# Frontend
 
-- React + TypeScript
-- Vite
-- @vitejs/plugin-react-swc
-- TanStack Router
-- TanStack Query
-- TanStack Table
-- TanStack Form
-- Tailwind CSS
-- shadcn/ui
+The frontend is a single-page application built with React and TypeScript.  
+It uses the Supabase API to fetch and filter card data.
 
-## Notes
+## Local Development
 
-- React Compiler is not enabled
+See [../README.md](../README.md)

@@ -2,7 +2,7 @@
 
 This folder contains all database schema migrations for the project.
 
-## ⚠️ Important: regenerate frontend types
+## ⚠️ Important: regenerate types for frontend and workers
 
 Whenever you **add, modify, or delete a migration**, you **must regenerate Supabase types** so that frontend and workers stay in sync with the database schema.
 
