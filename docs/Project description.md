@@ -2,19 +2,20 @@
 
 ## Project Overview
 
-**Faction** is a custom Magic: The Gathering format with multiple playable variants.  
-Each variant combines **Faction rules** with card-pool restrictions from existing formats (e.g. Modern, Premodern).
+**Faction** is a custom format for the card game **Magic: The Gathering**.  
+The format revolves around the concept of multiple **factions**, set of creature types.
 
 The project is a **read-only reference application**:
+
 - No deckbuilding
 - No user-generated content
 - No writes after import
 - Heavy read filtering
 
 The application allows users to:
+
 - Choose a faction
 - Browse all legal cards for that faction
-- Apply external format restrictions
 
 ---
 
@@ -37,10 +38,6 @@ The application allows users to:
    - Faction legality is not derived at runtime
    - It is precomputed and stored explicitly
 
-5. **Schema evolves intentionally**
-   - Schema changes only when rules require them
-   - No speculative columns
-
 ---
 
 ## Faction Rules (v0.1)
@@ -57,14 +54,16 @@ The application allows users to:
 ## Glossary
 
 ### Faction
+
 A **faction** is a set of creature types.
 
 A faction exists **only if** it appears as the **full set of creature types** on the type line of at least one existing creature card.
 
 Examples:
+
 - `["elf"]` → valid faction
 - `["human", "ranger"]` → valid faction
-- `["ranger"]` → *not* a faction unless a creature card exists with exactly that type line
+- `["ranger"]` → _not_ a faction unless a creature card exists with exactly that type line
 
 ---
 
@@ -77,6 +76,7 @@ The **complete set of creature types** appearing on the type line of a creature 
 - Exactly **one** per creature card
 
 Examples:
+
 - `Creature — Elf Warrior` → `["elf", "warrior"]`
 - `Creature — Dragon` → `["dragon"]`
 
@@ -85,11 +85,13 @@ Examples:
 ### Faction Affinities (Non-Creature Cards Only)
 
 **Faction affinities** are **isolated sets of creature types** referenced anywhere in a non-creature card’s:
+
 - rules text
 - name
 - type line
 
 Rules:
+
 - Multiple affinities may exist per card
 - **Subsets are excluded**
   - If both `["elf"]` and `["elf", "warrior"]` are found, keep only `["elf", "warrior"]`
@@ -102,16 +104,19 @@ Stored as: text[][] (each inner array is one affinity group)
 ## Double-Faced Card Rules
 
 ### Creature / Creature
+
 - If one face’s faction identity is a subset of the other:
   - Keep the larger identity
 - Otherwise:
   - The card has **no faction identity**
 
 ### Creature / Non-Creature
+
 - Use the faction identity of the creature face
 - **No faction affinities** are assigned
 
 ### Non-Creature / Non-Creature
+
 - Combine faction affinities from both faces
 - Remove any subset affinities
 
@@ -120,6 +125,7 @@ Stored as: text[][] (each inner array is one affinity group)
 ## Card Classification
 
 ### Creature Cards (or at least one creature face)
+
 - Must have:
   - `is_creature = true`
   - exactly one `faction_identity_id`
@@ -130,6 +136,7 @@ A creature card is legal **only if**: card.faction_identity_id = chosen_faction.
 ---
 
 ### Non-Creature Cards
+
 - Must have:
   - `is_creature = false`
   - zero or more `faction_affinities`
@@ -140,6 +147,7 @@ A non-creature card is legal **if any** affinity group is a subset of the chosen
 ---
 
 ### Cards Without Identity or Affinity
+
 - Illegal by default
 - Exception: basic lands (handled explicitly)
 
@@ -148,18 +156,20 @@ A non-creature card is legal **if any** affinity group is a subset of the chosen
 ## Canonical Filtering Logic
 
 Let:
+
 - `F` = chosen faction identity (array of creature types)
 - `C` = card
 
 ### Creature Filtering
+
 C.is_creature = true
 AND C.faction_identity_id = F.id
 
 ---
 
 ### Non-Creature Filtering
-A non-creature card is legal if **any** affinity group `A` satisfies: A ⊆ F.identity
 
+A non-creature card is legal if **any** affinity group `A` satisfies: A ⊆ F.identity
 
 This is evaluated at query time using array containment logic.
 
@@ -168,16 +178,17 @@ This is evaluated at query time using array containment logic.
 ## Data Model Strategy
 
 ### Normalized (Queryable)
+
 - Card name
 - Type line
 - Mana value
 - Creature flag
 - Faction identity reference
 - Faction affinities (`text[][]` saved as jsonb)
-- External format legalities
 
 ### Non-Normalized
-- Full raw Scryfall JSON (stored, not queried)
+
+- Potentially in the future, full raw Scryfall JSON (stored, not queried)
 
 ---
 
@@ -195,9 +206,9 @@ This is evaluated at query time using array containment logic.
    - Remove subset groups
    - Store as faction affinities
 5. Persist cards
-6. Apply external format legalities
 
 The import process is:
+
 - Idempotent
 - Fully rerunnable
 - Safe to reset
@@ -215,5 +226,3 @@ The import process is:
 ## Status
 
 This document defines the **authoritative architecture** for the Faction format.
-
-
