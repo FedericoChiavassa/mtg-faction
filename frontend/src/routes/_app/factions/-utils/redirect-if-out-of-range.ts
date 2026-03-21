@@ -1,6 +1,6 @@
 import type { UseNavigateResult } from '@tanstack/react-router';
 
-import type { TSearch } from './-schema';
+import type { TSearch } from '../-schema';
 
 export function redirectIfOutOfRange(
   navigate: UseNavigateResult<'/factions'>,

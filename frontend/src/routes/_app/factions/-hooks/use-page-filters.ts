@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { DEFAULT_PER_PAGE, DEFAULT_SORT_BY, type TSearch } from './-schema';
+import { DEFAULT_PER_PAGE, DEFAULT_SORT_BY, type TSearch } from '../-schema';
 
 export function usePageFilters({
   search,

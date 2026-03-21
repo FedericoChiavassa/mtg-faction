@@ -10,7 +10,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-import type { usePageFilters } from './-use-page-filters';
+import type { usePageFilters } from '../-hooks/use-page-filters';
 
 export function FilterBadges({
   rangeLimits,

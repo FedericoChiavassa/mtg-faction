@@ -38,9 +38,7 @@ import { DataTableSelect } from '@/features/factions/ui/table/data-table-select'
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
-import { FilterBadges } from './-filter-badges';
-import { FiltersToggle } from './-filters-toggle';
-import { redirectIfOutOfRange } from './-redirect-if-out-of-range';
+import { usePageFilters } from './-hooks/use-page-filters';
 import {
   DEFAULT_PER_PAGE,
   DEFAULT_SORT_BY,
@@ -48,7 +46,9 @@ import {
   SearchSchema,
   SORT_BY_OPTIONS,
 } from './-schema';
-import { usePageFilters } from './-use-page-filters';
+import { FilterBadges } from './-ui/filter-badges';
+import { FiltersToggle } from './-ui/filters-toggle';
+import { redirectIfOutOfRange } from './-utils/redirect-if-out-of-range';
 
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,
