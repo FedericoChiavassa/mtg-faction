@@ -12,10 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRulesRouteImport } from './routes/_app/rules'
-import { Route as AppFactionsRouteImport } from './routes/_app/factions'
 import { Route as AppContactRouteImport } from './routes/_app/contact'
 import { Route as AppCardsRouteImport } from './routes/_app/cards'
 import { Route as AppAboutRouteImport } from './routes/_app/about'
+import { Route as AppFactionsRouteRouteImport } from './routes/_app/factions/route'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -29,11 +29,6 @@ const IndexRoute = IndexRouteImport.update({
 const AppRulesRoute = AppRulesRouteImport.update({
   id: '/rules',
   path: '/rules',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppFactionsRoute = AppFactionsRouteImport.update({
-  id: '/factions',
-  path: '/factions',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppContactRoute = AppContactRouteImport.update({
@@ -51,46 +46,51 @@ const AppAboutRoute = AppAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppFactionsRouteRoute = AppFactionsRouteRouteImport.update({
+  id: '/factions',
+  path: '/factions',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/factions': typeof AppFactionsRouteRoute
   '/about': typeof AppAboutRoute
   '/cards': typeof AppCardsRoute
   '/contact': typeof AppContactRoute
-  '/factions': typeof AppFactionsRoute
   '/rules': typeof AppRulesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/factions': typeof AppFactionsRouteRoute
   '/about': typeof AppAboutRoute
   '/cards': typeof AppCardsRoute
   '/contact': typeof AppContactRoute
-  '/factions': typeof AppFactionsRoute
   '/rules': typeof AppRulesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteRouteWithChildren
+  '/_app/factions': typeof AppFactionsRouteRoute
   '/_app/about': typeof AppAboutRoute
   '/_app/cards': typeof AppCardsRoute
   '/_app/contact': typeof AppContactRoute
-  '/_app/factions': typeof AppFactionsRoute
   '/_app/rules': typeof AppRulesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/cards' | '/contact' | '/factions' | '/rules'
+  fullPaths: '/' | '/factions' | '/about' | '/cards' | '/contact' | '/rules'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/cards' | '/contact' | '/factions' | '/rules'
+  to: '/' | '/factions' | '/about' | '/cards' | '/contact' | '/rules'
   id:
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/factions'
     | '/_app/about'
     | '/_app/cards'
     | '/_app/contact'
-    | '/_app/factions'
     | '/_app/rules'
   fileRoutesById: FileRoutesById
 }
@@ -122,13 +122,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRulesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/factions': {
-      id: '/_app/factions'
-      path: '/factions'
-      fullPath: '/factions'
-      preLoaderRoute: typeof AppFactionsRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/contact': {
       id: '/_app/contact'
       path: '/contact'
@@ -150,22 +143,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAboutRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/factions': {
+      id: '/_app/factions'
+      path: '/factions'
+      fullPath: '/factions'
+      preLoaderRoute: typeof AppFactionsRouteRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
 interface AppRouteRouteChildren {
+  AppFactionsRouteRoute: typeof AppFactionsRouteRoute
   AppAboutRoute: typeof AppAboutRoute
   AppCardsRoute: typeof AppCardsRoute
   AppContactRoute: typeof AppContactRoute
-  AppFactionsRoute: typeof AppFactionsRoute
   AppRulesRoute: typeof AppRulesRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppFactionsRouteRoute: AppFactionsRouteRoute,
   AppAboutRoute: AppAboutRoute,
   AppCardsRoute: AppCardsRoute,
   AppContactRoute: AppContactRoute,
-  AppFactionsRoute: AppFactionsRoute,
   AppRulesRoute: AppRulesRoute,
 }
 

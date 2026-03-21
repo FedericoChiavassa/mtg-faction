@@ -15,16 +15,6 @@ function RouteComponent() {
         <Outlet />
       </main>
       <SiteFooter />
-      {/* <GlobalBackgroundAura /> */}
     </>
   );
 }
-
-// function GlobalBackgroundAura() {
-//   return (
-//     <div className="pointer-events-none fixed inset-0 -z-10">
-//       <div className="absolute top-60 left-0 h-72 w-72 rounded-full bg-blue-400/3 blur-3xl" />
-//       <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-red-400/3 blur-3xl" />
-//     </div>
-//   );
-// }

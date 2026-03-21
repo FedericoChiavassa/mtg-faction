@@ -38,17 +38,17 @@ import { DataTableSelect } from '@/features/factions/ui/table/data-table-select'
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
-import { FilterBadges } from './-factions/filter-badges';
-import { FiltersToggle } from './-factions/filters-toggle';
-import { redirectIfOutOfRange } from './-factions/redirectIfOutOfRange';
+import { FilterBadges } from './-filter-badges';
+import { FiltersToggle } from './-filters-toggle';
+import { redirectIfOutOfRange } from './-redirect-if-out-of-range';
 import {
   DEFAULT_PER_PAGE,
   DEFAULT_SORT_BY,
   PER_PAGE_OPTIONS,
   SearchSchema,
   SORT_BY_OPTIONS,
-} from './-factions/schema';
-import { usePageFilters } from './-factions/usePageFilters';
+} from './-schema';
+import { usePageFilters } from './-use-page-filters';
 
 export const Route = createFileRoute('/_app/factions')({
   component: FactionsRoute,

@@ -123,33 +123,6 @@ function HomeRoute() {
       </main>
 
       <SiteFooter />
-
-      {/* <BackgroundMagicAura /> */}
     </>
   );
 }
-
-// function BackgroundMagicAura() {
-//   return (
-//     <div
-//       aria-hidden
-//       data-slot="background-magic-aura"
-//       className="pointer-events-none absolute inset-0 overflow-hidden"
-//     >
-//       {/* White */}
-//       <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-yellow-200/10 blur-3xl" />
-
-//       {/* Blue */}
-//       <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
-
-//       {/* Black */}
-//       <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-purple-900/10 blur-3xl" />
-
-//       {/* Red */}
-//       <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-red-500/10 blur-3xl" />
-
-//       {/* Green (center glow) */}
-//       <div className="absolute top-1/2 left-1/2 h-128 w-lg -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/5 blur-3xl" />
-//     </div>
-//   );
-// }

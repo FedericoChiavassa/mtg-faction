@@ -1,10 +1,10 @@
 import type { Database } from '@db/types';
-import { supabase } from '@lib/createClient';
+import { supabase } from '@lib/create-client';
 
-import { bulkUpsert } from './helpers/bulkUpsert';
-import { extractCreatureGroupsFromText } from './helpers/extractCreatureGroupsFromText';
-import { fetchAllFactionIdentities } from './helpers/fetchAllFactionIdentities';
-import { updateFactionCounts } from './helpers/updateFactionCounts';
+import { bulkUpsert } from './helpers/bulk-upsert';
+import { extractCreatureGroupsFromText } from './helpers/extract-creature-groups-from-text';
+import { fetchAllFactionIdentities } from './helpers/fetch-all-faction-identities';
+import { updateFactionCounts } from './helpers/update-faction-counts';
 
 // --------------------
 // Memory Monitoring
