@@ -11,6 +11,8 @@ import { updateFactionCounts } from './update-faction-counts';
 type FactionRow = Database['public']['Tables']['faction_identities']['Row'];
 type CardRow = Database['public']['Tables']['cards']['Row'];
 
+vi.mock('../lib/create-client', () => ({ supabase: {} }));
+
 // --------------------
 // Mock database state using Partial
 const mockFactions: Partial<FactionRow>[] = [

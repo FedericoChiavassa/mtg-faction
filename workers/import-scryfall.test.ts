@@ -14,6 +14,8 @@ import type {
 import { run as importScryfall } from './import-scryfall';
 import * as supabaseModule from './lib/create-client';
 
+vi.mock('../lib/create-client', () => ({ supabase: {} }));
+
 // --------------------
 // Mock Scryfall API responses
 // --------------------
