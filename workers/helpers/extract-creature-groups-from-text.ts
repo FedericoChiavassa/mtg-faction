@@ -1,4 +1,4 @@
-type CreatureTypeSet = {
+export type CreatureTypeSet = {
   singularSet: Set<string>;
   pluralMap: Map<string, string>;
   maxTypeLength: number;

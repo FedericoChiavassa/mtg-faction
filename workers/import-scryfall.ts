@@ -9,9 +9,9 @@ import { updateFactionCounts } from './helpers/update-faction-counts';
 // --------------------
 // Memory Monitoring
 // --------------------
-function logMemoryUsage(label: string) {
+function logMemoryUsage() {
   const used = process.memoryUsage();
-  console.log(`\n[${label}] Memory Usage:`);
+  console.log(`\n📟 Memory Usage:`);
   console.log(`  RSS: ${Math.round(used.rss / 1024 / 1024)} MB`);
   console.log(`  Heap Total: ${Math.round(used.heapTotal / 1024 / 1024)} MB`);
   console.log(`  Heap Used: ${Math.round(used.heapUsed / 1024 / 1024)} MB`);
@@ -21,7 +21,7 @@ function logMemoryUsage(label: string) {
 // --------------------
 // Types
 // --------------------
-type ScryfallCatalog = {
+export type ScryfallCatalog = {
   object: 'catalog';
   data: string[];
 };
@@ -39,7 +39,7 @@ type CardInsert = {
   faction_affinities?: string[][] | null;
 };
 
-type ScryfallBulkData = {
+export type ScryfallBulkData = {
   object: 'list';
   data: {
     object: string;
@@ -66,7 +66,7 @@ type ScryfallCardFace = {
   };
 };
 
-type ScryfallCard = {
+export type ScryfallCard = {
   id: string;
   oracle_id: string;
   scryfall_uri: string;
@@ -306,7 +306,6 @@ function identityKey(identity: string[]): string {
 // Main import
 // --------------------
 async function importScryfall() {
-  console.log('\n=== START ===');
   console.log('\nFetching Scryfall bulk data...');
   const bulkRes = await fetch('https://api.scryfall.com/bulk-data');
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
@@ -329,7 +328,8 @@ async function importScryfall() {
     const scryfallDate = new Date(oracleCardsData.updated_at);
 
     if (scryfallDate <= lastUpdate) {
-      console.log('✅ Database is already up to date. Skipping download.');
+      console.log('\n✅ Database is already up to date. Skipping download.');
+      console.log('\n=== END ===');
       process.exit(0);
     }
   }
@@ -371,9 +371,6 @@ async function importScryfall() {
       }
     }
   }
-
-  // Cleanup
-  allCards.length = 0;
 
   // 1. Prepare Creature Data & Identities
   const identityMap = new Map<string, string[]>();
@@ -451,12 +448,6 @@ async function importScryfall() {
     onConflict: 'oracle_id',
   });
 
-  // Cleanup
-  identityMap.clear();
-  creatureInserts.length = 0;
-  const creatureCardsCount = finalCreatureInserts.length;
-  finalCreatureInserts.length = 0;
-
   // 5. Process Non-Creatures
   const nonCreatureInserts: CardInsert[] = [];
   for (const c of nonCreatures) {
@@ -486,17 +477,16 @@ async function importScryfall() {
     onConflict: 'oracle_id',
   });
 
-  // Cleanup
-  const nonCreatureCardsCount = nonCreatureInserts.length;
-  nonCreatureInserts.length = 0;
+  // 6. Update faction counts
+  await updateFactionCounts();
 
-  // 6. Update sync log
+  // 7. Update sync log
   const syncData: Database['public']['Tables']['sync_logs']['Insert'] = {
     completed_at: oracleCardsData.updated_at,
     creature_types: creatureTypesJson?.data?.length || 0,
     faction_identities: allIdentities?.length || 0,
-    creature_cards: creatureCardsCount,
-    non_creature_cards: nonCreatureCardsCount,
+    creature_cards: finalCreatureInserts.length,
+    non_creature_cards: nonCreatureInserts.length,
   };
 
   console.log('\nPreparing to log sync results:');
@@ -510,24 +500,19 @@ async function importScryfall() {
     console.log('\nsync_logs updated successfully');
   }
 
-  console.log('Import complete!');
+  console.log('\n✅ Import complete!');
 }
 
 // --------------------
 // Run
 // --------------------
-async function run() {
+export async function run() {
+  console.log('\n=== START ===');
   const start = performance.now();
   await importScryfall();
-  await updateFactionCounts();
-  logMemoryUsage('END');
+  logMemoryUsage();
   console.log(
     `\n🏁 Total runtime: ${((performance.now() - start) / 1000).toFixed(2)}s`,
   );
   console.log('\n=== END ===');
 }
-
-run().catch(err => {
-  console.error('Error importing Scryfall cards:', err);
-  process.exit(1);
-});
