@@ -9,7 +9,7 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "types": ["node"],
+    "types": ["vitest/globals", "node"],
 
     "baseUrl": ".",
     "paths": {

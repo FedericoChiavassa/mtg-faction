@@ -6,8 +6,9 @@
     "node": "24.x"
   },
   "scripts": {
-    "test": "echo \"No tests yet\"",
-    "import-scryfall": "tsx import-scryfall.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "import-scryfall": "tsx run.ts",
     "tsc:check": "tsc --noEmit",
     "format:fix": "prettier --write . --ignore-path ../.prettierignore",
     "format:check": "prettier --check . --ignore-path ../.prettierignore",
@@ -19,6 +20,7 @@
     "dotenv": "^17.3.1"
   },
   "devDependencies": {
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "vitest": "^4.1.1"
   }
 }

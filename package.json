@@ -11,6 +11,7 @@
   "scripts": {
     "prepare": "(test \"$NODE_ENV\" = \"production\" || test \"$CI\" = \"true\" || npx --no-install husky) || true",
     "test": "npm run test --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present",
     "dev": "npm run dev --workspace=frontend",
     "dev:host": "npm run dev:host --workspace=frontend",
     "build": "npm run build --workspace=frontend",
