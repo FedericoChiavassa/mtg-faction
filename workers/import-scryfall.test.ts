@@ -232,12 +232,7 @@ describe('importScryfall', () => {
       throw new Error('process.exit called');
     }) as () => never);
 
-    await expect(
-      importScryfall().catch(err => {
-        console.error('\n❌ Error importing Scryfall cards:', err);
-        process.exit(1);
-      }),
-    ).rejects.toThrow('process.exit called');
+    await expect(importScryfall()).rejects.toThrow('process.exit called');
 
     expect(exitSpy).toHaveBeenCalledWith(0);
     expect(bulkUpsertMock).not.toHaveBeenCalled();
