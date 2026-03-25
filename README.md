@@ -1,23 +1,31 @@
 # Faction
 
-This is the source code for [Faction](https://mtgfaction.vercel.app), a Magic: The Gathering card game format created by the community.
+[Faction](https://mtgfaction.vercel.app) is built to support a community-created _Magic: The Gathering_ format.  
+It uses automated data ingestion and normalization to transform a large real-world dataset into a fast, structured search experience.
 
-Frontend can be found [here](frontend).  
-The code that fetches data from Scryfall can be found in [workers](workers).  
-Database migrations and functions can be found in [supabase](supabase).
+## Technical Features
 
-## Tech stack
+- Clean monorepo setup with **workspaces** and a CI workflow
+- **Database-first development** using migrations
+- **Automated data pipelines** (Node workers + cron + Supabase)
+- **Testable backend logic** (Vitest + isolated helpers)
+- **Fully typed database layer** using generated Supabase types
+- **Pure functions** for complex logic (easier testing + maintainability)
+- **Feature-based frontend architecture**
+- **Real-world performance patterns** (virtualized lists, server-driven filtering)
+- **Responsive UI** designed to work smoothly on both mobile and esktop
+- **Contact form** that writes to the database and sends email notifications with **Resend**
+- **Vercel analytics** to track usage (no personal data is collected)
 
-- React + TypeScript
-- Vite
-- TanStack Router
-- TanStack Query
-- TanStack Table
-- TanStack Form
-- Tailwind CSS
-- shadcn/ui
-- zod
-- supabase
+## Architecture
+
+Scryfall API  
+ ↓  
+[Workers](workers) (Node + Vitest)  
+ ↓  
+[Supabase](supabase) (PostgreSQL + migrations + Edge functions)  
+ ↓  
+[Vite + React frontend](frontend) (TypeScript, TanStack Router + Query + Table + Form, Zod, Shadcn UI, Tailwind CSS)
 
 ## Local Development
 
@@ -41,14 +49,16 @@ supabase start
 
 ### 2. Configure Environment
 
-Create a `.env` file in the workers directory using the credentials output from `supabase start`:
+Using the credentials output from `supabase start`
+
+Create a `.env` file in the workers directory:
 
 ```env
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_SECRET_KEY=your-local-service-role-key
 ```
 
-Create a `.env.local` file in the frontend directory using the credentials output from `supabase start`:
+Create a `.env.local` file in the frontend directory:
 
 ```env
 VITE_SUPABASE_URL=http://127.0.0.1:54321
