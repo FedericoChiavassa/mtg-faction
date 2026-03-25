@@ -1,8 +1,10 @@
-# Faction
+# Faction (Developer Reference)
+
+> This document contains the authoritative rules and architecture for Faction. Intended for contributors and developers.
 
 ## Project Overview
 
-**Faction** is a custom format for the card game **Magic: The Gathering**.  
+**Faction** is a custom **Magic: The Gathering** format.  
 The format revolves around the concept of multiple **factions**, set of creature types.
 
 The project is a **read-only reference application**:
@@ -222,7 +224,3 @@ The import process is:
 > **No runtime inference of faction rules is allowed.**
 
 ---
-
-## Status
-
-This document defines the **authoritative architecture** for the Faction format.
