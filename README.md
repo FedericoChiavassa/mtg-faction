@@ -1,4 +1,4 @@
-# Faction
+# MTG Faction
 
 [Faction](https://mtgfaction.vercel.app) is built to support a community-created _Magic: The Gathering_ format.
 
@@ -22,7 +22,7 @@ It uses automated data ingestion and normalization to transform a large real-wor
 
 Scryfall API  
  ↓  
-[Workers](workers) (Node + Vitest)  
+[Workers](workers) (TypeScript + Vitest)  
  ↓  
 [Supabase](supabase) (PostgreSQL + migrations + Edge functions)  
  ↓  
