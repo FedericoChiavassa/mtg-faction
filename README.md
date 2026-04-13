@@ -6,17 +6,15 @@ It uses automated data ingestion and normalization to transform a large real-wor
 
 ## Technical Features
 
-- Clean monorepo setup with **workspaces** and a CI workflow
-- **Database-first development** using migrations
-- **Automated data pipelines** (Node workers + cron + Supabase)
-- **Testable backend logic** (Vitest + isolated helpers)
-- **Fully typed database layer** using generated Supabase types
-- **Pure functions** for complex logic (easier testing + maintainability)
-- **Feature-based frontend architecture**
-- **Real-world performance patterns** (virtualized lists, server-driven filtering)
-- **Responsive UI** designed to work smoothly on both mobile and esktop
-- **Contact form** that writes to the database and sends email notifications with **Resend**
-- **Vercel analytics** to track usage (no personal data is collected)
+- Monorepo setup with **workspaces** and a CI workflow for automated testing and deployment
+- **Automated data pipelines** (workers + cron + Supabase) ingesting and normalizing datasets in batches
+- **Testable backend logic** (Vitest + isolated helpers) to ensure data integrity
+- **Fully typed database layer** using generated Supabase types to automatically enforce schema consistency
+- **Feature-based frontend architecture** and file-based routing
+- **Performance-oriented patterns** (virtualized lists, server-driven filtering)
+- **Responsive UI** designed to work smoothly on both mobile and desktop
+- **Serverless notification system** using Supabase Edge Functions and Resend
+- **Vercel Analytics** to track usage (no personal data is collected)
 
 ## Architecture
 

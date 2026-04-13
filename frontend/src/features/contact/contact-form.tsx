@@ -241,9 +241,9 @@ export default function ContactForm() {
               rows={6}
               id={field.name}
               name={field.name}
-              className="shadow-none"
               value={field.state.value}
               onBlur={field.handleBlur}
+              className="min-h-30 shadow-none"
               placeholder="Write your message..."
               onChange={e => field.handleChange(e.target.value)}
             />
