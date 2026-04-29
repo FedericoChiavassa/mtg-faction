@@ -98,11 +98,19 @@ function FactionsRoute() {
   const totalPages = Math.ceil(totalCount / filters.perPage);
   const currentPage = data?.currentPage ?? filters.page - 1;
   const outOfRange = data?.outOfRange;
+  const pagination = useMemo(
+    () => ({
+      pageIndex: currentPage,
+      pageSize: filters.perPage,
+      pageCount: totalPages,
+    }),
+    [currentPage, filters.perPage, totalPages],
+  );
 
-  const closeFilters = () => {
+  const closeFilters = useCallback(() => {
     setOpenFilters(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
   const handleFilterSubmit = useCallback(
     (newValues: FactionFilterValues) => {
@@ -136,6 +144,7 @@ function FactionsRoute() {
       });
     },
     [
+      closeFilters,
       navigate,
       rangeLimits?.maxCards,
       rangeLimits?.maxCreatures,
@@ -161,27 +170,30 @@ function FactionsRoute() {
     onSubmit: handleFilterSubmit,
   });
 
-  const handleSortingChange: OnChangeFn<SortingState> = updaterOrValue => {
-    const newSorting =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue([])
-        : updaterOrValue;
+  const handleSortingChange: OnChangeFn<SortingState> = useCallback(
+    updaterOrValue => {
+      const newSorting =
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue([])
+          : updaterOrValue;
 
-    const newSortBy = newSorting[0]?.id as
-      | Parameters<typeof useFactions>[0]['sortBy']
-      | undefined;
+      const newSortBy = newSorting[0]?.id as
+        | Parameters<typeof useFactions>[0]['sortBy']
+        | undefined;
 
-    if (newSortBy) {
-      void navigate({
-        resetScroll: false,
-        search: prev => ({
-          ...prev,
-          page: undefined,
-          sortBy: newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
-        }),
-      });
-    }
-  };
+      if (newSortBy) {
+        void navigate({
+          resetScroll: false,
+          search: prev => ({
+            ...prev,
+            page: undefined,
+            sortBy: newSortBy !== DEFAULT_SORT_BY ? newSortBy : undefined,
+          }),
+        });
+      }
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     redirectIfOutOfRange(
@@ -366,10 +378,7 @@ function FactionsRoute() {
             <FactionCardList
               data={factions}
               isLoading={isLoading}
-              pagination={{
-                pageIndex: currentPage,
-                pageSize: filters.perPage,
-              }}
+              pagination={pagination}
             />
           ) : (
             <DataTable
@@ -377,13 +386,9 @@ function FactionsRoute() {
               columns={columns}
               isLoading={isLoading}
               sortBy={filters.sortBy}
+              pagination={pagination}
               isPlaceholderData={isPlaceholderData}
               onSortingChange={handleSortingChange}
-              pagination={{
-                pageIndex: currentPage,
-                pageSize: filters.perPage,
-                pageCount: totalPages,
-              }}
             />
           )}
 

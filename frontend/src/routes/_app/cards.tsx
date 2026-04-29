@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { createFileRoute, Link, useRouterState } from '@tanstack/react-router';
 import { Layers, Shuffle } from 'lucide-react';
@@ -55,6 +55,14 @@ function CardsRoute() {
     select: s => s.location.state,
   });
 
+  const formValues = useMemo(
+    () => ({
+      faction: faction,
+      cardType: type,
+    }),
+    [faction, type],
+  );
+
   const { data, isLoading, isError, isPlaceholderData } = useCards({
     factionId: faction ?? '',
     isCreature:
@@ -69,22 +77,22 @@ function CardsRoute() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const outOfRange = data?.outOfRange;
 
-  const handleFilterChange = ({
-    faction: newFaction,
-    cardType,
-  }: CardFilterValues) => {
-    void navigate({
-      search: buildCardsSearch({
-        faction: newFaction,
-        type: cardType,
-        page: undefined,
-      }),
-      state: {
-        disablePlaceholderData: newFaction !== faction,
-      },
-    });
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
+  const handleFilterChange = useCallback(
+    ({ faction: newFaction, cardType }: CardFilterValues) => {
+      void navigate({
+        search: buildCardsSearch({
+          faction: newFaction,
+          type: cardType,
+          page: undefined,
+        }),
+        state: {
+          disablePlaceholderData: newFaction !== faction,
+        },
+      });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    },
+    [faction, navigate],
+  );
 
   useEffect(() => {
     if (outOfRange) {
@@ -121,8 +129,8 @@ function CardsRoute() {
         >
           <CardFilterForm
             isMobile={isMobile}
+            initialValues={formValues}
             onChange={handleFilterChange}
-            initialValues={{ faction, cardType: type }}
           />
 
           <div className="ml-auto flex items-center max-md:ml-0 max-md:w-full max-md:flex-col max-md:justify-center">

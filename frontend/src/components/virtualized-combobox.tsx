@@ -297,13 +297,16 @@ export function VirtualizedCombobox<T extends Option = Option>({
 
   const value = controlledValue ?? internalValue;
 
-  const handleValueChange = (newValue: string) => {
-    if (controlledValue === undefined) {
-      setInternalValue(newValue);
-    }
-    onValueChange?.(newValue);
-    setOpen(false);
-  };
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      if (controlledValue === undefined) {
+        setInternalValue(newValue);
+      }
+      onValueChange?.(newValue);
+      setOpen(false);
+    },
+    [controlledValue, onValueChange],
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

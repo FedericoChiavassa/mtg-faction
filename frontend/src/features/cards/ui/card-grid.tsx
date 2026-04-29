@@ -171,8 +171,8 @@ function Card({
             {card.normal_img_url_2 && (
               <div className="absolute inset-0 h-full w-full rotate-y-180 backface-hidden">
                 <img
+                  loading="lazy"
                   alt={card.name}
-                  loading="eager"
                   src={card.normal_img_url_2}
                   onLoad={() => setIsLoadingB(false)}
                   onError={() => {

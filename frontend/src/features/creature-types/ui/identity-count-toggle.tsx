@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useFactionStats } from '@/features/factions/queries';
@@ -12,13 +10,9 @@ export function IdentityCountToggle({
   onValueChange: (value: string) => void;
 }) {
   const { data: stats, isLoading } = useFactionStats();
-  const options = useMemo(
-    () =>
-      stats
-        ? [...Array(stats.maxIdentities)].map((_, i) => (i + 1).toString())
-        : ['1', '2', '3', '4'],
-    [stats],
-  );
+  const options = stats
+    ? [...Array(stats.maxIdentities)].map((_, i) => (i + 1).toString())
+    : ['1', '2', '3', '4'];
 
   const handleChange = ([val]: string[]) => {
     onValueChange(val);
