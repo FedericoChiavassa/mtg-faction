@@ -15,6 +15,7 @@
     "dev": "npm run dev --workspace=frontend",
     "dev:host": "npm run dev:host --workspace=frontend",
     "build": "npm run build --workspace=frontend",
+    "preview": "npm run preview --workspace=frontend",
     "import-scryfall": "npm run import-scryfall --workspace=workers",
     "types:gen": "npx supabase gen types typescript --local --schema public > supabase/types/database.gen.d.ts",
     "types:check": "npx supabase gen types typescript --local --schema public > /tmp/supabase-types.ts && diff -u /tmp/supabase-types.ts supabase/types/database.gen.d.ts",

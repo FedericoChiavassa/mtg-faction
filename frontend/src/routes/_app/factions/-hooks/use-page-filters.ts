@@ -32,58 +32,32 @@ export function usePageFilters({
   );
 
   // create a dirty flag for each filter
-  const isIdentitiesDirty = useMemo(() => {
-    return filters.identities.length > 0;
-  }, [filters.identities.length]);
+  const isIdentitiesDirty = filters.identities.length > 0;
 
-  const isMaxIdentitiesDirty = useMemo(() => {
-    return filters.maxIdentities !== undefined;
-  }, [filters.maxIdentities]);
+  const isMaxIdentitiesDirty = filters.maxIdentities !== undefined;
 
-  const isCardsRangeDirty = useMemo(() => {
-    return (
-      !!filters.minCards ||
-      (filters.maxCards !== undefined &&
-        filters.maxCards !== rangeLimits?.maxCards)
-    );
-  }, [filters.maxCards, filters.minCards, rangeLimits?.maxCards]);
+  const isCardsRangeDirty =
+    !!filters.minCards ||
+    (filters.maxCards !== undefined &&
+      filters.maxCards !== rangeLimits?.maxCards);
 
-  const isCreaturesRangeDirty = useMemo(() => {
-    return (
-      !!filters.minCreatures ||
-      (filters.maxCreatures !== undefined &&
-        filters.maxCreatures !== rangeLimits?.maxCreatures)
-    );
-  }, [filters.maxCreatures, filters.minCreatures, rangeLimits?.maxCreatures]);
+  const isCreaturesRangeDirty =
+    !!filters.minCreatures ||
+    (filters.maxCreatures !== undefined &&
+      filters.maxCreatures !== rangeLimits?.maxCreatures);
 
-  const isNonCreaturesRangeDirty = useMemo(() => {
-    return (
-      !!filters.minNonCreatures ||
-      (filters.maxNonCreatures !== undefined &&
-        filters.maxNonCreatures !== rangeLimits?.maxNonCreatures)
-    );
-  }, [
-    filters.maxNonCreatures,
-    filters.minNonCreatures,
-    rangeLimits?.maxNonCreatures,
-  ]);
+  const isNonCreaturesRangeDirty =
+    !!filters.minNonCreatures ||
+    (filters.maxNonCreatures !== undefined &&
+      filters.maxNonCreatures !== rangeLimits?.maxNonCreatures);
 
   // create a dirty flag for all filters
-  const isFiltersDirty = useMemo(() => {
-    return (
-      isIdentitiesDirty ||
-      isMaxIdentitiesDirty ||
-      isCardsRangeDirty ||
-      isCreaturesRangeDirty ||
-      isNonCreaturesRangeDirty
-    );
-  }, [
-    isIdentitiesDirty,
-    isMaxIdentitiesDirty,
-    isCardsRangeDirty,
-    isCreaturesRangeDirty,
-    isNonCreaturesRangeDirty,
-  ]);
+  const isFiltersDirty =
+    isIdentitiesDirty ||
+    isMaxIdentitiesDirty ||
+    isCardsRangeDirty ||
+    isCreaturesRangeDirty ||
+    isNonCreaturesRangeDirty;
 
   return {
     filters,
