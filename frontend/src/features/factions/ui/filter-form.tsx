@@ -18,7 +18,7 @@ import {
   FieldLabel,
   FieldSeparator,
 } from '@/components/ui/field';
-import { IdentityCombobox } from '@/features/creature-types/ui/Identity-combobox';
+import { IdentityCombobox } from '@/features/creature-types/ui/identity-combobox';
 import { IdentityCountToggle } from '@/features/creature-types/ui/identity-count-toggle';
 import type { FactionStats } from '@/features/factions/queries';
 
