@@ -20,15 +20,14 @@ import {
 } from '@/components/ui/field';
 import { IdentityCombobox } from '@/features/creature-types/ui/identity-combobox';
 import { IdentityCountToggle } from '@/features/creature-types/ui/identity-count-toggle';
-import type { FactionStats } from '@/features/factions/queries';
 
 import type { useFactionForm } from '../hooks/use-faction-form';
+import { useFactionLimits } from '../hooks/use-faction-limits';
 import { CountSlider } from './count-slider';
 
 type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
   className?: string;
-  stats?: FactionStats;
   isDirty?: boolean;
   onReset?: () => void;
   onClose?: () => void;
@@ -41,13 +40,13 @@ const fieldLabelStyle_mobile = 'text-xs';
 export function FilterForm({
   form,
   className,
-  stats,
   isDirty,
   onReset,
   onClose,
   isMobile,
 }: Props) {
   const isTouched = useStore(form.store, state => state.isTouched);
+  const stats = useFactionLimits();
 
   return (
     <div className={className}>
@@ -74,8 +73,8 @@ export function FilterForm({
                     Creature Types
                   </FieldLabel>
                   <IdentityCombobox
-                    value={field.state.value}
                     className="max-w-md flex-1"
+                    value={field.state.value ?? []}
                     onValueChange={val => field.handleChange(val)}
                   />
                 </Field>

@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 import { useForm } from '@tanstack/react-form';
 
+import { useDirtyFields } from './use-dirty-fields';
+import { useFormBadges } from './use-form-badges';
+
 export type FactionFilterValues = {
-  identities: string[];
+  identities: string[] | undefined;
   maxIdentities: number | null | undefined;
   cardsRange: [number, number];
   creaturesRange: [number, number];
@@ -20,6 +23,9 @@ export function useFactionForm({
   onSubmit,
   isOpen,
 }: UseFactionFormOptions) {
+  const { isDirty } = useDirtyFields(values);
+  const formBadges = useFormBadges(values);
+
   const form = useForm({
     defaultValues: values,
     onSubmit: async ({ value }) => {
@@ -34,5 +40,7 @@ export function useFactionForm({
 
   return {
     form,
+    isFormDirty: isDirty,
+    formBadges,
   };
 }

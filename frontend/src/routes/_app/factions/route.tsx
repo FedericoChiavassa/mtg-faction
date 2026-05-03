@@ -20,7 +20,8 @@ import {
   type FactionFilterValues,
   useFactionForm,
 } from '@/features/factions/hooks/use-faction-form';
-import { useFactions, useFactionStats } from '@/features/factions/queries';
+import { useFactionLimits } from '@/features/factions/hooks/use-faction-limits';
+import { useFactions } from '@/features/factions/queries';
 import { FactionCardList } from '@/features/factions/ui/faction-card-list';
 import { FilterForm } from '@/features/factions/ui/filter-form';
 import { columns } from '@/features/factions/ui/table/columns';
@@ -37,9 +38,9 @@ import {
   SearchSchema,
   SORT_BY_OPTIONS,
 } from './-schema';
-import { FilterBadges } from './-ui/filter-badges';
 import { FiltersDrawer } from './-ui/filters-drawer';
 import { FiltersToggle } from './-ui/filters-toggle';
+import { FormBadges } from './-ui/form-badges';
 import { redirectIfOutOfRange } from './-utils/redirect-if-out-of-range';
 
 export const Route = createFileRoute('/_app/factions')({
@@ -53,41 +54,15 @@ function FactionsRoute() {
   const isMobile = useIsMobile();
   const [openFilters, setOpenFilters] = useState(false);
 
-  const { data: stats } = useFactionStats();
-  const rangeLimits = useMemo(
-    () => ({
-      maxCards: stats?.maxCards ?? 9999,
-      maxCreatures: stats?.maxCreatures ?? 9999,
-      maxNonCreatures: stats?.maxNonCreatures ?? 9999,
-    }),
-    [stats],
-  );
+  const rangeLimits = useFactionLimits();
 
-  const {
-    filters,
-    isFiltersDirty,
-    isIdentitiesDirty,
-    isMaxIdentitiesDirty,
-    isCardsRangeDirty,
-    isCreaturesRangeDirty,
-    isNonCreaturesRangeDirty,
-  } = usePageFilters({
+  const { filters, formFilters } = usePageFilters({
     search,
-    rangeLimits,
   });
 
   const { data, isLoading, isPlaceholderData } = useFactions({
+    ...filters,
     page: filters.page - 1, // query starts from 0
-    pageSize: filters.perPage,
-    sortBy: filters.sortBy,
-    identities: filters.identities.length > 0 ? filters.identities : undefined,
-    maxIdentities: filters.maxIdentities,
-    minCards: filters.minCards,
-    minCreatures: filters.minCreatures,
-    minNonCreatures: filters.minNonCreatures,
-    maxCards: filters.maxCards,
-    maxCreatures: filters.maxCreatures,
-    maxNonCreatures: filters.maxNonCreatures,
     placeholderData: keepPreviousData,
   });
 
@@ -95,16 +70,16 @@ function FactionsRoute() {
 
   const factions = data?.data ?? [];
   const totalCount = data?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / filters.perPage);
+  const totalPages = Math.ceil(totalCount / filters.pageSize);
   const currentPage = data?.currentPage ?? filters.page - 1;
   const outOfRange = data?.outOfRange;
   const pagination = useMemo(
     () => ({
       pageIndex: currentPage,
-      pageSize: filters.perPage,
+      pageSize: filters.pageSize,
       pageCount: totalPages,
     }),
-    [currentPage, filters.perPage, totalPages],
+    [currentPage, filters.pageSize, totalPages],
   );
 
   const closeFilters = useCallback(() => {
@@ -129,16 +104,16 @@ function FactionsRoute() {
         search: prev => ({
           ...prev,
           page: undefined,
-          identities: identities.length > 0 ? identities : undefined,
+          identities: identities,
           maxIdentities: maxIdentities,
-          minCards: getMin(cardsRange),
-          minCreatures: getMin(creaturesRange),
-          minNonCreatures: getMin(nonCreaturesRange),
-          maxCards: getMax(cardsRange, rangeLimits?.maxCards),
-          maxCreatures: getMax(creaturesRange, rangeLimits?.maxCreatures),
-          maxNonCreatures: getMax(
+          minCards: toMinParam(cardsRange),
+          minCreatures: toMinParam(creaturesRange),
+          minNonCreatures: toMinParam(nonCreaturesRange),
+          maxCards: toMaxParam(cardsRange, rangeLimits.maxCards),
+          maxCreatures: toMaxParam(creaturesRange, rangeLimits.maxCreatures),
+          maxNonCreatures: toMaxParam(
             nonCreaturesRange,
-            rangeLimits?.maxNonCreatures,
+            rangeLimits.maxNonCreatures,
           ),
         }),
       });
@@ -146,27 +121,15 @@ function FactionsRoute() {
     [
       closeFilters,
       navigate,
-      rangeLimits?.maxCards,
-      rangeLimits?.maxCreatures,
-      rangeLimits?.maxNonCreatures,
+      rangeLimits.maxCards,
+      rangeLimits.maxCreatures,
+      rangeLimits.maxNonCreatures,
     ],
   );
 
-  const { form } = useFactionForm({
+  const { form, isFormDirty, formBadges } = useFactionForm({
     isOpen: openFilters,
-    values: {
-      maxIdentities: filters.maxIdentities,
-      identities: filters.identities,
-      cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
-      creaturesRange: [
-        filters.minCreatures,
-        filters.maxCreatures ?? rangeLimits?.maxCreatures,
-      ],
-      nonCreaturesRange: [
-        filters.minNonCreatures,
-        filters.maxNonCreatures ?? rangeLimits?.maxNonCreatures,
-      ],
-    },
+    values: formFilters,
     onSubmit: handleFilterSubmit,
   });
 
@@ -196,14 +159,8 @@ function FactionsRoute() {
   );
 
   useEffect(() => {
-    redirectIfOutOfRange(
-      navigate,
-      outOfRange,
-      search,
-      rangeLimits,
-      stats?.maxIdentities,
-    );
-  }, [navigate, outOfRange, rangeLimits, search, stats?.maxIdentities]);
+    redirectIfOutOfRange(navigate, outOfRange, search, rangeLimits);
+  }, [navigate, outOfRange, rangeLimits, search]);
 
   return (
     <>
@@ -225,7 +182,7 @@ function FactionsRoute() {
             className="ml-auto"
             isMobile={isMobile}
             onClose={closeFilters}
-            isFiltersDirty={isFiltersDirty}
+            isFiltersDirty={isFormDirty}
             onClick={() => setOpenFilters(prev => !prev)}
           />
         )}
@@ -238,7 +195,7 @@ function FactionsRoute() {
               open={openFilters}
               isMobile={isMobile}
               onClose={closeFilters}
-              isFiltersDirty={isFiltersDirty}
+              isFiltersDirty={isFormDirty}
               onClick={() => setOpenFilters(prev => !prev)}
             />
           )}
@@ -253,9 +210,8 @@ function FactionsRoute() {
                 <Separator />
                 <FilterForm
                   form={form}
-                  stats={stats}
+                  isDirty={isFormDirty}
                   onClose={closeFilters}
-                  isDirty={isFiltersDirty}
                   className="my-8 w-full pb-11.5"
                 />
               </CollapsibleContent>
@@ -267,24 +223,11 @@ function FactionsRoute() {
             className={cn(
               'relative z-15 -mt-15 flex w-full items-center justify-end gap-3 bg-background py-4',
               'max-md:mt-0 max-md:justify-between',
-              isFiltersDirty && '-mt-5',
+              isFormDirty && '-mt-5',
             )}
           >
             {/* Filter badges - desktop */}
-            {!isMobile && (
-              <FilterBadges
-                rangeLimits={rangeLimits}
-                data={{
-                  filters,
-                  isFiltersDirty,
-                  isIdentitiesDirty,
-                  isMaxIdentitiesDirty,
-                  isCardsRangeDirty,
-                  isCreaturesRangeDirty,
-                  isNonCreaturesRangeDirty,
-                }}
-              />
-            )}
+            {!isMobile && <FormBadges badges={formBadges} />}
 
             {/* Sort By */}
             <Field
@@ -317,7 +260,7 @@ function FactionsRoute() {
             >
               <FieldLabel className="text-xs text-nowrap">Per Page</FieldLabel>
               <DataTableSelect
-                value={filters.perPage}
+                value={filters.pageSize}
                 options={PER_PAGE_OPTIONS}
                 onChange={val => {
                   const newPerPage = val ?? DEFAULT_PER_PAGE;
@@ -357,20 +300,7 @@ function FactionsRoute() {
 
           {/* Filter badges - mobile */}
           {isMobile && (
-            <FilterBadges
-              startingIcon
-              className="mb-4"
-              rangeLimits={rangeLimits}
-              data={{
-                filters,
-                isFiltersDirty,
-                isIdentitiesDirty,
-                isMaxIdentitiesDirty,
-                isCardsRangeDirty,
-                isCreaturesRangeDirty,
-                isNonCreaturesRangeDirty,
-              }}
-            />
+            <FormBadges className="mb-4" showStartingIcon badges={formBadges} />
           )}
 
           {/* Table */}
@@ -411,7 +341,7 @@ function FactionsRoute() {
                     page: newPage,
                   }),
                 }).then(() => {
-                  if (filters.perPage === 100 || isMobile) {
+                  if (filters.pageSize === 100 || isMobile) {
                     closeFilters();
                   }
                 })
@@ -425,29 +355,25 @@ function FactionsRoute() {
       {isMobile && (
         <FiltersDrawer
           form={form}
-          stats={stats}
           openFilters={openFilters}
           closeFilters={closeFilters}
+          isFiltersDirty={isFormDirty}
           setOpenFilters={setOpenFilters}
-          isFiltersDirty={isFiltersDirty}
         />
       )}
     </>
   );
 }
 
-function getMin(range: [number, number] | undefined) {
-  if (range && range[0] > 0) {
+function toMinParam(range: [number, number]) {
+  if (range[0] > 0) {
     return range[0];
   }
   return undefined;
 }
 
-function getMax(
-  range: [number, number] | undefined,
-  limit: number | undefined,
-) {
-  if (range && range[1] < (limit ?? 9999)) {
+function toMaxParam(range: [number, number], limit: number) {
+  if (range[1] < limit) {
     return range[1];
   }
   return undefined;

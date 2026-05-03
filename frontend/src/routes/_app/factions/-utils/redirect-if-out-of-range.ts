@@ -1,17 +1,14 @@
 import type { UseNavigateResult } from '@tanstack/react-router';
 
+import type { useFactionLimits } from '@/features/factions/hooks/use-faction-limits';
+
 import type { TSearch } from '../-schema';
 
 export function redirectIfOutOfRange(
   navigate: UseNavigateResult<'/factions'>,
   outOfRange: boolean | undefined,
   search: TSearch,
-  rangeLimits: {
-    maxCards: number;
-    maxCreatures: number;
-    maxNonCreatures: number;
-  },
-  identitiesLimit: number | undefined = 4,
+  rangeLimits: ReturnType<typeof useFactionLimits>,
 ) {
   const {
     minCards,
@@ -44,7 +41,7 @@ export function redirectIfOutOfRange(
       ? undefined
       : maxNonCreatures;
   const fixedMaxIdentities =
-    maxIdentities && maxIdentities > identitiesLimit
+    maxIdentities && maxIdentities > rangeLimits.maxIdentities
       ? undefined
       : maxIdentities;
 

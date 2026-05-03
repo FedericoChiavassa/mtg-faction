@@ -10,21 +10,18 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import type { useFactionForm } from '@/features/factions/hooks/use-faction-form';
-import type { useFactionStats } from '@/features/factions/queries';
 import { FilterForm } from '@/features/factions/ui/filter-form';
 
 export function FiltersDrawer({
   openFilters,
   setOpenFilters,
   form,
-  stats,
   closeFilters,
   isFiltersDirty,
 }: {
   openFilters: boolean;
   setOpenFilters: (open: boolean) => void;
   form: ReturnType<typeof useFactionForm>['form'];
-  stats: ReturnType<typeof useFactionStats>['data'];
   closeFilters: () => void;
   isFiltersDirty: boolean;
 }) {
@@ -39,7 +36,6 @@ export function FiltersDrawer({
           <FilterForm
             isMobile
             form={form}
-            stats={stats}
             className="pb-11.5"
             onClose={closeFilters}
             isDirty={isFiltersDirty}
