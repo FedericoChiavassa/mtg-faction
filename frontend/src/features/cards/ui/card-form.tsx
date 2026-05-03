@@ -10,24 +10,24 @@ import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 
 import { CardTypeToggle, type CardTypeValue } from './card-type-toggle';
 
-export type CardFilterValues = {
+export type CardFormValues = {
   faction: string | null | undefined;
   cardType: CardTypeValue;
 };
 
-type Props = {
-  initialValues?: CardFilterValues;
-  onSubmit?: (values: CardFilterValues) => void;
-  onChange?: (values: CardFilterValues) => void;
+type CardFormProps = {
+  initialValues?: CardFormValues;
+  onSubmit?: (values: CardFormValues) => void;
+  onChange?: (values: CardFormValues) => void;
   isMobile?: boolean;
 };
 
-export function CardFilterForm({
+export function CardForm({
   initialValues = { faction: null, cardType: 'all' },
   onSubmit,
   onChange,
   isMobile,
-}: Props) {
+}: CardFormProps) {
   const [filtersOpen, setFiltersOpen] = useState(isMobile ? false : true);
   const isResetting = useRef(false);
 

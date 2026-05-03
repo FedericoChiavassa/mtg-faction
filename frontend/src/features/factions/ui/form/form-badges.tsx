@@ -15,7 +15,7 @@ export function FormBadges({
   return (
     <div
       className={cn(
-        'pointer-events-none relative mr-auto flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis',
+        'pointer-events-none relative flex flex-wrap items-center gap-2 overflow-hidden text-xs text-ellipsis',
         className,
       )}
     >

@@ -9,36 +9,33 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import type { useFactionForm } from '@/features/factions/hooks/use-faction-form';
-import { FilterForm } from '@/features/factions/ui/filter-form';
+import type { useFactionForm } from '@/features/factions/hooks/form/use-faction-form';
+import { FactionForm } from '@/features/factions/ui/form/faction-form';
 
-export function FiltersDrawer({
-  openFilters,
-  setOpenFilters,
+export function FormDrawer({
+  open,
+  setOpen,
   form,
-  closeFilters,
-  isFiltersDirty,
+  isFormDirty,
 }: {
-  openFilters: boolean;
-  setOpenFilters: (open: boolean) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   form: ReturnType<typeof useFactionForm>['form'];
-  closeFilters: () => void;
-  isFiltersDirty: boolean;
+  isFormDirty: boolean;
 }) {
   return (
-    <Drawer fixed open={openFilters} onOpenChange={() => setOpenFilters(false)}>
+    <Drawer fixed open={open} onOpenChange={() => setOpen(false)}>
       <DrawerContent className="min-h-[80dvh]">
         <DrawerHeader className="sr-only">
-          <DrawerTitle>Filters options</DrawerTitle>
+          <DrawerTitle>Form options</DrawerTitle>
         </DrawerHeader>
 
         <div className="no-scrollbar overflow-y-auto bg-background px-4 pt-6">
-          <FilterForm
+          <FactionForm
             isMobile
             form={form}
             className="pb-11.5"
-            onClose={closeFilters}
-            isDirty={isFiltersDirty}
+            isDirty={isFormDirty}
           />
         </div>
 
@@ -55,13 +52,13 @@ export function FiltersDrawer({
           >
             Apply
           </Button>
-          {isFiltersDirty && (
+          {isFormDirty && (
             <Button
               size="xs"
               type="reset"
               variant="outline"
               nativeButton={false}
-              onClick={() => setOpenFilters(false)}
+              onClick={() => setOpen(false)}
               className="flex-1 bg-background no-underline!"
               render={
                 <Link

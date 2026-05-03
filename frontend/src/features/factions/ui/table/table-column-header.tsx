@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { isSortingDesc } from '@/features/factions/lib/faction-sorting';
 
-interface DataTableColumnHeaderProps<
+interface TableColumnHeaderProps<
   TData,
   TValue,
 > extends React.HTMLAttributes<HTMLDivElement> {
@@ -21,14 +21,14 @@ interface DataTableColumnHeaderProps<
   align?: 'left' | 'center' | 'right';
 }
 
-export function DataTableColumnHeader<TData, TValue>({
+export function TableColumnHeader<TData, TValue>({
   column,
   title,
   table,
   icon: Icon,
   className,
   align = 'left',
-}: DataTableColumnHeaderProps<TData, TValue>) {
+}: TableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }

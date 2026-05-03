@@ -4,7 +4,7 @@ import { useForm } from '@tanstack/react-form';
 import { useDirtyFields } from './use-dirty-fields';
 import { useFormBadges } from './use-form-badges';
 
-export type FactionFilterValues = {
+export type FactionFormValues = {
   identities: string[] | undefined;
   maxIdentities: number | null | undefined;
   cardsRange: [number, number];
@@ -13,8 +13,8 @@ export type FactionFilterValues = {
 };
 
 type UseFactionFormOptions = {
-  values: FactionFilterValues;
-  onSubmit?: (values: FactionFilterValues) => void;
+  values: FactionFormValues;
+  onSubmit?: (values: FactionFormValues) => void;
   isOpen?: boolean;
 };
 

@@ -9,13 +9,13 @@ import {
 } from 'lucide-react';
 
 import { useDirtyFields } from './use-dirty-fields';
-import type { FactionFilterValues } from './use-faction-form';
+import type { FactionFormValues } from './use-faction-form';
 
 const BADGE_CONFIG: Record<
-  keyof FactionFilterValues,
+  keyof FactionFormValues,
   {
     icon: LucideIcon;
-    getValue: (values: FactionFilterValues) => string;
+    getValue: (values: FactionFormValues) => string;
   }
 > = {
   identities: {
@@ -42,13 +42,13 @@ const BADGE_CONFIG: Record<
   },
 };
 
-export function useFormBadges(values: FactionFilterValues) {
+export function useFormBadges(values: FactionFormValues) {
   const { dirtyFields } = useDirtyFields(values);
 
   const formBadges = useMemo(
     () =>
       Object.entries(BADGE_CONFIG).map(([key, config]) => {
-        const typedKey = key as keyof FactionFilterValues;
+        const typedKey = key as keyof FactionFormValues;
 
         return {
           id: typedKey,

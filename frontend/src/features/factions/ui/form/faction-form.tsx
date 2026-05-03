@@ -21,9 +21,9 @@ import {
 import { IdentityCombobox } from '@/features/creature-types/ui/identity-combobox';
 import { IdentityCountToggle } from '@/features/creature-types/ui/identity-count-toggle';
 
-import type { useFactionForm } from '../hooks/use-faction-form';
-import { useFactionLimits } from '../hooks/use-faction-limits';
-import { CountSlider } from './count-slider';
+import type { useFactionForm } from '../../hooks/form/use-faction-form';
+import { useFactionLimits } from '../../hooks/use-faction-limits';
+import { CountSlider } from '../count-slider';
 
 type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
@@ -37,7 +37,7 @@ type Props = {
 const fieldLabelStyle = 'w-[21%] pr-3 grow-0! text-xs';
 const fieldLabelStyle_mobile = 'text-xs';
 
-export function FilterForm({
+export function FactionForm({
   form,
   className,
   isDirty,

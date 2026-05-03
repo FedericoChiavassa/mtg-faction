@@ -17,16 +17,17 @@ import { Field, FieldLabel } from '@/components/ui/field';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  type FactionFilterValues,
+  type FactionFormValues,
   useFactionForm,
-} from '@/features/factions/hooks/use-faction-form';
+} from '@/features/factions/hooks/form/use-faction-form';
 import { useFactionLimits } from '@/features/factions/hooks/use-faction-limits';
 import { useFactions } from '@/features/factions/queries';
 import { FactionCardList } from '@/features/factions/ui/faction-card-list';
-import { FilterForm } from '@/features/factions/ui/filter-form';
+import { FactionForm } from '@/features/factions/ui/form/faction-form';
+import { FormBadges } from '@/features/factions/ui/form/form-badges';
 import { columns } from '@/features/factions/ui/table/columns';
-import { DataTable } from '@/features/factions/ui/table/data-table';
-import { DataTableSelect } from '@/features/factions/ui/table/data-table-select';
+import { FactionTable } from '@/features/factions/ui/table/faction-table';
+import { TableSelect } from '@/features/factions/ui/table/table-select';
 import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 
@@ -38,9 +39,8 @@ import {
   SearchSchema,
   SORT_BY_OPTIONS,
 } from './-schema';
-import { FiltersDrawer } from './-ui/filters-drawer';
-import { FiltersToggle } from './-ui/filters-toggle';
-import { FormBadges } from './-ui/form-badges';
+import { FormDrawer } from './-ui/form-drawer';
+import { FormToggle } from './-ui/form-toggle';
 import { redirectIfOutOfRange } from './-utils/redirect-if-out-of-range';
 
 export const Route = createFileRoute('/_app/factions')({
@@ -52,7 +52,7 @@ function FactionsRoute() {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
   const isMobile = useIsMobile();
-  const [openFilters, setOpenFilters] = useState(false);
+  const [openForm, setOpenForm] = useState(false);
 
   const rangeLimits = useFactionLimits();
 
@@ -82,14 +82,14 @@ function FactionsRoute() {
     [currentPage, filters.pageSize, totalPages],
   );
 
-  const closeFilters = useCallback(() => {
-    setOpenFilters(false);
+  const closeForm = useCallback(() => {
+    setOpenForm(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleFilterSubmit = useCallback(
-    (newValues: FactionFilterValues) => {
-      closeFilters();
+  const handleFormSubmit = useCallback(
+    (newValues: FactionFormValues) => {
+      closeForm();
 
       const {
         cardsRange,
@@ -119,7 +119,7 @@ function FactionsRoute() {
       });
     },
     [
-      closeFilters,
+      closeForm,
       navigate,
       rangeLimits.maxCards,
       rangeLimits.maxCreatures,
@@ -128,9 +128,9 @@ function FactionsRoute() {
   );
 
   const { form, isFormDirty, formBadges } = useFactionForm({
-    isOpen: openFilters,
+    isOpen: openForm,
     values: formFilters,
-    onSubmit: handleFilterSubmit,
+    onSubmit: handleFormSubmit,
   });
 
   const handleSortingChange: OnChangeFn<SortingState> = useCallback(
@@ -175,43 +175,43 @@ function FactionsRoute() {
           <PageHeaderTitle icon={Flag}>Factions</PageHeaderTitle>
         </div>
 
-        {/* Filters toggle - mobile */}
+        {/* Form toggle - mobile */}
         {isMobile && (
-          <FiltersToggle
-            open={openFilters}
+          <FormToggle
+            open={openForm}
             className="ml-auto"
             isMobile={isMobile}
-            onClose={closeFilters}
-            isFiltersDirty={isFormDirty}
-            onClick={() => setOpenFilters(prev => !prev)}
+            onClose={closeForm}
+            isFormDirty={isFormDirty}
+            onClick={() => setOpenForm(prev => !prev)}
           />
         )}
       </PageHeader>
       <Container className="mt-px">
         <div className="mx-auto pb-15 max-md:pb-10">
-          {/* Filters toggle - desktop */}
+          {/* Form toggle - desktop */}
           {!isMobile && (
-            <FiltersToggle
-              open={openFilters}
+            <FormToggle
+              open={openForm}
               isMobile={isMobile}
-              onClose={closeFilters}
-              isFiltersDirty={isFormDirty}
-              onClick={() => setOpenFilters(prev => !prev)}
+              onClose={closeForm}
+              isFormDirty={isFormDirty}
+              onClick={() => setOpenForm(prev => !prev)}
             />
           )}
 
-          {/* Filters form - desktop */}
+          {/* Factions form - desktop */}
           {!isMobile && (
-            <Collapsible open={openFilters} onOpenChange={setOpenFilters}>
+            <Collapsible open={openForm} onOpenChange={setOpenForm}>
               <CollapsibleContent
                 animate
                 className="-mx-1.5 px-1.5 max-md:-mx-4 max-md:px-4"
               >
                 <Separator />
-                <FilterForm
+                <FactionForm
                   form={form}
+                  onClose={closeForm}
                   isDirty={isFormDirty}
-                  onClose={closeFilters}
                   className="my-8 w-full pb-11.5"
                 />
               </CollapsibleContent>
@@ -226,8 +226,10 @@ function FactionsRoute() {
               isFormDirty && '-mt-5',
             )}
           >
-            {/* Filter badges - desktop */}
-            {!isMobile && <FormBadges badges={formBadges} />}
+            {/* Form badges - desktop */}
+            {!isMobile && (
+              <FormBadges badges={formBadges} className="mr-auto" />
+            )}
 
             {/* Sort By */}
             <Field
@@ -235,7 +237,7 @@ function FactionsRoute() {
               className="ml-auto w-auto gap-2 max-md:ml-0 max-md:flex-1 max-md:gap-1 max-md:overflow-hidden"
             >
               <FieldLabel className="text-xs text-nowrap">Sort By</FieldLabel>
-              <DataTableSelect
+              <TableSelect
                 value={filters.sortBy}
                 options={SORT_BY_OPTIONS}
                 onChange={val => {
@@ -259,7 +261,7 @@ function FactionsRoute() {
               className="w-auto shrink-0 gap-2 max-md:gap-1 max-md:overflow-hidden"
             >
               <FieldLabel className="text-xs text-nowrap">Per Page</FieldLabel>
-              <DataTableSelect
+              <TableSelect
                 value={filters.pageSize}
                 options={PER_PAGE_OPTIONS}
                 onChange={val => {
@@ -298,9 +300,13 @@ function FactionsRoute() {
 
           <Separator className="-mx-4 mb-4 block min-w-dvw md:hidden" />
 
-          {/* Filter badges - mobile */}
+          {/* Form badges - mobile */}
           {isMobile && (
-            <FormBadges className="mb-4" showStartingIcon badges={formBadges} />
+            <FormBadges
+              showStartingIcon
+              badges={formBadges}
+              className="mr-auto mb-4"
+            />
           )}
 
           {/* Table */}
@@ -311,7 +317,7 @@ function FactionsRoute() {
               pagination={pagination}
             />
           ) : (
-            <DataTable
+            <FactionTable
               data={factions}
               columns={columns}
               isLoading={isLoading}
@@ -342,7 +348,7 @@ function FactionsRoute() {
                   }),
                 }).then(() => {
                   if (filters.pageSize === 100 || isMobile) {
-                    closeFilters();
+                    closeForm();
                   }
                 })
               }
@@ -351,14 +357,13 @@ function FactionsRoute() {
         </div>
       </Container>
 
-      {/* Filters drawer - mobile */}
+      {/* Form drawer - mobile */}
       {isMobile && (
-        <FiltersDrawer
+        <FormDrawer
           form={form}
-          openFilters={openFilters}
-          closeFilters={closeFilters}
-          isFiltersDirty={isFormDirty}
-          setOpenFilters={setOpenFilters}
+          open={openForm}
+          setOpen={setOpenForm}
+          isFormDirty={isFormDirty}
         />
       )}
     </>

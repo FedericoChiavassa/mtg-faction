@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
-import type { FactionFilterValues } from './use-faction-form';
-import { useFactionLimits } from './use-faction-limits';
+import { useFactionLimits } from '../use-faction-limits';
+import type { FactionFormValues } from './use-faction-form';
 
-export function useDirtyFields(values: FactionFilterValues): {
-  dirtyFields: Record<keyof FactionFilterValues, boolean>;
+export function useDirtyFields(values: FactionFormValues): {
+  dirtyFields: Record<keyof FactionFormValues, boolean>;
   isDirty: boolean;
 } {
   const rangeLimits = useFactionLimits();

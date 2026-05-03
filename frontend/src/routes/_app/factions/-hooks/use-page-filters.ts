@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { FactionFilterValues } from '@/features/factions/hooks/use-faction-form';
+import type { FactionFormValues } from '@/features/factions/hooks/form/use-faction-form';
 import { useFactionLimits } from '@/features/factions/hooks/use-faction-limits';
 
 import { DEFAULT_PER_PAGE, DEFAULT_SORT_BY, type TSearch } from '../-schema';
@@ -25,7 +25,7 @@ export function usePageFilters({ search }: { search: TSearch }) {
     [search],
   );
 
-  const formFilters: FactionFilterValues = useMemo(
+  const formFilters: FactionFormValues = useMemo(
     () => ({
       maxIdentities: filters.maxIdentities,
       identities: filters.identities,

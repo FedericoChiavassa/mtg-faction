@@ -4,20 +4,20 @@ import { RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-export function FiltersToggle({
+export function FormToggle({
   open,
   onClose,
   onClick,
   isMobile,
   className,
-  isFiltersDirty,
+  isFormDirty,
 }: {
   open: boolean;
   isMobile: boolean;
   className?: string;
   onClose: () => void;
   onClick: () => void;
-  isFiltersDirty: boolean;
+  isFormDirty: boolean;
 }) {
   return (
     <div
@@ -36,7 +36,7 @@ export function FiltersToggle({
           <SlidersHorizontal className="mr-1 size-4" />{' '}
           {open && !isMobile ? 'Hide Filters' : 'Show Filters'}
         </Button>
-        {isFiltersDirty && (
+        {isFormDirty && (
           <Button
             size="xs"
             onClick={onClose}
