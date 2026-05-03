@@ -23,7 +23,7 @@ import { IdentityCountToggle } from '@/features/creature-types/ui/identity-count
 
 import type { useFactionForm } from '../../hooks/form/use-faction-form';
 import { useFactionLimits } from '../../hooks/use-faction-limits';
-import { CountSlider } from '../count-slider';
+import { CountSlider } from './count-slider';
 
 type Props = {
   form: ReturnType<typeof useFactionForm>['form'];
