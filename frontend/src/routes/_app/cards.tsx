@@ -21,10 +21,7 @@ import { Empty, EmptyDescription } from '@/components/ui/empty';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { useCards } from '@/features/cards/queries';
-import {
-  CardFilterForm,
-  type CardFilterValues,
-} from '@/features/cards/ui/card-filter-form';
+import { CardForm, type CardFormValues } from '@/features/cards/ui/card-form';
 import { CardGrid } from '@/features/cards/ui/card-grid';
 import { useFactionList } from '@/features/factions/queries';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
@@ -78,7 +75,7 @@ function CardsRoute() {
   const outOfRange = data?.outOfRange;
 
   const handleFilterChange = useCallback(
-    ({ faction: newFaction, cardType }: CardFilterValues) => {
+    ({ faction: newFaction, cardType }: CardFormValues) => {
       void navigate({
         search: buildCardsSearch({
           faction: newFaction,
@@ -127,7 +124,7 @@ function CardsRoute() {
             ),
           }}
         >
-          <CardFilterForm
+          <CardForm
             isMobile={isMobile}
             initialValues={formValues}
             onChange={handleFilterChange}
@@ -268,7 +265,7 @@ function buildCardsSearch({
 }: {
   faction?: string | null;
   page?: number;
-  type?: CardFilterValues['cardType'];
+  type?: CardFormValues['cardType'];
 }) {
   return {
     faction,

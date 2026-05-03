@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Faction } from '@/features/factions/queries';
 
-import { DataTableColumnHeader } from './data-table-column-header';
+import { TableColumnHeader } from './table-column-header';
 
 const columnHelper = createColumnHelper<Faction>();
 
@@ -42,7 +42,7 @@ export const columns: ColumnDef<Faction, any>[] = [
   }),
   columnHelper.accessor('name', {
     header: ({ column, table }) => (
-      <DataTableColumnHeader table={table} column={column} title="Faction" />
+      <TableColumnHeader table={table} column={column} title="Faction" />
     ),
     cell: info => (
       <Button
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Faction, any>[] = [
 
   columnHelper.accessor('count', {
     header: ({ column }) => (
-      <DataTableColumnHeader
+      <TableColumnHeader
         title="Cards"
         icon={Layers}
         align="center"
@@ -84,7 +84,7 @@ export const columns: ColumnDef<Faction, any>[] = [
   }),
   columnHelper.accessor('creatures_count', {
     header: ({ column }) => (
-      <DataTableColumnHeader
+      <TableColumnHeader
         align="center"
         icon={PawPrint}
         column={column}
@@ -112,7 +112,7 @@ export const columns: ColumnDef<Faction, any>[] = [
   }),
   columnHelper.accessor('non_creatures_count', {
     header: ({ column }) => (
-      <DataTableColumnHeader
+      <TableColumnHeader
         align="center"
         icon={Sparkles}
         column={column}

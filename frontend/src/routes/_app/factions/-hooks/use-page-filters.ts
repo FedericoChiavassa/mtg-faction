@@ -1,25 +1,19 @@
 import { useMemo } from 'react';
 
+import type { FactionFormValues } from '@/features/factions/hooks/form/use-faction-form';
+import { useFactionLimits } from '@/features/factions/hooks/use-faction-limits';
+
 import { DEFAULT_PER_PAGE, DEFAULT_SORT_BY, type TSearch } from '../-schema';
 
-export function usePageFilters({
-  search,
-  rangeLimits,
-}: {
-  search: TSearch;
-  rangeLimits: {
-    maxCards: number;
-    maxCreatures: number;
-    maxNonCreatures: number;
-  };
-}) {
-  // create a filters object
+export function usePageFilters({ search }: { search: TSearch }) {
+  const rangeLimits = useFactionLimits();
+
   const filters = useMemo(
     () => ({
       page: search.page ?? 1,
-      perPage: search.perPage ?? DEFAULT_PER_PAGE,
+      pageSize: search.perPage ?? DEFAULT_PER_PAGE,
       sortBy: search.sortBy ?? DEFAULT_SORT_BY,
-      identities: search.identities ?? [],
+      identities: search.identities,
       maxIdentities: search.maxIdentities,
       minCards: search.minCards ?? 0,
       minCreatures: search.minCreatures ?? 0,
@@ -31,41 +25,37 @@ export function usePageFilters({
     [search],
   );
 
-  // create a dirty flag for each filter
-  const isIdentitiesDirty = filters.identities.length > 0;
-
-  const isMaxIdentitiesDirty = filters.maxIdentities !== undefined;
-
-  const isCardsRangeDirty =
-    !!filters.minCards ||
-    (filters.maxCards !== undefined &&
-      filters.maxCards !== rangeLimits?.maxCards);
-
-  const isCreaturesRangeDirty =
-    !!filters.minCreatures ||
-    (filters.maxCreatures !== undefined &&
-      filters.maxCreatures !== rangeLimits?.maxCreatures);
-
-  const isNonCreaturesRangeDirty =
-    !!filters.minNonCreatures ||
-    (filters.maxNonCreatures !== undefined &&
-      filters.maxNonCreatures !== rangeLimits?.maxNonCreatures);
-
-  // create a dirty flag for all filters
-  const isFiltersDirty =
-    isIdentitiesDirty ||
-    isMaxIdentitiesDirty ||
-    isCardsRangeDirty ||
-    isCreaturesRangeDirty ||
-    isNonCreaturesRangeDirty;
+  const formFilters: FactionFormValues = useMemo(
+    () => ({
+      maxIdentities: filters.maxIdentities,
+      identities: filters.identities,
+      cardsRange: [filters.minCards, filters.maxCards ?? rangeLimits?.maxCards],
+      creaturesRange: [
+        filters.minCreatures,
+        filters.maxCreatures ?? rangeLimits?.maxCreatures,
+      ],
+      nonCreaturesRange: [
+        filters.minNonCreatures,
+        filters.maxNonCreatures ?? rangeLimits?.maxNonCreatures,
+      ],
+    }),
+    [
+      filters.identities,
+      filters.maxCards,
+      filters.maxCreatures,
+      filters.maxIdentities,
+      filters.maxNonCreatures,
+      filters.minCards,
+      filters.minCreatures,
+      filters.minNonCreatures,
+      rangeLimits?.maxCards,
+      rangeLimits?.maxCreatures,
+      rangeLimits?.maxNonCreatures,
+    ],
+  );
 
   return {
     filters,
-    isFiltersDirty,
-    isIdentitiesDirty,
-    isMaxIdentitiesDirty,
-    isCardsRangeDirty,
-    isCreaturesRangeDirty,
-    isNonCreaturesRangeDirty,
+    formFilters,
   };
 }

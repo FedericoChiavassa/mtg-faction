@@ -7,12 +7,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type DataTableSelectOption<T extends string | number> = {
+type TableSelectOption<T extends string | number> = {
   value: T;
   label: React.ReactNode;
 };
 
-export function DataTableSelect<T extends string | number>({
+export function TableSelect<T extends string | number>({
   value,
   onChange,
   options,
@@ -20,7 +20,7 @@ export function DataTableSelect<T extends string | number>({
 }: {
   value: T | null | undefined;
   onChange: (val: T | null) => void;
-  options: DataTableSelectOption<T>[];
+  options: TableSelectOption<T>[];
   placeholder?: string;
 }) {
   const selectedLabel = options.find(opt => opt.value === value)?.label;

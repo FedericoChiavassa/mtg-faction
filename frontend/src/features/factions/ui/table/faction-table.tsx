@@ -24,7 +24,7 @@ import { useDeferredLoading } from '@/hooks/use-deferred-loading';
 import { isSortingDesc } from '../../lib/faction-sorting';
 import type { useFactions } from '../../queries';
 
-interface DataTableProps<TData, TValue> {
+interface FactionTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
@@ -39,7 +39,7 @@ interface DataTableProps<TData, TValue> {
   className?: string;
 }
 
-export function DataTable<TData, TValue>({
+export function FactionTable<TData, TValue>({
   columns,
   data,
   pagination,
@@ -48,7 +48,7 @@ export function DataTable<TData, TValue>({
   isLoading = false,
   isPlaceholderData = false,
   className,
-}: DataTableProps<TData, TValue>) {
+}: FactionTableProps<TData, TValue>) {
   const showLoadingTransition = useDeferredLoading(isPlaceholderData);
   const { pageSize, pageCount } = pagination;
 
