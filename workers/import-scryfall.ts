@@ -6,6 +6,15 @@ import { extractCreatureGroupsFromText } from './helpers/extract-creature-groups
 import { fetchAllFactionIdentities } from './helpers/fetch-all-faction-identities';
 import { updateFactionCounts } from './helpers/update-faction-counts';
 
+const FETCH_INIT = {
+  method: 'GET',
+  headers: {
+    'User-Agent':
+      'mtg-faction (contact: https://mtgfaction.vercel.app/contact)',
+    Accept: 'application/json',
+  },
+};
+
 // --------------------
 // Memory Monitoring
 // --------------------
@@ -307,7 +316,7 @@ function identityKey(identity: string[]): string {
 // --------------------
 async function importScryfall() {
   console.log('\nFetching Scryfall bulk data...');
-  const bulkRes = await fetch('https://api.scryfall.com/bulk-data');
+  const bulkRes = await fetch('https://api.scryfall.com/bulk-data', FETCH_INIT);
   const bulkData = (await bulkRes.json()) as ScryfallBulkData;
 
   const oracleCardsData = bulkData.data.find(d => d.type === 'oracle_cards');
@@ -335,14 +344,21 @@ async function importScryfall() {
   }
 
   console.log('Downloading full card data...');
-  const cardsRes = await fetch(oracleCardsData?.download_uri);
+  const cardsRes = await fetch(oracleCardsData?.download_uri, FETCH_INIT);
   const allCards = (await cardsRes.json()) as ScryfallCard[];
+  if (!allCards?.length) {
+    throw new Error('No cards found in Scryfall bulk data');
+  }
 
   console.log('Fetching creature types...');
   const creatureTypesRes = await fetch(
     'https://api.scryfall.com/catalog/creature-types',
+    FETCH_INIT,
   );
   const creatureTypesJson = (await creatureTypesRes.json()) as ScryfallCatalog;
+  if (!creatureTypesJson?.data?.length) {
+    throw new Error('No creature types found in Scryfall catalog');
+  }
   const creatureTypeSet = createCreatureTypeSet({
     creatureTypes: creatureTypesJson.data,
   });
