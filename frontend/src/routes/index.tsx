@@ -22,7 +22,7 @@ function HomeRoute() {
   return (
     <>
       <Container className="absolute z-50 flex h-12 items-center self-center bg-transparent">
-        <ThemeToggle className="-mr-2 ml-auto" />
+        <ThemeToggle className="-mr-3 ml-auto md:-mr-0.5" />
       </Container>
 
       <main className="just relative flex min-h-dvh w-full flex-col items-center overflow-hidden pb-15 text-center">
