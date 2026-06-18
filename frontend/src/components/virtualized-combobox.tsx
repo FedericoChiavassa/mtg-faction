@@ -274,6 +274,7 @@ export type VirtualizedComboboxProps<T extends Option = Option> = {
   size?: VariantProps<typeof buttonVariants>['size'];
   className?: string;
   capitalizeCommandValue?: boolean;
+  disableSpinner?: boolean;
 };
 
 export function VirtualizedCombobox<T extends Option = Option>({
@@ -288,6 +289,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
   size,
   className,
   capitalizeCommandValue = false,
+  disableSpinner,
 }: VirtualizedComboboxProps<T>) {
   const isMobile = useIsMobile();
 
@@ -330,7 +332,7 @@ export function VirtualizedCombobox<T extends Option = Option>({
               triggerPlaceholder)
             : triggerPlaceholder}
         </span>
-        {loading ? (
+        {loading && !disableSpinner ? (
           <Spinner className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         ) : (
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
