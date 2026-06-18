@@ -18,6 +18,7 @@ export type FactionComboboxProps = {
   size?: VirtualizedComboboxProps['size'];
   hasPopover?: boolean;
   className?: string;
+  disableSpinner?: boolean;
 };
 
 export function FactionCombobox({
@@ -27,6 +28,7 @@ export function FactionCombobox({
   size,
   hasPopover = true,
   className,
+  disableSpinner,
 }: FactionComboboxProps) {
   const isMobile = useIsMobile();
   const [internalValue, setInternalValue] =
@@ -52,6 +54,7 @@ export function FactionCombobox({
       capitalizeCommandValue
       options={factionList ?? []}
       filter={searchMatchesFaction}
+      disableSpinner={disableSpinner}
       triggerPlaceholder={placeholder}
       onValueChange={handleValueChange}
       searchPlaceholder="Search a faction..."

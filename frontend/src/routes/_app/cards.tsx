@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { createFileRoute, Link, useRouterState } from '@tanstack/react-router';
-import { Layers, Shuffle } from 'lucide-react';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
+import { Layers } from 'lucide-react';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
@@ -16,14 +16,12 @@ import {
   PaginationCount,
   SitePagination,
 } from '@/components/layout/site-pagination';
-import { Button } from '@/components/ui/button';
 import { Empty, EmptyDescription } from '@/components/ui/empty';
 import { Separator } from '@/components/ui/separator';
-import { Spinner } from '@/components/ui/spinner';
 import { useCards } from '@/features/cards/queries';
 import { CardForm, type CardFormValues } from '@/features/cards/ui/card-form';
 import { CardGrid } from '@/features/cards/ui/card-grid';
-import { useFactionList } from '@/features/factions/queries';
+import { RandomCardsButton } from '@/features/cards/ui/random-cards-button';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useIsScrolled } from '@/hooks/use-is-scrolled';
@@ -46,8 +44,6 @@ function CardsRoute() {
   const isScrolled = useIsScrolled();
   const isMobile = useIsMobile();
   const navigate = Route.useNavigate();
-  const { data: factionList, isLoading: isFactionListLoading } =
-    useFactionList();
   const { disablePlaceholderData = false } = useRouterState({
     select: s => s.location.state,
   });
@@ -202,32 +198,12 @@ function CardsRoute() {
             />
             <Empty className="justify-start gap-6 pt-6">
               <EmptyDescription>
-                <Button
+                <RandomCardsButton
                   size="sm"
                   variant="secondary"
-                  nativeButton={false}
+                  label="Random faction"
                   className="no-underline!"
-                  disabled={isFactionListLoading}
-                  render={
-                    <Link
-                      to="/cards"
-                      state={{ disablePlaceholderData: true }}
-                      search={() =>
-                        buildCardsSearch({
-                          faction:
-                            factionList?.[
-                              Math.floor(Math.random() * factionList.length)
-                            ].id,
-                          type: 'all',
-                          page: undefined,
-                        })
-                      }
-                    />
-                  }
-                >
-                  Random faction{' '}
-                  {isFactionListLoading ? <Spinner /> : <Shuffle />}
-                </Button>
+                />
               </EmptyDescription>
             </Empty>
           </div>

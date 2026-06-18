@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowRight, Shuffle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { Container } from '@/components/layout/container';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteLogo } from '@/components/site-logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { useFactionList } from '@/features/factions/queries';
+import { RandomCardsButton } from '@/features/cards/ui/random-cards-button';
 import { FactionCombobox } from '@/features/factions/ui/faction-combobox';
 
 export const Route = createFileRoute('/')({
@@ -16,8 +15,6 @@ export const Route = createFileRoute('/')({
 
 function HomeRoute() {
   const navigate = Route.useNavigate();
-  const { data: factionList, isLoading: isFactionListLoading } =
-    useFactionList();
 
   return (
     <>
@@ -46,6 +43,7 @@ function HomeRoute() {
 
           <div className="mx-auto mt-9 flex max-w-full items-center justify-center gap-2 overflow-hidden max-md:mx-0">
             <FactionCombobox
+              disableSpinner
               className="max-w-none text-start max-md:w-full"
               placeholder="Select a faction to browse its cards..."
               onValueChange={selectedFaction => {
@@ -61,27 +59,11 @@ function HomeRoute() {
               }}
             />
 
-            <Button
+            <RandomCardsButton
               size="icon"
               variant="outline"
-              nativeButton={false}
               title="Random faction cards"
-              disabled={isFactionListLoading}
-              render={
-                <Link
-                  to="/cards"
-                  state={{ disablePlaceholderData: true }}
-                  search={() => ({
-                    faction:
-                      factionList?.[
-                        Math.floor(Math.random() * factionList.length)
-                      ].id,
-                  })}
-                />
-              }
-            >
-              {isFactionListLoading ? <Spinner /> : <Shuffle />}
-            </Button>
+            />
           </div>
 
           <div className="mt-10 flex justify-center gap-4">
