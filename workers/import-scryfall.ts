@@ -1,5 +1,6 @@
 import type { Database } from '@db/types';
 import { supabase } from '@lib/create-client';
+import { gunzipSync } from 'node:zlib';
 
 import { bulkUpsert } from './helpers/bulk-upsert';
 import { extractCreatureGroupsFromText } from './helpers/extract-creature-groups-from-text';
@@ -57,7 +58,7 @@ export type ScryfallBulkData = {
     updated_at: string;
     name: string;
     uri: string;
-    download_uri: string;
+    jsonl_download_uri: string;
   }[];
 };
 
@@ -344,8 +345,15 @@ async function importScryfall() {
   }
 
   console.log('Downloading full card data...');
-  const cardsRes = await fetch(oracleCardsData?.download_uri, FETCH_INIT);
-  const allCards = (await cardsRes.json()) as ScryfallCard[];
+  const cardsRes = await fetch(oracleCardsData?.jsonl_download_uri, FETCH_INIT);
+  const compressed = Buffer.from(await cardsRes.arrayBuffer());
+  const decompressed = gunzipSync(compressed).toString('utf-8');
+
+  const allCards = decompressed
+    .split('\n')
+    .filter(line => line.trim().length > 0)
+    .map(line => JSON.parse(line) as ScryfallCard);
+
   if (!allCards?.length) {
     throw new Error('No cards found in Scryfall bulk data');
   }

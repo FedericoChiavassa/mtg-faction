@@ -1,5 +1,6 @@
 import type { Database } from '@db/types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { gzipSync } from 'node:zlib';
 import type { MockedFunction } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -29,7 +30,7 @@ const mockBulkData: ScryfallBulkData = {
       updated_at: '2026-01-02T00:00:00Z',
       name: 'Oracle Cards',
       uri: 'https://api.scryfall.com/bulk-data/oracle-cards',
-      download_uri: 'https://data.scryfall.com/oracle-cards.json',
+      jsonl_download_uri: 'https://data.scryfall.com/oracle-cards.jsonl.gz',
     },
   ],
 };
@@ -117,6 +118,12 @@ describe('importScryfall', () => {
     // call 2 → oracle cards download
     // call 3 → creature types catalog
     // --------------------
+
+    const jsonlBody = mockScryfallCards
+      .map(card => JSON.stringify(card))
+      .join('\n');
+    const gzippedBody = gzipSync(jsonlBody);
+
     vi.stubGlobal(
       'fetch',
       vi
@@ -125,7 +132,13 @@ describe('importScryfall', () => {
           json: () => Promise.resolve(mockBulkData),
         })
         .mockResolvedValueOnce({
-          json: () => Promise.resolve(mockScryfallCards),
+          arrayBuffer: () =>
+            Promise.resolve(
+              gzippedBody.buffer.slice(
+                gzippedBody.byteOffset,
+                gzippedBody.byteOffset + gzippedBody.byteLength,
+              ),
+            ),
         })
         .mockResolvedValueOnce({
           json: () => Promise.resolve(mockCreatureTypes),
